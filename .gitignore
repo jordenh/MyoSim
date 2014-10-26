@@ -26,3 +26,10 @@
 *.exe
 *.out
 *.app
+
+# C# files
+
+
+# Temporary build directory
+TemporaryGeneratedFile*.cs
+*.cache

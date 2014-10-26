@@ -17,6 +17,11 @@ namespace WindowsFormsApplication1
             InitializeComponent();
         }
 
+        private void call_myo_sim(string command)
+        {
+
+        }
+
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
         {
 

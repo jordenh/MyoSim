@@ -1,0 +1,9 @@
+C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe
+C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.pdb
+C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\Form.csprojResolveAssemblyReference.cache
+C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
+C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\Form.csproj.GenerateResource.Cache
+C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
+C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
+C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Form1.resources
