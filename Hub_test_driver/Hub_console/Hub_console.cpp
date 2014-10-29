@@ -1,7 +1,7 @@
 // Hub_console.cpp : Defines the entry point for the console application.
 //
 
-#include "Hub_sim.hpp"
+#include "myo.hpp"
 #include "stdafx.h"
 
 
