@@ -7,12 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.IO.Pipes;
+using System.Threading;
 
 namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
-        public Form1()
+        public Form1(NamedPipeServerStream pipeStream)
         {
             InitializeComponent();
         }
@@ -102,16 +105,38 @@ namespace WindowsFormsApplication1
             }         
         }
 
-        private void send_command_button_Click(object sender, EventArgs e)
+        private void send_command_button_Click(object sender, EventArgs e, NamedPipeServerStream pipeStream)
         {
             char deliminator = ';';
             string command = command_chain.Text;
             string[] words = command.Split(deliminator);
 
+          /*  Form1 Server = new Form1(); //named pipe
+            Thread MessageThread = new Thread(Server.ThreadStartServer);
+            MessageThread.Start();
+          */
             foreach (string word in words)
             {
                 System.Console.WriteLine(word);
+                using (StreamWriter sw = new StreamWriter(pipeStream))
+                {
+                    sw.Write(word);
+                }
             }
         }
+
+        /*
+        public void ThreadStartServer()
+        {
+            // Create a name pipe
+            using (NamedPipeServerStream pipeStream = new NamedPipeServerStream("BvrPipe"))
+            {
+                Console.WriteLine("[Server] Pipe created {0}", pipeStream.GetHashCode());
+                // Wait for a connection
+                pipeStream.WaitForConnection();
+                Console.WriteLine("[Server] Pipe connection established");
+            }
+        }
+        */
     }
 }

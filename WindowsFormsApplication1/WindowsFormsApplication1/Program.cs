@@ -29,7 +29,7 @@ namespace WindowsFormsApplication1
                 // Wait for a connection
                 pipeStream.WaitForConnection();
                 Console.WriteLine("[Server] Pipe connection established");
-
+            /*
                 using (StreamReader sr = new StreamReader(pipeStream))
                 {
                     string temp;
@@ -39,20 +39,52 @@ namespace WindowsFormsApplication1
                         Console.WriteLine("{0}: {1}", DateTime.Now, temp);
                     }
                 }
+
+            */
             }
 
-            Console.WriteLine("Connection lost");
+       //     Console.WriteLine("Connection lost");
+            
         }
+
+        public void SendMessage()
+        {
+            // Create a name pipe
+            using (NamedPipeServerStream pipeStream = new NamedPipeServerStream("BvrPipe"))
+            {
+                Console.WriteLine("[Server] Pipe created {0}", pipeStream.GetHashCode());
+
+                // Wait for a connection
+                pipeStream.WaitForConnection();
+                Console.WriteLine("[Server] Pipe connection established");
+
+                using (StreamWriter sw = new StreamWriter(pipeStream))
+                {
+                    string text = "test message from C# Server!";
+                    sw.Write(text);
+                }
+                Application.Run(new Form1(pipeStream));
+            }
+
+         }
 
         static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
-            
             Program Server = new Program();
-            Thread ServerThread = new Thread(Server.ThreadStartServer);
+            Thread ServerThread = new Thread(Server.SendMessage);
             ServerThread.Start();
+
+           
+
+          
+            
+            
+
+           
+         //   Thread SendMessageThread = new Thread(Server.SendMessage);
+         //   SendMessageThread.Start();
            
 
         }
