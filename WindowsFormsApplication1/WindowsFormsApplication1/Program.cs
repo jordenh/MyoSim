@@ -64,7 +64,10 @@ namespace WindowsFormsApplication1
                     sw.Write(text);
                 }
  */
-                Application.Run(new Form1(pipeStream));
+                using (StreamWriter sw = new StreamWriter(pipeStream))
+                {
+                    Application.Run(new Form1(pipeStream, sw));
+                }
             }
 
          }

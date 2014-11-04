@@ -16,10 +16,12 @@ namespace WindowsFormsApplication1
     public partial class Form1 : Form
     {
         NamedPipeServerStream pipeStream1;
+        StreamWriter sw1;
 
-        public Form1(NamedPipeServerStream pipeStream)
+        public Form1(NamedPipeServerStream pipeStream, StreamWriter sw)
         {
             pipeStream1 = pipeStream;
+            sw1 = sw;
             InitializeComponent();
         }
 
@@ -113,6 +115,7 @@ namespace WindowsFormsApplication1
             char deliminator = ';';
             string command = command_chain.Text;
             string[] words = command.Split(deliminator);
+          
 
           /*  Form1 Server = new Form1(); //named pipe
             Thread MessageThread = new Thread(Server.ThreadStartServer);
@@ -121,10 +124,9 @@ namespace WindowsFormsApplication1
             foreach (string word in words)
             {
                 System.Console.WriteLine(word);
-                using (StreamWriter sw = new StreamWriter(pipeStream1))
-                {
-                    sw.Write(word);
-                }
+               
+                    sw1.Write(word);
+            
             }
         }
 
