@@ -57,12 +57,13 @@ namespace WindowsFormsApplication1
                 // Wait for a connection
                 pipeStream.WaitForConnection();
                 Console.WriteLine("[Server] Pipe connection established");
-
+/*
                 using (StreamWriter sw = new StreamWriter(pipeStream))
                 {
                     string text = "test message from C# Server!";
                     sw.Write(text);
                 }
+ */
                 Application.Run(new Form1(pipeStream));
             }
 

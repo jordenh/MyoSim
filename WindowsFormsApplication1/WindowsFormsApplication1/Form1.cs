@@ -15,8 +15,11 @@ namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
+        NamedPipeServerStream pipeStream1;
+
         public Form1(NamedPipeServerStream pipeStream)
         {
+            pipeStream1 = pipeStream;
             InitializeComponent();
         }
 
@@ -105,7 +108,7 @@ namespace WindowsFormsApplication1
             }         
         }
 
-        private void send_command_button_Click(object sender, EventArgs e, NamedPipeServerStream pipeStream)
+        private void send_command_button_Click(object sender, EventArgs e)
         {
             char deliminator = ';';
             string command = command_chain.Text;
@@ -118,7 +121,7 @@ namespace WindowsFormsApplication1
             foreach (string word in words)
             {
                 System.Console.WriteLine(word);
-                using (StreamWriter sw = new StreamWriter(pipeStream))
+                using (StreamWriter sw = new StreamWriter(pipeStream1))
                 {
                     sw.Write(word);
                 }

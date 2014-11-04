@@ -126,6 +126,7 @@ namespace WindowsFormsApplication1
             // 
             // send_command_button
             // 
+            
             this.send_command_button.Location = new System.Drawing.Point(430, 272);
             this.send_command_button.Name = "send_command_button";
             this.send_command_button.Size = new System.Drawing.Size(75, 23);
@@ -172,6 +173,7 @@ namespace WindowsFormsApplication1
             // 
             // Form1
             // 
+
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(520, 307);
