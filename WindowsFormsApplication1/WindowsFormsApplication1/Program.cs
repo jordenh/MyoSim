@@ -66,7 +66,7 @@ namespace WindowsFormsApplication1
  */
                 using (StreamWriter sw = new StreamWriter(pipeStream))
                 {
-                    Application.Run(new Form1(pipeStream, sw));
+                    Application.Run();//new Form1(pipeStream, sw));
                 }
             }
 
@@ -74,11 +74,17 @@ namespace WindowsFormsApplication1
 
         static void Main(string[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Program Server = new Program();
-            Thread ServerThread = new Thread(Server.SendMessage);
-            ServerThread.Start();
+            using (NamedPipeClientStream pipeStream = new NamedPipeClientStream(".", "MyPipe", PipeDirection.InOut))
+            {
+                pipeStream.Connect();
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new Form1(pipeStream));
+
+            }
+         //   Program Server = new Program();
+          //  Thread ServerThread = new Thread(Server.SendMessage);
+         //   ServerThread.Start();
 
            
 

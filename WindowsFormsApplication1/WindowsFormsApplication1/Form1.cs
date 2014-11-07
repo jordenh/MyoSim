@@ -15,14 +15,21 @@ namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
+       /*
         NamedPipeServerStream pipeStream1;
         StreamWriter sw1;
-
-        public Form1(NamedPipeServerStream pipeStream, StreamWriter sw)
+        */
+        NamedPipeClientStream pipeStream;
+        public Form1(NamedPipeClientStream pipeStream1)//NamedPipeServerStream pipeStream, StreamWriter sw)
         {
+          /*
             pipeStream1 = pipeStream;
             sw1 = sw;
+           */
+            pipeStream = pipeStream1;
             InitializeComponent();
+        
+           
         }
 
         private void call_myo_sim(string command)
@@ -112,22 +119,91 @@ namespace WindowsFormsApplication1
 
         private void send_command_button_Click(object sender, EventArgs e)
         {
+            
             char deliminator = ';';
             string command = command_chain.Text;
-            string[] words = command.Split(deliminator);
-          
-
-          /*  Form1 Server = new Form1(); //named pipe
-            Thread MessageThread = new Thread(Server.ThreadStartServer);
-            MessageThread.Start();
-          */
-            foreach (string word in words)
+            char last = command[command.Length - 1];
+            if(last == ';')
             {
-                System.Console.WriteLine(word);
-               
-                    sw1.Write(word);
+               command= command.Remove(command.Length - 1);
+            }
+            System.Console.WriteLine("string to sent: " + command);
+            string[] words = command.Split(deliminator);
+
+                // The connect function will indefinately wait for the pipe to become available
+                // can set up waiting time if needed
+             
+
+                foreach (string word in words)
+                {
+                    System.Console.WriteLine(word);
+
+                    if (!pipeStream.IsConnected)    //It thinks it's connected but can't read anything ....
+                    {
+                        System.Console.WriteLine("Failed to connect!!");
+                        return;
+                    }
+                    System.Console.WriteLine("Connected!!");
+
+                    pipeStream.Write(Encoding.ASCII.GetBytes(word), 0, word.Length);
+
+                    System.Console.WriteLine("Message Sent!!");
+
+                    byte[] buffer = new byte[200];
+                    pipeStream.Read(buffer, 0, 200);
+
+                    string s = ASCIIEncoding.ASCII.GetString(buffer);
+                   
+                    System.Console.WriteLine("Server Status: " + s);
+
+                }
+
+
+            
+
+            
+            /*
+            using (NamedPipeClientStream pipeStream = new NamedPipeClientStream(".", "MyPipe", PipeDirection.InOut))
+            {
+                // The connect function will indefinately wait for the pipe to become available
+                // can set up waiting time if needed
+                pipeStream.Connect();
+                
+                       foreach (string word in words)
+                       {
+                           System.Console.WriteLine(word);
+                                                
+                           if (!pipeStream.IsConnected)    //It thinks it's connected but can't read anything ....
+                           {
+                               System.Console.WriteLine("Failed to connect!!");
+                               return;
+                           }
+                           System.Console.WriteLine("Connected!!");
+
+                           using (StreamWriter sw = new StreamWriter(pipeStream))
+                           {
+                               sw.Write(word);
+                           }
+                           System.Console.WriteLine("Message Sent!!");
+
+                           //Read server reply
+                           StreamReader sr = new StreamReader(pipeStream);
+                           
+                               char[] c = new char[200];
+
+                               while (sr.Peek() >= 0)
+                               {
+                                   sr.Read(c, 0, c.Length);
+                               }
+
+                               string s = new string(c);
+                               System.Console.WriteLine("Server Status: " + c);
+                           
+                       }
+
             
             }
+             */
         }
 
         /*
