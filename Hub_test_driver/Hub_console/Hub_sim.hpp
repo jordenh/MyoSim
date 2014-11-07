@@ -5,9 +5,14 @@
  */
 #pragma once
 
-#include "libmyo.h"
-#include "myo.hpp"
+#include "Hub_connection.hpp"
+#include "myo/libmyo.h"
+
 #include <vector>
+#include <Windows.h>
+
+#define OK		0
+#define ERROR	-1
 
 namespace myo {
 
@@ -65,17 +70,23 @@ namespace myo {
 		Myo* addMyo(libmyo_myo_t opaqueMyo);
 
 		libmyo_hub_t _hub;
+		std::vector<HubConnection> _hub_connection;
 		std::vector<Myo*> _myos;
 		std::vector<DeviceListener*> _listeners;
 
 		/// @endcond
 
 	private:
+
+		/// Run sim version of libmyo_run
+		libmyo_result_t Hub_sim::hub_run(libmyo_hub_t hub, unsigned int duration_ms, libmyo_handler_t handler, void* user_data,
+			libmyo_error_details_t* out_error);
+
 		// Not implemented
 		Hub_sim(const Hub_sim&);
 		Hub_sim& operator=(const Hub_sim&);
 	};
-
+		
 	/// @example hello-myo.cpp
 
 } // namespace myo

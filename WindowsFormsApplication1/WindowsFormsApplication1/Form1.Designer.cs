@@ -129,6 +129,7 @@
             this.send_command_button.Name = "send_command_button";
             this.send_command_button.Size = new System.Drawing.Size(75, 23);
             this.send_command_button.TabIndex = 9;
+            this.send_command_button.Tag = "stream";
             this.send_command_button.Text = "Send";
             this.send_command_button.UseVisualStyleBackColor = true;
             this.send_command_button.Click += new System.EventHandler(this.send_command_button_Click);

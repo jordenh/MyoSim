@@ -7,15 +7,20 @@
 
 #include <algorithm>
 #include <exception>
+#include <Windows.h>
 
-#include "cxx/DeviceListener.hpp"
-#include "cxx/Myo.hpp"
-#include "cxx/Pose.hpp"
-#include "cxx/Quaternion.hpp"
-#include "cxx/Vector3.hpp"
-#include "cxx/detail/ThrowOnError.hpp"
+#include "myo/cxx/DeviceListener.hpp"
+#include "myo/cxx/Myo.hpp"
+#include "myo/cxx/Pose.hpp"
+#include "myo/cxx/Quaternion.hpp"
+#include "myo/cxx/Vector3.hpp"
+#include "myo/cxx/detail/ThrowOnError.hpp"
 
 namespace myo {
+	void test_fnc(void)
+	{
+		printf("all the testing");
+	}
 
 	inline
 		Hub_sim::Hub_sim(const std::string& applicationIdentifier)
@@ -23,7 +28,8 @@ namespace myo {
 		, _myos()
 		, _listeners()
 	{
-		libmyo_init_hub(&_hub, applicationIdentifier.c_str(), ThrowOnError());
+		/// Create connection here
+		//libmyo_init_hub(&_hub, applicationIdentifier.c_str(), ThrowOnError());
 	}
 
 	inline
@@ -60,7 +66,7 @@ namespace myo {
 		};
 
 		do {
-			libmyo_run(_hub, timeout_ms ? timeout_ms : 1000, &local::handler, this, ThrowOnError());
+			hub_run(_hub, timeout_ms ? timeout_ms : 1000, &local::handler, this, ThrowOnError());
 		} while (!timeout_ms && _myos.size() <= prevSize);
 
 		if (_myos.size() <= prevSize) {
@@ -95,6 +101,7 @@ namespace myo {
 	inline
 		void Hub_sim::onDeviceEvent(libmyo_event_t event)
 	{
+		/* allow only 1 sim myo */
 		libmyo_myo_t opaqueMyo = libmyo_event_get_myo(event);
 
 		Myo* myo = lookupMyo(opaqueMyo);
@@ -102,7 +109,7 @@ namespace myo {
 		if (!myo && libmyo_event_get_type(event) == libmyo_event_paired) {
 			myo = addMyo(opaqueMyo);
 		}
-
+		
 		if (!myo) {
 			// Ignore events for Myos we don't know about.
 			return;
@@ -117,10 +124,8 @@ namespace myo {
 
 			switch (libmyo_event_get_type(event)) {
 			case libmyo_event_paired: {
-				FirmwareVersion version = { libmyo_event_get_firmware_version(event, libmyo_version_major),
-					libmyo_event_get_firmware_version(event, libmyo_version_minor),
-					libmyo_event_get_firmware_version(event, libmyo_version_patch),
-					libmyo_event_get_firmware_version(event, libmyo_version_hardware_rev) };
+				/* Fake firmware number for sim*/
+				FirmwareVersion version = { 1, 0, 0, 0 };
 				listener->onPair(myo, time, version);
 				break;
 			}
@@ -231,6 +236,24 @@ namespace myo {
 		_myos.push_back(myo);
 
 		return myo;
+	}
+
+	/***** Private methods *****/
+
+	libmyo_result_t Hub_sim::hub_run(libmyo_hub_t hub, unsigned int duration_ms, libmyo_handler_t handler, void* user_data,
+		libmyo_error_details_t* out_error)
+	{
+		ULONGLONG start_time;
+		ULONGLONG end_time;
+		libmyo_handler_result_t ret;
+		
+		start_time = GetTickCount64();
+
+		do {
+			ret = handler(this, ThrowOnError());
+			end_time = GetTickCount64();
+		} while ((end_time - start_time) >= duration_ms);
+		return libmyo_success;
 	}
 
 } // namespace myo
