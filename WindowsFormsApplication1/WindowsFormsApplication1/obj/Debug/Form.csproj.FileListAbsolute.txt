@@ -7,3 +7,12 @@ C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsAppl
 C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
 C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
 C:\Users\Frederick\Source\Repos\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Form1.resources
+C:\Users\Jeremy\GitProjects\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\Form.csprojResolveAssemblyReference.cache
+C:\Users\Jeremy\GitProjects\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\Form.csproj.GenerateResource.Cache
+C:\Users\Jeremy\GitProjects\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\MyoSimGUI.exe.config
+C:\Users\Jeremy\GitProjects\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\MyoSimGUI.exe
+C:\Users\Jeremy\GitProjects\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\MyoSimGUI.pdb
+C:\Users\Jeremy\GitProjects\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\MyoSimGUI.MyoSimulatorForm.resources
+C:\Users\Jeremy\GitProjects\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\MyoSimGUI.Properties.Resources.resources
+C:\Users\Jeremy\GitProjects\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\MyoSimGUI.exe
+C:\Users\Jeremy\GitProjects\MyoSim\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\MyoSimGUI.pdb

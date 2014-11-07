@@ -33,3 +33,4 @@
 # Temporary build directory
 TemporaryGeneratedFile*.cs
 *.cache
+*.suo
