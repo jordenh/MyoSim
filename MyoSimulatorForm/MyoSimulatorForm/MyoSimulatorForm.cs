@@ -7,12 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.IO.Pipes;
+using System.Threading;
 
 namespace MyoSimGUI
 {
     public partial class MyoSimulatorForm : Form
     {
         public const char commandDelimiter = ';';
+        NamedPipeClientStream pipeStream;
 
         static Dictionary<string, string> labelToCommand = new Dictionary<string, string>
         {
@@ -26,8 +30,9 @@ namespace MyoSimGUI
             {"Unknown", "unknown"}
         };
 
-        public MyoSimulatorForm()
+        public MyoSimulatorForm(NamedPipeClientStream pipeStream)
         {
+            this.pipeStream = pipeStream;
             InitializeComponent();
             foreach (string key in labelToCommand.Keys) 
             {
@@ -87,11 +92,37 @@ namespace MyoSimGUI
         private void sendCommandButton_Click(object sender, EventArgs e)
         {
             string command = commandChain.Text;
+
+            if (command[command.Length - 1] == commandDelimiter)
+            {
+                command = command.Remove(command.Length - 1);
+            }
+
+            System.Console.WriteLine("String to send: " + command);
             string[] words = command.Split(commandDelimiter);
 
             foreach (string word in words)
             {
                 System.Console.WriteLine(word);
+
+                if (!pipeStream.IsConnected)
+                {
+                    System.Console.WriteLine("Failed to connect!!");
+                    return;
+                }
+
+                System.Console.WriteLine("Connected!!");
+
+                pipeStream.Write(Encoding.ASCII.GetBytes(word), 0, word.Length);
+
+                System.Console.WriteLine("Message Sent!!");
+
+                byte[] buffer = new byte[200];
+                pipeStream.Read(buffer, 0, 200);
+
+                string s = ASCIIEncoding.ASCII.GetString(buffer);
+
+                System.Console.WriteLine("Server Status: " + s);
             }
         }
 
