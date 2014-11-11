@@ -1,0 +1,71 @@
+/*
+ * HubSim.hpp
+ *
+ * Simulator version of Hub module in Myo SDK
+ */
+#pragma once
+
+#include "SimEvent.h"
+#include "MyoSim.h"
+#include "myo.hpp"
+#include <vector>
+
+namespace myoSim {
+
+	class DeviceListener;
+
+	/// @brief A Hub provides access to one or more Myo instances.
+	class HubSim {
+	public:
+		/// Construct a hub.
+		/// \a applicationIdentifier must follow a reverse domain name format (ex. com.domainname.appname). Application
+		/// identifiers can be formed from the set of alphanumeric ASCII characters (a-z, A-Z, 0-9). The hyphen (-) and
+		/// underscore (_) characters are permitted if they are not adjacent to a period (.) character  (i.e. not at the
+		/// start or end of each segment), but are not permitted in the top-level domain. Application identifiers must have
+		/// three or more segments. For example, if a company's domain is example.com and the application is named
+		/// hello-world, one could use "com.example.hello-world" as a valid application identifier. \a applicationIdentifier
+		/// can be an empty string.
+		/// Throws an exception of type std::invalid_argument if \a applicationIdentifier is not in the proper reverse
+		/// domain name format or is longer than 255 characters.
+		/// Throws an exception of type std::runtime_error if the hub initialization failed for some reason, typically
+		/// because Myo Connect is not running and a connection can thus not be established.
+		HubSim(const std::string& applicationIdentifier = "");
+
+		/// Deallocate any resources associated with a Hub.
+		/// This will cause all Myo instances retrieved from this Hub to become invalid.
+		~HubSim();
+
+		/// Wait for a Myo to become paired, or time out after \a timeout_ms milliseconds if provided.
+		/// If \a timeout_ms is zero, this function blocks until a Myo is found.
+		/// This function must not be called concurrently with run() or runOnce().
+		Myo* waitForMyo(unsigned int milliseconds = 0);
+
+		/// Register a listener to be called when device events occur.
+		void addListener(DeviceListener* listener);
+
+		/// Remove a previously registered listener.
+		void removeListener(DeviceListener* listener);
+
+		/// Run the event loop for the specified duration (in milliseconds).
+		void run(unsigned int duration_ms);
+
+		/// Run the event loop until a single event occurs, or the specified duration (in milliseconds) has elapsed.
+		void runOnce(unsigned int duration_ms);
+
+	protected:
+		void onDeviceEvent(SimEvent simEvent);
+        Myo* lookupMyo(unsigned int myoIdentifier) const;
+
+        Myo* addMyo(unsigned int identifier);
+
+		std::vector<Myo*> myos;
+		std::vector<DeviceListener*> listeners;
+
+		/// @endcond
+
+	private:
+		// Not implemented
+		HubSim(const HubSim&);
+		HubSim& operator=(const HubSim&);
+	};
+} // namespace myo

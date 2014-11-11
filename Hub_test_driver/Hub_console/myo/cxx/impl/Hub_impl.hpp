@@ -88,7 +88,7 @@ void Hub::removeListener(DeviceListener* listener)
     _listeners.erase(I);
 }
 
-inline
+inline 
 void Hub::onDeviceEvent(libmyo_event_t event)
 {
     libmyo_myo_t opaqueMyo = libmyo_event_get_myo(event);

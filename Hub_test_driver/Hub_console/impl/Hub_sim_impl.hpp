@@ -1,9 +1,9 @@
 /*
- * Hub_sim_impl.hpp
+ * HubSim_impl.hpp
  * 
  * Implementation for the Hub simultor methods.
  */
-#include "../Hub_sim.hpp"
+#include "../HubSim.hpp"
 
 #include <algorithm>
 #include <exception>
@@ -18,7 +18,7 @@
 namespace myo {
 
 	inline
-		Hub_sim::Hub_sim(const std::string& applicationIdentifier)
+		HubSim::HubSim(const std::string& applicationIdentifier)
 		: _hub(0)
 		, _myos()
 		, _listeners()
@@ -27,7 +27,7 @@ namespace myo {
 	}
 
 	inline
-		Hub_sim::~Hub_sim()
+		HubSim::~HubSim()
 	{
 		for (std::vector<Myo*>::iterator I = _myos.begin(), IE = _myos.end(); I != IE; ++I) {
 			delete *I;
@@ -36,13 +36,13 @@ namespace myo {
 	}
 
 	inline
-		Myo* Hub_sim::waitForMyo(unsigned int timeout_ms)
+		Myo* HubSim::waitForMyo(unsigned int timeout_ms)
 	{
 		std::size_t prevSize = _myos.size();
 
 		struct local {
 			static libmyo_handler_result_t handler(void* user_data, libmyo_event_t event) {
-				Hub_sim* hub_sim = static_cast<Hub_sim*>(user_data);
+				HubSim* hub_sim = static_cast<HubSim*>(user_data);
 
 				/// replace this with get from socket call
 				libmyo_myo_t opaque_myo = libmyo_event_get_myo(event);
@@ -71,7 +71,7 @@ namespace myo {
 	}
 
 	inline
-		void Hub_sim::addListener(DeviceListener* listener)
+		void HubSim::addListener(DeviceListener* listener)
 	{
 		if (std::find(_listeners.begin(), _listeners.end(), listener) != _listeners.end()) {
 			// Listener was already added.
@@ -81,7 +81,7 @@ namespace myo {
 	}
 
 	inline
-		void Hub_sim::removeListener(DeviceListener* listener)
+		void HubSim::removeListener(DeviceListener* listener)
 	{
 		std::vector<DeviceListener*>::iterator I = std::find(_listeners.begin(), _listeners.end(), listener);
 		if (I == _listeners.end()) {
@@ -93,7 +93,7 @@ namespace myo {
 	}
 
 	inline
-		void Hub_sim::onDeviceEvent(libmyo_event_t event)
+		void HubSim::onDeviceEvent(libmyo_event_t event)
 	{
 		libmyo_myo_t opaqueMyo = libmyo_event_get_myo(event);
 
@@ -174,11 +174,11 @@ namespace myo {
 	}
 
 	inline
-		void Hub_sim::run(unsigned int duration_ms)
+		void HubSim::run(unsigned int duration_ms)
 	{
 		struct local {
 			static libmyo_handler_result_t handler(void* user_data, libmyo_event_t event) {
-				Hub_sim* hub_sim = static_cast<Hub_sim*>(user_data);
+				HubSim* hub_sim = static_cast<HubSim*>(user_data);
 
 				hub_sim->onDeviceEvent(event);
 
@@ -189,11 +189,11 @@ namespace myo {
 	}
 
 	inline
-		void Hub_sim::runOnce(unsigned int duration_ms)
+		void HubSim::runOnce(unsigned int duration_ms)
 	{
 		struct local {
 			static libmyo_handler_result_t handler(void* user_data, libmyo_event_t event) {
-				Hub_sim* hub_sim = static_cast<Hub_sim*>(user_data);
+				HubSim* hub_sim = static_cast<HubSim*>(user_data);
 
 				hub_sim->onDeviceEvent(event);
 
@@ -204,13 +204,13 @@ namespace myo {
 	}
 
 	inline
-		libmyo_hub_t Hub_sim::libmyoObject()
+		libmyo_hub_t HubSim::libmyoObject()
 	{
 		return _hub;
 	}
 
 	inline
-		Myo* Hub_sim::lookupMyo(libmyo_myo_t opaqueMyo) const
+		Myo* HubSim::lookupMyo(libmyo_myo_t opaqueMyo) const
 	{
 		Myo* myo = 0;
 		for (std::vector<Myo*>::const_iterator I = _myos.begin(), IE = _myos.end(); I != IE; ++I) {
@@ -224,7 +224,7 @@ namespace myo {
 	}
 
 	inline
-		Myo* Hub_sim::addMyo(libmyo_myo_t opaqueMyo)
+		Myo* HubSim::addMyo(libmyo_myo_t opaqueMyo)
 	{
 		Myo* myo = new Myo(opaqueMyo);
 
