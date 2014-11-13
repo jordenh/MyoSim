@@ -27,10 +27,16 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Hub_sim.hpp">
+    <ClInclude Include="HubSim.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="impl\Hub_sim_impl.hpp">
+    <ClInclude Include="MyoSim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceListenerSim.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -39,6 +45,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Hub_console.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HubSim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyoSim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SimEvent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
