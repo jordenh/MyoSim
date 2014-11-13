@@ -64,8 +64,16 @@ namespace MyoSimGUI
         {
             string filename = saveFilename.Text;
             string command = commandChain.Text;
+            System.IO.StreamWriter file = null;
 
-            System.IO.StreamWriter file = new System.IO.StreamWriter(filename);
+            try
+            {
+                file = new System.IO.StreamWriter(filename);
+            }
+            catch (ArgumentException except)
+            {
+                MessageBox.Show(except.ToString(), string.Format("File not loaded."));
+            }
             file.WriteLine(command);
             file.Close();
         }
