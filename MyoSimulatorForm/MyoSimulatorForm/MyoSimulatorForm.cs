@@ -16,7 +16,7 @@ namespace MyoSimGUI
     public partial class MyoSimulatorForm : Form
     {
         public const char commandDelimiter = ';';
-        NamedPipeClientStream pipeStream;
+        private NamedPipeServerStream pipeStream;
 
         static Dictionary<string, string> labelToCommand = new Dictionary<string, string>
         {
@@ -30,14 +30,20 @@ namespace MyoSimGUI
             {"Unknown", "unknown"}
         };
 
-        public MyoSimulatorForm(NamedPipeClientStream pipeStream)
+        public MyoSimulatorForm(NamedPipeServerStream pipeStream)
         {
             this.pipeStream = pipeStream;
             InitializeComponent();
+            this.sendCommandButton.Enabled = false;
             foreach (string key in labelToCommand.Keys) 
             {
                 this.gestureList.Items.Add(key);
             }
+        }
+
+        public void enableSendCommand()
+        {
+            this.sendCommandButton.Enabled = true;
         }
 
         private void sendCommand(string label, Dictionary<string, string> labelToCommandMap)
@@ -116,13 +122,6 @@ namespace MyoSimGUI
                 pipeStream.Write(Encoding.ASCII.GetBytes(word), 0, word.Length);
 
                 System.Console.WriteLine("Message Sent!!");
-
-                byte[] buffer = new byte[200];
-                pipeStream.Read(buffer, 0, 200);
-
-                string s = ASCIIEncoding.ASCII.GetString(buffer);
-
-                System.Console.WriteLine("Server Status: " + s);
             }
         }
 

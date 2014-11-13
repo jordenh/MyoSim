@@ -7,7 +7,7 @@
 
 #include "SimEvent.h"
 #include "MyoSim.h"
-#include "myo.hpp"
+#include "myo/myo.hpp"
 #include <vector>
 
 namespace myoSim {
@@ -15,7 +15,7 @@ namespace myoSim {
 	class DeviceListener;
 
 	/// @brief A Hub provides access to one or more Myo instances.
-	class HubSim {
+	class Hub {
 	public:
 		/// Construct a hub.
 		/// \a applicationIdentifier must follow a reverse domain name format (ex. com.domainname.appname). Application
@@ -29,11 +29,11 @@ namespace myoSim {
 		/// domain name format or is longer than 255 characters.
 		/// Throws an exception of type std::runtime_error if the hub initialization failed for some reason, typically
 		/// because Myo Connect is not running and a connection can thus not be established.
-		HubSim(const std::string& applicationIdentifier = "");
+		Hub(const std::string& applicationIdentifier = "");
 
 		/// Deallocate any resources associated with a Hub.
 		/// This will cause all Myo instances retrieved from this Hub to become invalid.
-		~HubSim();
+		~Hub();
 
 		/// Wait for a Myo to become paired, or time out after \a timeout_ms milliseconds if provided.
 		/// If \a timeout_ms is zero, this function blocks until a Myo is found.
@@ -65,7 +65,7 @@ namespace myoSim {
 
 	private:
 		// Not implemented
-		HubSim(const HubSim&);
-		HubSim& operator=(const HubSim&);
+		Hub(const Hub&);
+		Hub& operator=(const Hub&);
 	};
 } // namespace myo

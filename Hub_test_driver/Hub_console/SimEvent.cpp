@@ -11,6 +11,55 @@ SimEvent::~SimEvent()
 {
 }
 
+void SimEvent::setEventType(myoSimEvent type)
+{
+    eventType = type;
+}
+
+void SimEvent::setTimestamp(uint64_t timestamp)
+{
+    eventTimestamp = timestamp;
+}
+
+void SimEvent::setMyoIdentifier(int identifier)
+{
+    myoIdentifier = identifier;
+}
+
+void SimEvent::setArm(myoSim::Arm arm)
+{
+    this->arm = arm;
+}
+
+void SimEvent::setXDirection(myoSim::XDirection xDirection)
+{
+    this->xDirection = xDirection;
+}
+
+void SimEvent::setOrientation(float xOrientation, float yOrientation,
+    float zOrientation, float wOrientation)
+{
+    this->xOrientation = xOrientation;
+    this->yOrientation = yOrientation;
+    this->zOrientation = zOrientation;
+    this->wOrientation = wOrientation;
+}
+
+void SimEvent::setAccelerometerData(vectorIndex index, float data)
+{
+    accelerometerData[static_cast<int>(index)] = data;
+}
+
+void SimEvent::setGyroscopeData(vectorIndex index, float data)
+{
+    gyroscopeData[static_cast<int>(index)] = data;
+}
+
+void SimEvent::setPose(myo::Pose pose)
+{
+    this->pose = pose;
+}
+
 myoSimEvent SimEvent::getEventType() const
 {
     return eventType;
@@ -58,6 +107,7 @@ float SimEvent::getWOrientation() const
 
 float SimEvent::getAccelerometerData(vectorIndex index) const
 {
+
     switch (index)
     {
     case vectorIndex::first:

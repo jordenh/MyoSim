@@ -29,6 +29,17 @@ public:
     SimEvent();
     ~SimEvent();
 
+    void setEventType(myoSimEvent type);
+    void setTimestamp(uint64_t timestamp);
+    void setMyoIdentifier(int identifier);
+    void setArm(myoSim::Arm arm);
+    void setXDirection(myoSim::XDirection xDirection);
+    void setOrientation(float xOrientation, float yOrientation, 
+        float zOrientation, float wOrientation);
+    void setAccelerometerData(vectorIndex index, float data);
+    void setGyroscopeData(vectorIndex index, float data);
+    void setPose(myo::Pose pose);
+
     myoSimEvent getEventType() const;
     uint64_t getEventTimestamp() const;
     unsigned int getMyoIdentifier() const;
