@@ -143,5 +143,13 @@ namespace MyoSimGUI
         {
             sendCommand(this.gestureList.SelectedItem.ToString(), labelToCommand);
         }
+
+        private void MyoSimulatorForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // TODO: send a disconnect event instead once we get protocol sorted
+            string dc_signal = "DCed";
+            pipeStream.Write(Encoding.ASCII.GetBytes(dc_signal), 0, dc_signal.Length);
+            Dispose();
+        }
     }
 }
