@@ -73,7 +73,9 @@ namespace MyoSimGUI
             catch (ArgumentException except)
             {
                 MessageBox.Show(except.ToString(), string.Format("File not loaded."));
+                return;
             }
+
             file.WriteLine(command);
             file.Close();
         }
@@ -91,6 +93,10 @@ namespace MyoSimGUI
             catch(ArgumentException except)
             {
                MessageBox.Show(except.ToString(), string.Format("File does not exist"));
+            }
+            catch (FileNotFoundException except)
+            {
+                MessageBox.Show(except.ToString(), string.Format("File not found"));
             }
             finally
             {
