@@ -18,9 +18,7 @@
 #define USE_SIMULATOR
 
 #ifdef USE_SIMULATOR
-#include "HubSim.hpp"
-#include "MyoSim.h"
-#include "DeviceListenerSim.h"
+#include "MyoSimIncludes.hpp"
 #endif
 
 #ifdef USE_SIMULATOR
@@ -41,7 +39,7 @@ public:
 
     // onPose() is called whenever the Myo detects that the person wearing it has changed their pose, for example,
     // making a fist, or not making a fist anymore.
-    void onPose(Myo* myo, uint64_t timestamp, myo::Pose pose)
+    void onPose(Myo* myo, uint64_t timestamp, Pose pose)
     {
         if (currentPose.type() != pose.type())
         {
@@ -51,13 +49,14 @@ public:
 
         currentPose = pose;
         // Vibrate the Myo whenever we've detected that the user has made a fist.
-        if (pose == myo::Pose::fist) {
-            myo->vibrate(myo::Myo::vibrationMedium);
+        if (pose == Pose::fist) {
+            myo->vibrate(Myo::vibrationMedium);
         }
     }
 
-    myo::Pose currentPose;
+    Pose currentPose;
 };
+
 int main(int argc, char** argv)
 {
     try {
@@ -86,61 +85,3 @@ int main(int argc, char** argv)
         return 1;
     }
 }
-
-/*
-#include "stdafx.h"
-#include <Windows.h>
-#include <myo/myo.hpp>
-
-#define BUFFER_SIZE 512
-
-int _tmain(int argc, _TCHAR* argv[])
-{
-    HANDLE pipe;
-    LPTSTR pipeName = TEXT("\\\\.\\pipe\\BvrPipe");
-
-    while (true)
-    {
-        pipe = CreateFile(pipeName, GENERIC_READ | GENERIC_WRITE, 0, 
-            NULL, OPEN_EXISTING, 0, NULL);
-
-        if (pipe != INVALID_HANDLE_VALUE) break;
-
-        if (GetLastError() != ERROR_PIPE_BUSY)
-        {
-            std::cout << "Could not open pipe. Last error=" << GetLastError() << std::endl;
-            return -1;
-        }
-
-        if (!WaitNamedPipe(pipeName, 20000))
-        {
-            printf("Could not open pipe: 20 second wait time out.");
-            return -1;
-        }
-    }
-
-    BOOL success;
-    do
-    {
-        TCHAR buffer[BUFFER_SIZE];
-        DWORD numBytes;
-        ZeroMemory(buffer, BUFFER_SIZE);
-        success = ReadFile(pipe, buffer, BUFFER_SIZE*sizeof(TCHAR), &numBytes, NULL);
-
-        if (!success && GetLastError() != ERROR_MORE_DATA) break;
-
-        std::cout << buffer << std::endl;
-    } while (!success);
-
-    if (!success)
-    {
-        std::cout << "ReadFile from pipe failed. Last error=" << GetLastError() << std::endl;
-        return -1;
-    }
-    
-    system("PAUSE");
-    CloseHandle(pipe);
-	return 0;
-}
-
-*/

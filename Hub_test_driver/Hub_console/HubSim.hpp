@@ -18,21 +18,9 @@ namespace myoSim {
 	class Hub {
 	public:
 		/// Construct a hub.
-		/// \a applicationIdentifier must follow a reverse domain name format (ex. com.domainname.appname). Application
-		/// identifiers can be formed from the set of alphanumeric ASCII characters (a-z, A-Z, 0-9). The hyphen (-) and
-		/// underscore (_) characters are permitted if they are not adjacent to a period (.) character  (i.e. not at the
-		/// start or end of each segment), but are not permitted in the top-level domain. Application identifiers must have
-		/// three or more segments. For example, if a company's domain is example.com and the application is named
-		/// hello-world, one could use "com.example.hello-world" as a valid application identifier. \a applicationIdentifier
-		/// can be an empty string.
-		/// Throws an exception of type std::invalid_argument if \a applicationIdentifier is not in the proper reverse
-		/// domain name format or is longer than 255 characters.
-		/// Throws an exception of type std::runtime_error if the hub initialization failed for some reason, typically
-		/// because Myo Connect is not running and a connection can thus not be established.
 		Hub(const std::string& applicationIdentifier = "");
 
 		/// Deallocate any resources associated with a Hub.
-		/// This will cause all Myo instances retrieved from this Hub to become invalid.
 		~Hub();
 
 		/// Wait for a Myo to become paired, or time out after \a timeout_ms milliseconds if provided.

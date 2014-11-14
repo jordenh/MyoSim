@@ -55,7 +55,7 @@ namespace MyoSimGUI
             }
         }
 
-        private void call_myo_sim(string command)
+        private void callMyoSim(string command)
         {
 
         }

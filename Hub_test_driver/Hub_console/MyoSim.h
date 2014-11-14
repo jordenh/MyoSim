@@ -6,10 +6,17 @@ namespace myoSim {
     class Myo
     {
     public:
+        // Pass-through enum to Myo Vibration Type.
+        enum VibrationType {
+            vibrationShort = libmyo_vibration_short,
+            vibrationMedium = libmyo_vibration_medium,
+            vibrationLong = libmyo_vibration_long
+        };
+
         Myo(unsigned int id);
         ~Myo();
 
-        void vibrate(myo::Myo::VibrationType type);
+        void vibrate(VibrationType type);
         void requestRssi() const;
 
         bool connectToPipe(unsigned int timeout);

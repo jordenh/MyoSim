@@ -84,8 +84,12 @@
     <ClInclude Include="DeviceListenerSim.h" />
     <ClInclude Include="HubSim.hpp" />
     <ClInclude Include="MyoSim.h" />
+    <ClInclude Include="MyoSimIncludes.hpp" />
+    <ClInclude Include="PoseSim.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SimEvent.h" />
+    <ClInclude Include="SimQuaternion.h" />
+    <ClInclude Include="SimVector3.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -93,6 +97,7 @@
     <ClCompile Include="HubSim.cpp" />
     <ClCompile Include="Hub_console.cpp" />
     <ClCompile Include="MyoSim.cpp" />
+    <ClCompile Include="PoseSim.cpp" />
     <ClCompile Include="SimEvent.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
