@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace MyoSimGUI
 {
@@ -48,19 +49,40 @@ namespace MyoSimGUI
             {"Thumb to Pinky", "thumbToPinky"},
             {"Unknown", "unknown"}
         };
+        
+        public struct Quaternion
+        {
+            public float x;
+            public float y;
+            public float z;
+            public float w;
+        }
+
+        public struct vector3
+        {
+            public float x;
+            public float y;
+            public float z;
+        }
 
         private unsafe int Parseline(string[] lines, int* abs_time)
         {
             int len = -1;
             int delta_time;
-            int x;
-            int y;
-            int z;
+            int time_dat;
+            Quaternion quat_dat;
+            vector3 gyro_dat;
+            vector3 gyro_dat_prev;
+            vector3 accel_dat;
 
             char command_delim = ' ';
-            byte[] current_orient_command = new byte[44];
-            byte[] current_async_command = new byte[7]
+            //byte[] current_orient_command = new byte[44];
+            byte[] current_async_command = new byte[7];
 
+            IntPtr time_bytes = Marshal.AllocHGlobal(Marshal.SizeOf(time_dat));
+            IntPtr quat_bytes = Marshal.AllocHGlobal(Marshal.SizeOf(quat_dat));
+            IntPtr gyro_bytes = Marshal.AllocHGlobal(Marshal.SizeOf(gyro_dat));
+            IntPtr accel_bytes = Marshal.AllocHGlobal(Marshal.SizeOf(accel_dat));
 
             for (int i = 0; i < lines.Length; ++i)
             {
@@ -82,20 +104,20 @@ namespace MyoSimGUI
                         if (command.Length != SIZEOF_MOVE_CMD ||
                             !(int.TryParse(command.Last(), out delta_time)) ||
                             delta_time < 0 ||
-                            !(int.TryParse(command[1], out x)) ||
-                            !(int.TryParse(command[2], out y)) ||
-                            !(int.TryParse(command[3], out z)) )
+                            !(float.TryParse(command[1], out gyro_dat.x)) ||
+                            !(float.TryParse(command[2], out gyro_dat.y)) ||
+                            !(float.TryParse(command[3], out gyro_dat.z)) )
                         {
                             Console.WriteLine("ERROR in move");
                         }
                         else
                         {
-                            displacement_variables dispX = new displacement_variables();
-                            displacement_variables dispY = new displacement_variables();
-                            displacement_variables dispZ = new displacement_variables();
+                            displacement_variables dispX = new displacement_variables(gyro_dat.x, gyro_prev.x);
+                            displacement_variables dispY = new displacement_variables(gyro_dat.y, gyro_prev.y);
+                            displacement_variables dispZ = new displacement_variables(gyro_dat.z, gyro_prev.z);
 
                             /* Set first bit to be 1 to signal orientation data */
-                            current_orient_command[0] |= ( 1 << (sizeof(int)*8) );
+                            time_dat |= ( 1 << (sizeof(int)*8) );
 
                             /* Make sure that the last data sent is a multiple of ms_btw_send */
                             for (int t = 0; t <= (delta_time + ms_btw_send - (delta_time % ms_btw_send)); t += ms_btw_send)
@@ -104,7 +126,17 @@ namespace MyoSimGUI
                                 dispY.calc_next_disp(t);
                                 dispZ.calc_next_disp(t);
 
-                                current_orient_command[TIME_B_START] |= (byte)((t >> 3) & 0x0000007F);
+                                /* set time of command */
+                                time_dat |= (t & 0x7F);
+                                /* Calculate and save quaterion data */
+                                
+                                /* Calculate and save gyro vector */
+                                gyro_dat.x += dispX.get_disp();
+                                gyro_dat.y += dispY.get_disp();
+                                gyro_dat.z += dispZ.get_disp();
+                                /* Get accel data */
+
+                              /*  current_orient_command[TIME_B_START] |= (byte)((t >> 3) & 0x0000007F);
                                 current_orient_command[TIME_B_START + 1] = (byte)((t >> 2) & 0x000000FF);
                                 current_orient_command[TIME_B_START + 2] = (byte)((t >> 1) & 0x000000FF);
                                 current_orient_command[TIME_B_START + 3] = (byte)(t & 0x000000FF);
@@ -114,7 +146,7 @@ namespace MyoSimGUI
                                 current_orient_command[3] += (byte)dispZ.get_disp();
                                 Console.WriteLine("X " + current_orient_command[1]);
                                 bin_command_list.Add(t, current_orient_command);
-                          
+                          */
                             }
                         }
 

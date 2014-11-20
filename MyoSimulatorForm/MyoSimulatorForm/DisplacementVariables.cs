@@ -8,7 +8,12 @@ namespace MyoSimGUI
 {
     class displacement_variables
     {
-        public displacement_variables(float d = 0, float v0 = 1, float a = 0) { }
+        public displacement_variables(float d_prev=0, float d_next=0, float accel=0) 
+        {
+            d = d_next - d_prev;
+            v0 = 1;
+            a = accel;
+        }
 
         ~displacement_variables() { }
 
