@@ -1,9 +1,12 @@
 #include "stdafx.h"
 #include "HubSim.hpp"
 #include "DeviceListenerSim.h"
+#include <string>
+#include <iostream>
 
-// TODO: This will change when we come up with a protocol.
-#define MAX_MESSAGE_LEN 50
+
+#define MAX_MESSAGE_LEN 47
+
 
 namespace myoSim
 {
@@ -155,16 +158,72 @@ namespace myoSim
 
                 if (success)
                 {
-                    std::string message(buffer);
-                    SimEvent evt;
+					//get size of data
+					int data_size = buffer[0];
+
+					TCHAR data_type_temp[2];
+					TCHAR data[43];
+
+					//get the data/event type(2 bytes)
+
+					for (int x = 0; x < 2; x++)
+					{
+						data_type_temp[x] = buffer[x + 1];
+					}
+					//get the data
+					for (int y = 0; y < data_size; y++)
+					{
+						data[y] = buffer[y + 3];
+					}
+					
+					std::string event_type(data_type_temp);
+
+					
+					SimEvent evt;
+					//set event type
+					//still need to add types for disconnect
+					if (event_type == "onOrientationData")
+					{
+						evt.setEventType(myoSimEvent::orientation);
+					}
+					else if (event_type == "onPose")
+					{
+						evt.setEventType(myoSimEvent::pose);
+						Pose pose();
+						evt.setPose();
+					}
+					else if (event_type == "onAttach")
+					{
+						evt.setEventType(myoSimEvent::paired);
+					}
+					else if (event_type == "onConnect")
+					{
+						evt.setEventType(myoSimEvent::connected);
+					}
+					else if (event_type == "onArmSync")
+					{
+						evt.setEventType(myoSimEvent::armRecognized);
+					}
+					else
+					{
+						printf("data_type error\n");
+						return;
+					}
+
+
+										
+					//std::string message(buffer);
+                   // SimEvent evt;
+
+					
                     // TODO: For now, all data received is pose data. Must change to support all data. 
                     // Will do that once protocol has been decided.
-                    evt.setEventType(myoSimEvent::pose);
+                   // evt.setEventType(myoSimEvent::pose);
 
                     // TODO: Have a proper way of dealing with this. Do it in 
                     // a different class. Perhaps have the Myo class convert
                     // messages to events first.
-                    if (message == "rest")
+                    /*if (message == "rest")
                     {
                         Pose pose(Pose::rest);
                         evt.setPose(pose);
@@ -198,7 +257,7 @@ namespace myoSim
                     {
                         Pose pose(Pose::unknown);
                         evt.setPose(pose);
-                    }
+                    }*/
 
                     evt.setTimestamp(GetTickCount());
                     evt.setMyoIdentifier((*it)->getIdentifier());

@@ -1,0 +1,15 @@
+﻿Build started 11/20/2014 10:39:48 AM.
+     1>Project "C:\Users\Owen\Documents\GitHub\MyoSim\Hub_test_driver\Hub_console\Hub_console.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         D:\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\Users\Owen\Documents\GitHub\MyoSim\Hub_test_driver\Hub_console\\myo\include /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\Hub_console.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt HubSim.cpp
+         HubSim.cpp
+     1>c:\users\owen\documents\github\myosim\hub_test_driver\hub_console\hubsim.cpp(158): warning C4091: '' : ignored on left of 'unsigned char' when no variable is declared
+     1>c:\users\owen\documents\github\myosim\hub_test_driver\hub_console\hubsim.cpp(158): error C2143: syntax error : missing ';' before '['
+     1>c:\users\owen\documents\github\myosim\hub_test_driver\hub_console\hubsim.cpp(158): error C3409: empty attribute block is not allowed
+     1>c:\users\owen\documents\github\myosim\hub_test_driver\hub_console\hubsim.cpp(158): error C2146: syntax error : missing ';' before identifier 'data'
+     1>c:\users\owen\documents\github\myosim\hub_test_driver\hub_console\hubsim.cpp(158): error C2065: 'data' : undeclared identifier
+     1>Done Building Project "C:\Users\Owen\Documents\GitHub\MyoSim\Hub_test_driver\Hub_console\Hub_console.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:02.21
