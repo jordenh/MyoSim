@@ -126,6 +126,7 @@
             this.Controls.Add(this.commandChain);
             this.Name = "MyoSimulatorForm";
             this.Text = "Myo Simulator";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MyoSimulatorForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 

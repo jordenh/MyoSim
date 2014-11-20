@@ -27,6 +27,8 @@ using namespace myoSim;
 using namespace myo;
 #endif
 
+static bool isDisconnected = false;
+
 // Classes that inherit from myo::DeviceListener can be used to receive events from Myo devices. DeviceListener
 // provides several virtual functions for handling different kinds of events. If you do not override an event, the
 // default behavior is to do nothing.
@@ -37,6 +39,15 @@ public:
     {
     }
 
+	/// Called when a paired Myo has been disconnected.
+	void onDisconnect(Myo* myo, uint64_t timestamp)
+	{
+		std::string temp;
+		std::cout << "unknown received" << std::endl;
+		isDisconnected = true;
+		std::cin >> temp;
+
+	}
     // onPose() is called whenever the Myo detects that the person wearing it has changed their pose, for example,
     // making a fist, or not making a fist anymore.
     void onPose(Myo* myo, uint64_t timestamp, Pose pose)
@@ -76,6 +87,10 @@ int main(int argc, char** argv)
 
         while (1) {
             hub.run(1000 / 20);
+			if (isDisconnected)
+			{
+				break;
+			}
         }
     }
     catch (const std::exception& e) {
