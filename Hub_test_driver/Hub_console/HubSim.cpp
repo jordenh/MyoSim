@@ -3,6 +3,7 @@
 #include "DeviceListenerSim.h"
 #include <string>
 #include <iostream>
+#include <map>
 
 
 #define MAX_MESSAGE_LEN 47
@@ -161,36 +162,89 @@ namespace myoSim
 					//get size of data
 					int data_size = buffer[0];
 
-					TCHAR data_type_temp[2];
+					TCHAR event_type_temp[2];
 					TCHAR data[43];
+					TCHAR timeStamp[4];
 
 					//get the data/event type(2 bytes)
 
 					for (int x = 0; x < 2; x++)
 					{
-						data_type_temp[x] = buffer[x + 1];
+						event_type_temp[x] = buffer[x + 1];
 					}
-					//get the data
-					for (int y = 0; y < data_size; y++)
+					//get the data if there is data(size > 0)
+					//if no data its handshake when open or close connection
+					//first 4 bytes are data type and time stamp
+					if (data_size < 0)
 					{
-						data[y] = buffer[y + 3];
+						
+						for (int y = 0; y < data_size; y++)
+						{
+							data[y] = buffer[y+7];
+							
+						}
+						//get the time stamp(4 bytes), get rid of first bit(data type)
+						
+						for (int z = 0; z < 4; z++)
+						{
+							timeStamp[z] = buffer[z+3];
+						
+						}
 					}
-					
-					std::string event_type(data_type_temp);
+					std::string event_type(event_type_temp);
 
 					
 					SimEvent evt;
 					//set event type
-					//still need to add types for disconnect
 					if (event_type == "onOrientationData")
 					{
 						evt.setEventType(myoSimEvent::orientation);
+
+						evt.setAccelerometerData(vectorIndex,data);
+						evt.setGyroscopeData(vectorIndex,data);
+						evt.setOrientation(x,y,z,w);
 					}
 					else if (event_type == "onPose")
 					{
 						evt.setEventType(myoSimEvent::pose);
-						Pose pose();
-						evt.setPose();
+
+						std::string message(data);
+
+						if (message == "rest")
+						{
+						Pose pose(Pose::rest);
+						evt.setPose(pose);
+						}
+						else if (message == "fist")
+						{
+						Pose pose(Pose::fist);
+						evt.setPose(pose);
+						}
+						else if (message == "waveIn")
+						{
+						Pose pose(Pose::waveIn);
+						evt.setPose(pose);
+						}
+						else if (message == "waveOut")
+						{
+						Pose pose(Pose::waveOut);
+						evt.setPose(pose);
+						}
+						else if (message == "fingersSpread")
+						{
+						Pose pose(Pose::fingersSpread);
+						evt.setPose(pose);
+						}
+						else if (message == "thumbToPinky")
+						{
+						Pose pose(Pose::thumbToPinky);
+						evt.setPose(pose);
+						}
+						else
+						{
+						Pose pose(Pose::unknown);
+						evt.setPose(pose);
+						}
 					}
 					else if (event_type == "onAttach")
 					{
@@ -203,6 +257,18 @@ namespace myoSim
 					else if (event_type == "onArmSync")
 					{
 						evt.setEventType(myoSimEvent::armRecognized);
+					}
+					else if (event_type == "onDetach")
+					{
+						evt.setEventType(myoSimEvent::unpaired);
+					}
+					else if (event_type == "onDisconnect")
+					{
+						evt.setEventType(myoSimEvent::disconnected;
+					}
+					else if (event_type == "onArmLost")
+					{
+						evt.setEventType(myoSimEvent::armLost);
 					}
 					else
 					{
