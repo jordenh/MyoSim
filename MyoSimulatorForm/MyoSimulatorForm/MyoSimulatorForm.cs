@@ -15,10 +15,27 @@ namespace MyoSimGUI
 {
     public partial class MyoSimulatorForm : Form
     {
+        /* static constants */
+        private const int SIZEOF_MOVE_CMD = 5;
+        private const int TIME_B_START = 0;
+        private const int QUAT_B_START = 4;
+        private const int GYRO_B_START = 19;
+        private const int ACCL_B_START = 31;
+
+        /* Keywords in our language. */
+        private const string MOVE_KW = "move";
+        private const string SET_ACCEL_KW = "set_accel";
+        private const string DELAY_KW = "delay";
+        private const string ASYNC_KW = "async";
+        private const string EXPECT_KW = "expect";
+
+
         public const char commandDelimiter = ';';
         private static int ms_btw_send = 10;
         private NamedPipeServerStream pipeStream;
-        private Dictionary<int, int[]> bin_command_list = new Dictionary<int, int[]>();
+
+        /* Holds resulting binary commands which will be sorted using the time as the key */
+        private Dictionary<int, byte[]> bin_command_list = new Dictionary<int, byte[]>();
 
         static Dictionary<string, string> labelToCommand = new Dictionary<string, string>
         {
@@ -31,49 +48,84 @@ namespace MyoSimGUI
             {"Thumb to Pinky", "thumbToPinky"},
             {"Unknown", "unknown"}
         };
-        
-        private unsafe int Parseline(string[] lines, int* current_time)
+
+        private unsafe int Parseline(string[] lines, int* abs_time)
         {
             int len = -1;
             int delta_time;
             int x;
             int y;
+            int z;
+
             char command_delim = ' ';
-            int[] current_orient_command = new int[11];
-            byte[] current_async_command = new byte[7];
+            byte[] current_orient_command = new byte[44];
+            byte[] current_async_command = new byte[7]
 
 
             for (int i = 0; i < lines.Length; ++i)
             {
+                /* Remove leading and trailing spaces */
                 lines[i].Trim();
                 string[] command = lines[i].Split(command_delim);
 
-                Console.Write(command);
+                for (int j = 0; j < command.Length; ++j)
+                {
+
+                    Console.WriteLine(command[j]);
+                }
+
+                /* Check for word for keyword */
                 switch (command.First())
                 {
-                    case "move":
+                    case MOVE_KW:
                         /* Check for invalid inputs */
-                        if (command.Length != 4 ||
+                        if (command.Length != SIZEOF_MOVE_CMD ||
                             !(int.TryParse(command.Last(), out delta_time)) ||
                             delta_time < 0 ||
                             !(int.TryParse(command[1], out x)) ||
-                            !(int.TryParse(command[2], out y)) )
+                            !(int.TryParse(command[2], out y)) ||
+                            !(int.TryParse(command[3], out z)) )
                         {
-
+                            Console.WriteLine("ERROR in move");
                         }
                         else
                         {
+                            displacement_variables dispX = new displacement_variables();
+                            displacement_variables dispY = new displacement_variables();
+                            displacement_variables dispZ = new displacement_variables();
+
                             /* Set first bit to be 1 to signal orientation data */
                             current_orient_command[0] |= ( 1 << (sizeof(int)*8) );
-                            
+
+                            /* Make sure that the last data sent is a multiple of ms_btw_send */
+                            for (int t = 0; t <= (delta_time + ms_btw_send - (delta_time % ms_btw_send)); t += ms_btw_send)
+                            {
+                                dispX.calc_next_disp(t);
+                                dispY.calc_next_disp(t);
+                                dispZ.calc_next_disp(t);
+
+                                current_orient_command[TIME_B_START] |= (byte)((t >> 3) & 0x0000007F);
+                                current_orient_command[TIME_B_START + 1] = (byte)((t >> 2) & 0x000000FF);
+                                current_orient_command[TIME_B_START + 2] = (byte)((t >> 1) & 0x000000FF);
+                                current_orient_command[TIME_B_START + 3] = (byte)(t & 0x000000FF);
+                                
+                                current_orient_command[QUAT_B_START] += BitConverter.GetBytes(dispX.get_disp());
+                                current_orient_command[QUAT_B_START + 1] += (byte)dispY.get_disp();
+                                current_orient_command[3] += (byte)dispZ.get_disp();
+                                Console.WriteLine("X " + current_orient_command[1]);
+                                bin_command_list.Add(t, current_orient_command);
+                          
+                            }
                         }
 
                         break;
-                    case "delay":
+                    case SET_ACCEL_KW:
                         break;
-                    case "async":
+                    case DELAY_KW:
                         break;
-                    case "expect":
+                    case ASYNC_KW:
+                        break;
+                    case EXPECT_KW:
                         break;
                     default:
                         break;
@@ -94,23 +146,17 @@ namespace MyoSimGUI
             int current_time = 0;
             string[] lines = System.IO.File.ReadAllLines(@filename);
 
-            char[] delim = {'(', ')'};
-            string[] temp = lines[0].Split(delim);
-            for (int i = 0; i < temp.Length; ++i)
-            {
-
-                Console.WriteLine("size " + temp.Length + " " + temp[i]);
-            }
+            
             unsafe
             {
                 Parseline(lines, &current_time);
             }
             
-            for (int i = 0; i < lines.Length; ++i)
+           /* for (int i = 0; i < lines.Length; ++i)
             {
                 Console.WriteLine(lines[i]);
             }
-
+            */
             return len;
         }
 
@@ -170,7 +216,8 @@ namespace MyoSimGUI
             string command;
             System.IO.StreamReader file = null;
             
-            ReadInputFile(@"C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\test_human_readable_input.txt");
+            //ReadInputFile(@"C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\test_human_readable_input.txt");
+            ReadInputFile(@"D:\Fred\Source\Repos\MyoSim\MyoSimulatorForm\test_human_readable_input.txt");
 
             try
             {
