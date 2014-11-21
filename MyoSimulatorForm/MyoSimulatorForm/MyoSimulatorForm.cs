@@ -112,9 +112,9 @@ namespace MyoSimGUI
                         }
                         else
                         {
-                            displacement_variables dispX = new displacement_variables(gyro_dat.x, gyro_prev.x);
-                            displacement_variables dispY = new displacement_variables(gyro_dat.y, gyro_prev.y);
-                            displacement_variables dispZ = new displacement_variables(gyro_dat.z, gyro_prev.z);
+                            displacement_variables dispX = new displacement_variables(gyro_dat.x, gyro_dat_prev.x);
+                            displacement_variables dispY = new displacement_variables(gyro_dat.y, gyro_dat_prev.y);
+                            displacement_variables dispZ = new displacement_variables(gyro_dat.z, gyro_dat_prev.z);
 
                             /* Set first bit to be 1 to signal orientation data */
                             time_dat |= ( 1 << (sizeof(int)*8) );

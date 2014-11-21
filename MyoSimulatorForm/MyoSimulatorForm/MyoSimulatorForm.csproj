@@ -45,7 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="CommandData.cs" />
+    <Compile Include="RecorderFileHandler.cs" />
+    <Compile Include="DisplacementVariables.cs" />
     <Compile Include="MyoSimulatorForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -34,3 +34,5 @@
 TemporaryGeneratedFile*.cs
 *.cache
 *.suo
+
+Debug
