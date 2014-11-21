@@ -6,6 +6,7 @@
 #include <map>
 
 
+
 #define MAX_MESSAGE_LEN 47
 
 
@@ -148,8 +149,7 @@ namespace myoSim
 
             for (it = myos.begin(); it != myos.end(); it++)
             {
-                // TODO: Implement some way of data packing, so that we don't
-                // have to read the raw data here.
+                
                 TCHAR buffer[MAX_MESSAGE_LEN];
                 unsigned int numBytes = MAX_MESSAGE_LEN;
                 DWORD actualBytes;
@@ -159,12 +159,18 @@ namespace myoSim
 
                 if (success)
                 {
+					
 					//get size of data
-					int data_size = buffer[0];
+					int data_size = (int) buffer[0];
+					//little endian
+				//	for (int n = sizeof(data_size); n >= 0; n--)
+				//		data_size = (data_size << 8) + buffer[n];
+				
 
 					TCHAR event_type_temp[2];
-					TCHAR data[43];
-					TCHAR timeStamp[4];
+					//TCHAR* data = (TCHAR *) malloc(data_size * sizeof(TCHAR));//new TCHAR[data_size];
+                    TCHAR data[40];
+					TCHAR timeStamp_temp[4];
 
 					//get the data/event type(2 bytes)
 
@@ -175,7 +181,7 @@ namespace myoSim
 					//get the data if there is data(size > 0)
 					//if no data its handshake when open or close connection
 					//first 4 bytes are data type and time stamp
-					if (data_size < 0)
+					if (data_size > 0)
 					{
 						
 						for (int y = 0; y < data_size; y++)
@@ -183,152 +189,131 @@ namespace myoSim
 							data[y] = buffer[y+7];
 							
 						}
+                        data[data_size] = 0;
+						std::string tempP(data);
+						std::cout << "input::" + tempP << std::endl;
 						//get the time stamp(4 bytes), get rid of first bit(data type)
 						
 						for (int z = 0; z < 4; z++)
 						{
-							timeStamp[z] = buffer[z+3];
+							timeStamp_temp[z] = buffer[z+3];
 						
 						}
+						//need to figure out if its little endian or big
+						//int timeStamp = 0;
+
+						//if (little_endian)
+						//{
+						//	for (int n = sizeof(timeStamp); n >= 0; n--)
+						//		timeStamp = (timeStamp << 8) + timeStamp_temp[n];
+						//}
+						//else
+						//{
+						//	for (unsigned n = 0; n < sizeof(timeStamp); n++)
+						//		timeStamp = (timeStamp << 8) + timeStamp_temp[n];
+						//}
+						
 					}
 					std::string event_type(event_type_temp);
 
 					
 					SimEvent evt;
 					//set event type
-					if (event_type == "onOrientationData")
+					if (event_type == "6")
 					{
+						std::cout << "Event Type 6" << std::endl;
 						evt.setEventType(myoSimEvent::orientation);
 
-						evt.setAccelerometerData(vectorIndex,data);
-						evt.setGyroscopeData(vectorIndex,data);
-						evt.setOrientation(x,y,z,w);
+						//evt.setAccelerometerData(vectorIndex_x,data);
+                        //evt.setAccelerometerData(vectorIndex_y,data);
+                        //evt.setAccelerometerData(vectorIndex_z,data);
+						//evt.setGyroscopeData(vectorIndex_x,data);
+                        //evt.setGyroscopeData(vectorIndex_y,data);
+                        //evt.setGyroscopeData(vectorIndex_z,data);
+						//evt.setOrientation(x,y,z,w);
 					}
-					else if (event_type == "onPose")
+					else if (event_type == "7")
 					{
+						std::cout << "Event Type 7" << std::endl;
+
 						evt.setEventType(myoSimEvent::pose);
 
 						std::string message(data);
-
+                        //free(data);
+                        //data = NULL;
 						if (message == "rest")
 						{
-						Pose pose(Pose::rest);
-						evt.setPose(pose);
+						    Pose pose(Pose::rest);
+						    evt.setPose(pose);
 						}
 						else if (message == "fist")
 						{
-						Pose pose(Pose::fist);
-						evt.setPose(pose);
+							Pose pose(Pose::fist);
+							evt.setPose(pose);
 						}
 						else if (message == "waveIn")
 						{
-						Pose pose(Pose::waveIn);
-						evt.setPose(pose);
+							std::cout << "input is waveIn" << std::endl;
+							Pose pose(Pose::waveIn);
+							evt.setPose(pose);
 						}
 						else if (message == "waveOut")
 						{
-						Pose pose(Pose::waveOut);
-						evt.setPose(pose);
+							Pose pose(Pose::waveOut);
+							evt.setPose(pose);
 						}
 						else if (message == "fingersSpread")
-						{
-						Pose pose(Pose::fingersSpread);
-						evt.setPose(pose);
+						{   
+							Pose pose(Pose::fingersSpread);
+							evt.setPose(pose);
 						}
 						else if (message == "thumbToPinky")
 						{
-						Pose pose(Pose::thumbToPinky);
-						evt.setPose(pose);
+						    Pose pose(Pose::thumbToPinky);
+						    evt.setPose(pose);
 						}
 						else
 						{
-						Pose pose(Pose::unknown);
-						evt.setPose(pose);
+                            std::cout << "unknown pose, possible error" << std::endl;
+						    Pose pose(Pose::unknown);
+						    evt.setPose(pose);
 						}
 					}
-					else if (event_type == "onAttach")
+					else if (event_type == "0")
 					{
 						evt.setEventType(myoSimEvent::paired);
 					}
-					else if (event_type == "onConnect")
+					else if (event_type == "2")
 					{
 						evt.setEventType(myoSimEvent::connected);
 					}
-					else if (event_type == "onArmSync")
+					else if (event_type == "4")
 					{
 						evt.setEventType(myoSimEvent::armRecognized);
 					}
-					else if (event_type == "onDetach")
+					else if (event_type == "1")
 					{
 						evt.setEventType(myoSimEvent::unpaired);
 					}
-					else if (event_type == "onDisconnect")
+					else if (event_type == "3")
 					{
-						evt.setEventType(myoSimEvent::disconnected;
+						evt.setEventType(myoSimEvent::disconnected);
 					}
-					else if (event_type == "onArmLost")
+					else if (event_type == "5")
 					{
 						evt.setEventType(myoSimEvent::armLost);
 					}
 					else
 					{
+						
 						printf("data_type error\n");
 						return;
 					}
-
-
-										
-					//std::string message(buffer);
-                   // SimEvent evt;
-
+											
 					
-                    // TODO: For now, all data received is pose data. Must change to support all data. 
-                    // Will do that once protocol has been decided.
-                   // evt.setEventType(myoSimEvent::pose);
-
-                    // TODO: Have a proper way of dealing with this. Do it in 
-                    // a different class. Perhaps have the Myo class convert
-                    // messages to events first.
-                    /*if (message == "rest")
-                    {
-                        Pose pose(Pose::rest);
-                        evt.setPose(pose);
-                    }
-                    else if (message == "fist")
-                    {
-                        Pose pose(Pose::fist);
-                        evt.setPose(pose);
-                    }
-                    else if (message == "waveIn")
-                    {
-                        Pose pose(Pose::waveIn);
-                        evt.setPose(pose);
-                    }
-                    else if (message == "waveOut")
-                    {
-                        Pose pose(Pose::waveOut);
-                        evt.setPose(pose);
-                    }
-                    else if (message == "fingersSpread")
-                    {
-                        Pose pose(Pose::fingersSpread);
-                        evt.setPose(pose);
-                    }
-                    else if (message == "thumbToPinky")
-                    {
-                        Pose pose(Pose::thumbToPinky);
-                        evt.setPose(pose);
-                    }
-                    else
-                    {
-                        Pose pose(Pose::unknown);
-                        evt.setPose(pose);
-                    }*/
-
                     evt.setTimestamp(GetTickCount());
                     evt.setMyoIdentifier((*it)->getIdentifier());
-
-                    onDeviceEvent(evt);
+					onDeviceEvent(evt);
                 }
             }
         }

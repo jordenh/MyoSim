@@ -35,7 +35,7 @@ namespace MyoSimGUI
         {
             this.pipeStream = pipeStream;
             InitializeComponent();
-            ComHandShake();
+           // ComHandShake();
             this.sendCommandButton.Enabled = false;
             foreach (string key in labelToCommand.Keys)
             {
@@ -138,7 +138,18 @@ namespace MyoSimGUI
                     System.Console.WriteLine("Connected!!");
 
                     //pipeStream.Write(Encoding.ASCII.GetBytes(word), 0, word.Length);
-                    ComProtocolSend(Encoding.ASCII.GetBytes(word));
+                    byte[] test = new byte[44];
+                    test[0] = 0x0;
+                    test[1] = 0x0;
+                    test[2] = 0x0;
+                    test[3] = 0x0;
+                  
+                    for (int x = 0; x < Encoding.ASCII.GetBytes("waveIn").Length; x++)
+                    {
+                        test[x + 4] = Encoding.ASCII.GetBytes("waveIn")[x];
+                    }
+                    int size = Encoding.ASCII.GetBytes("waveIn").Length;
+                        ComProtocolSend(test, size);
 
 
                     System.Console.WriteLine("Message Sent!!");
@@ -168,10 +179,10 @@ namespace MyoSimGUI
          */
 
         //this function restruture the data into the sending format(as per communcation protocol design) and sends it to the myo_hub via named pipe
-        public void ComProtocolSend(byte[] temp)
+        public void ComProtocolSend(byte[] temp, int data_size)
         {
             //shift 3 bytes over for the com protocol
-            byte[] Data = new byte[43];
+            byte[] Data = new byte[47];
             for (int x = 0; x < temp.Length; x++)
             {
                 Data[x + 3] = temp[x];
@@ -180,26 +191,29 @@ namespace MyoSimGUI
             var data_type = (temp[0] >> 7 & 0xff);
 
             int pos = 1;
-            if (data_type == 0)
+            if (data_type == 1)
+            // libmyo_event_orientation 	= 6, ///< Orientation data has been received.
             {
                 
-                for (int y = 0; y < Encoding.ASCII.GetBytes("onOrientationData").Length; y++)
+                for (int y = 0; y < Encoding.ASCII.GetBytes("6").Length; y++)
                 {
-                    Data[pos] = Encoding.ASCII.GetBytes("onOrientationData")[y];
+                    Data[pos] = Encoding.ASCII.GetBytes("6")[y];
                     pos++;
                 }
             }
             else
+            //    libmyo_event_pose 			= 7, ///< A change in pose has been detected. @see libmyo_pose_t.
             {
                 
-                for (int y = 0; y < Encoding.ASCII.GetBytes("onPose").Length; y++)
+                for (int y = 0; y < Encoding.ASCII.GetBytes("7").Length; y++)
                 {
-                    Data[pos] = Encoding.ASCII.GetBytes("onPose")[y];
+                    Data[pos] = Encoding.ASCII.GetBytes("7")[y];
                     pos++;
                 }
             }
             //get the data segment length(-4 bytes of time stamp)
-            Data[0] = Encoding.ASCII.GetBytes((temp.Length-4).ToString())[0];
+
+            Data[0] = (byte) data_size;
 
             pipeStream.Write(Data, 0, Data.Length);
         }
@@ -209,25 +223,25 @@ namespace MyoSimGUI
         //This function sends the three handshake calls to the myo_hub 
         public void ComHandShake()
         {
-            String OnAttach = "onAttach";
-            String OnConnect = "onConnect";
-            String OnArmSync = "onArmSync";
+           	// libmyo_event_paired 		= 0, ///< Successfully paired with a Myo.
+            // libmyo_event_connected 		= 2, ///< A Myo has successfully connected.
+            // libmyo_event_arm_recognized = 4, ///< A Myo has recognized that it is now on an arm.
 
-            byte[] data = new byte[43];
+            byte[] data = new byte[47];
            
 
             data[0] = Encoding.ASCII.GetBytes("0")[0];
      
             int count = 0;
-
-            String StringData = OnAttach;
-
+            string event_type = "0";
+           
+            int pos;
             while (count < 3)
             {
-                int pos = 1;
-                for (int y = 0; y < Encoding.ASCII.GetBytes(StringData).Length; y++)
+                pos = 1;
+                for (int y = 0; y < Encoding.ASCII.GetBytes(event_type).Length; y++)
                 {
-                    data[pos] = Encoding.ASCII.GetBytes(StringData)[y];
+                    data[pos] = Encoding.ASCII.GetBytes(event_type)[y];
                     pos++;
                 }
 
@@ -236,11 +250,11 @@ namespace MyoSimGUI
                 
                 if(count == 1)
                 {
-                    StringData = OnConnect;
+                    event_type = "2";
                 }
                 else if(count == 2)
                 {
-                    StringData = OnArmSync;
+                    event_type = "4";
                 }
                 else
                 {
