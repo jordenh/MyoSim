@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 #include <map>
-
+#include <cfloat>
 
 
 #define MAX_MESSAGE_LEN 47
@@ -162,14 +162,9 @@ namespace myoSim
 					
 					//get size of data
 					int data_size = (int) buffer[0];
-					//little endian
-				//	for (int n = sizeof(data_size); n >= 0; n--)
-				//		data_size = (data_size << 8) + buffer[n];
-				
-
+	
 					TCHAR event_type_temp[2];
-					//TCHAR* data = (TCHAR *) malloc(data_size * sizeof(TCHAR));//new TCHAR[data_size];
-                    TCHAR data[40];
+					TCHAR data[40];
 					TCHAR timeStamp_temp[4];
 
 					//get the data/event type(2 bytes)
@@ -186,8 +181,7 @@ namespace myoSim
 						
 						for (int y = 0; y < data_size; y++)
 						{
-							data[y] = buffer[y+7];
-							
+							data[y] = buffer[y+7];				
 						}
                         data[data_size] = 0;
 						std::string tempP(data);
@@ -199,48 +193,39 @@ namespace myoSim
 							timeStamp_temp[z] = buffer[z+3];
 						
 						}
-						//need to figure out if its little endian or big
-						//int timeStamp = 0;
-
-						//if (little_endian)
-						//{
-						//	for (int n = sizeof(timeStamp); n >= 0; n--)
-						//		timeStamp = (timeStamp << 8) + timeStamp_temp[n];
-						//}
-						//else
-						//{
-						//	for (unsigned n = 0; n < sizeof(timeStamp); n++)
-						//		timeStamp = (timeStamp << 8) + timeStamp_temp[n];
-						//}
+		
 						
 					}
 					std::string event_type(event_type_temp);
-
-					
+                  					
 					SimEvent evt;
 					//set event type
+                    //based on different event type take different actions
 					if (event_type == "6")
 					{
 						std::cout << "Event Type 6" << std::endl;
 						evt.setEventType(myoSimEvent::orientation);
-
-						//evt.setAccelerometerData(vectorIndex_x,data);
-                        //evt.setAccelerometerData(vectorIndex_y,data);
-                        //evt.setAccelerometerData(vectorIndex_z,data);
-						//evt.setGyroscopeData(vectorIndex_x,data);
-                        //evt.setGyroscopeData(vectorIndex_y,data);
-                        //evt.setGyroscopeData(vectorIndex_z,data);
-						//evt.setOrientation(x,y,z,w);
+                        for (int xx = 0; xx < data_size; xx++)
+                        {
+                            printf("Data: %i is %i",xx,(float)data[xx]);
+                        }
+                        /*
+						evt.setAccelerometerData(vectorIndex::first,data);
+                        evt.setAccelerometerData(vectorIndex::second,data);
+                        evt.setAccelerometerData(vectorIndex::third,data);
+						evt.setGyroscopeData(vectorIndex::first,data);
+                        evt.setGyroscopeData(vectorIndex::second,data);
+                        evt.setGyroscopeData(vectorIndex::third,data);
+						evt.setOrientation(x,y,z,w);
+                        */
 					}
 					else if (event_type == "7")
 					{
-						std::cout << "Event Type 7" << std::endl;
-
-						evt.setEventType(myoSimEvent::pose);
-
-						std::string message(data);
-                        //free(data);
-                        //data = NULL;
+                        std::string message(data);
+                        evt.setEventType(myoSimEvent::pose);
+						std::cout << "Event Type 7 : pose" << std::endl;
+                        std::cout << "input is : " + message<< std::endl;
+                                           
 						if (message == "rest")
 						{
 						    Pose pose(Pose::rest);
@@ -253,7 +238,6 @@ namespace myoSim
 						}
 						else if (message == "waveIn")
 						{
-							std::cout << "input is waveIn" << std::endl;
 							Pose pose(Pose::waveIn);
 							evt.setPose(pose);
 						}
@@ -305,7 +289,6 @@ namespace myoSim
 					}
 					else
 					{
-						
 						printf("data_type error\n");
 						return;
 					}

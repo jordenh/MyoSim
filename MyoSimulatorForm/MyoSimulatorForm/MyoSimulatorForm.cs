@@ -138,19 +138,40 @@ namespace MyoSimGUI
                     System.Console.WriteLine("Connected!!");
 
                     //pipeStream.Write(Encoding.ASCII.GetBytes(word), 0, word.Length);
-                    byte[] test = new byte[44];
-                    test[0] = 0x0;
-                    test[1] = 0x0;
-                    test[2] = 0x0;
-                    test[3] = 0x0;
+                   
+                    // binary data for waveIn at timestamp 0
+                    byte[] test_pose = new byte[14];
+                    test_pose[0] = 0x0;
+                    test_pose[1] = 0x0;
+                    test_pose[2] = 0x0;
+                    test_pose[3] = 0x0;
                   
                     for (int x = 0; x < Encoding.ASCII.GetBytes("waveIn").Length; x++)
                     {
-                        test[x + 4] = Encoding.ASCII.GetBytes("waveIn")[x];
+                        test_pose[x + 4] = Encoding.ASCII.GetBytes("waveIn")[x];
                     }
                     int size = Encoding.ASCII.GetBytes("waveIn").Length;
-                        ComProtocolSend(test, size);
 
+                    //binary data for orientation at time stamp 25
+                    byte[] test_orientation = new byte[14];
+                    test_orientation[0] = 0x80;
+                    test_orientation[1] = 0x00;
+                    test_orientation[2] = 0x00;
+                    test_orientation[3] = 0x19;
+                    test_orientation[4] = 0x14;
+                    test_orientation[5] = 0x14;
+                    test_orientation[6] = 0x14;
+                    test_orientation[7] = 0x14;
+                    test_orientation[8] = 0x1A;
+                    test_orientation[9] = 0x1A;
+                    test_orientation[10] = 0x1A;
+                    test_orientation[11] = 0x28;
+                    test_orientation[12] = 0x28;
+                    test_orientation[13] = 0x28;
+
+
+                    //ComProtocolSend(test_pose, size);
+                    ComProtocolSend(test_orientation, 10);
 
                     System.Console.WriteLine("Message Sent!!");
                 }
@@ -182,7 +203,7 @@ namespace MyoSimGUI
         public void ComProtocolSend(byte[] temp, int data_size)
         {
             //shift 3 bytes over for the com protocol
-            byte[] Data = new byte[47];
+            byte[] Data = new byte[17];
             for (int x = 0; x < temp.Length; x++)
             {
                 Data[x + 3] = temp[x];

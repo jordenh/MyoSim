@@ -1,10 +1,9 @@
-﻿Build started 11/21/2014 6:47:10 AM.
+﻿Build started 11/21/2014 11:21:11 AM.
      1>Project "C:\Users\Owen\Documents\GitHub\MyoSim\Hub_test_driver\Hub_console\Hub_console.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         D:\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\Users\Owen\Documents\GitHub\MyoSim\Hub_test_driver\Hub_console\\myo\include /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\Hub_console.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt HubSim.cpp Hub_console.cpp
-         Hub_console.cpp
+         D:\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /IC:\Users\Owen\Documents\GitHub\MyoSim\Hub_test_driver\Hub_console\\myo\include /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\Hub_console.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt HubSim.cpp
          HubSim.cpp
-         Generating Code...
+     1>cl : Command line warning D9028: minimal rebuild failure, reverting to normal build
        Link:
          D:\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Owen\Documents\GitHub\MyoSim\Hub_test_driver\Debug\Hub_console.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\Users\Owen\Documents\GitHub\MyoSim\Hub_test_driver\Hub_console\\myo\lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Owen\Documents\GitHub\MyoSim\Hub_test_driver\Debug\Hub_console.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Owen\Documents\GitHub\MyoSim\Hub_test_driver\Debug\Hub_console.lib" /MACHINE:X86 Debug\Hub_console.res
          Debug\HubSim.obj
@@ -18,4 +17,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.98
+Time Elapsed 00:00:03.76
