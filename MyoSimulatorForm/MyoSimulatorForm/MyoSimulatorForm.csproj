@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="CommandData.cs" />
     <Compile Include="RecorderFileHandler.cs" />
+    <Compile Include="ParsedCommand.cs" />
     <Compile Include="DisplacementVariables.cs" />
     <Compile Include="MyoSimulatorForm.cs">
       <SubType>Form</SubType>

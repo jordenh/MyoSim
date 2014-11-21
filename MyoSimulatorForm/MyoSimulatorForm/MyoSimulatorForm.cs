@@ -16,23 +16,7 @@ namespace MyoSimGUI
 {
     public partial class MyoSimulatorForm : Form
     {
-        /* static constants */
-        private const int SIZEOF_MOVE_CMD = 5;
-        private const int TIME_B_START = 0;
-        private const int QUAT_B_START = 4;
-        private const int GYRO_B_START = 19;
-        private const int ACCL_B_START = 31;
-
-        /* Keywords in our language. */
-        private const string MOVE_KW = "move";
-        private const string SET_ACCEL_KW = "set_accel";
-        private const string DELAY_KW = "delay";
-        private const string ASYNC_KW = "async";
-        private const string EXPECT_KW = "expect";
-
-
         public const char commandDelimiter = ';';
-        private static int ms_btw_send = 10;
         private NamedPipeServerStream pipeStream;
 
         /* Holds resulting binary commands which will be sorted using the time as the key */
@@ -49,119 +33,110 @@ namespace MyoSimGUI
             {"Thumb to Pinky", "thumbToPinky"},
             {"Unknown", "unknown"}
         };
-        
-        public struct Quaternion
-        {
-            public float x;
-            public float y;
-            public float z;
-            public float w;
-        }
-
-        public struct vector3
-        {
-            public float x;
-            public float y;
-            public float z;
-        }
 
         private unsafe int Parseline(string[] lines, int* abs_time)
         {
             int len = -1;
-            int delta_time;
-            int time_dat;
-            Quaternion quat_dat;
-            vector3 gyro_dat;
-            vector3 gyro_dat_prev;
-            vector3 accel_dat;
+            //int delta_time;
+            //int time_dat = 0;
+            //int x, y, z;
+            List<parsed_command> command_list = new List<parsed_command>();
 
-            char command_delim = ' ';
+
+            
+            //byte[] time_bytes = new bytes[1];
+
             //byte[] current_orient_command = new byte[44];
-            byte[] current_async_command = new byte[7];
+            //byte[] current_async_command = new byte[7];
 
-            IntPtr time_bytes = Marshal.AllocHGlobal(Marshal.SizeOf(time_dat));
-            IntPtr quat_bytes = Marshal.AllocHGlobal(Marshal.SizeOf(quat_dat));
-            IntPtr gyro_bytes = Marshal.AllocHGlobal(Marshal.SizeOf(gyro_dat));
-            IntPtr accel_bytes = Marshal.AllocHGlobal(Marshal.SizeOf(accel_dat));
+            //IntPtr time_p = Marshal.AllocHGlobal(Marshal.SizeOf(time_dat));
+            //IntPtr quat_p = Marshal.AllocHGlobal(Marshal.SizeOf(quat_dat));
+            //IntPtr gyro_p = Marshal.AllocHGlobal(Marshal.SizeOf(gyro_dat));
+            //IntPtr accel_p = Marshal.AllocHGlobal(Marshal.SizeOf(accel_dat));
 
-            for (int i = 0; i < lines.Length; ++i)
+            int i = 0;
+            foreach (string line in lines)
             {
                 /* Remove leading and trailing spaces */
-                lines[i].Trim();
-                string[] command = lines[i].Split(command_delim);
-
-                for (int j = 0; j < command.Length; ++j)
-                {
-
-                    Console.WriteLine(command[j]);
-                }
-
+                line.Trim();
+                command_list.Add(new parsed_command(line));
+                command_list.ElementAt(i).print_debug();
+                ++i;
                 /* Check for word for keyword */
-                switch (command.First())
-                {
-                    case MOVE_KW:
-                        /* Check for invalid inputs */
-                        if (command.Length != SIZEOF_MOVE_CMD ||
-                            !(int.TryParse(command.Last(), out delta_time)) ||
-                            delta_time < 0 ||
-                            !(float.TryParse(command[1], out gyro_dat.x)) ||
-                            !(float.TryParse(command[2], out gyro_dat.y)) ||
-                            !(float.TryParse(command[3], out gyro_dat.z)) )
-                        {
-                            Console.WriteLine("ERROR in move");
-                        }
-                        else
-                        {
-                            displacement_variables dispX = new displacement_variables(gyro_dat.x, gyro_dat_prev.x);
-                            displacement_variables dispY = new displacement_variables(gyro_dat.y, gyro_dat_prev.y);
-                            displacement_variables dispZ = new displacement_variables(gyro_dat.z, gyro_dat_prev.z);
+                //switch (command.First())
+                //{
+                //    case MOVE_KW:
+                //        /* Check for invalid inputs */
+                //        if (command.Length != SIZEOF_MOVE_CMD ||
+                //            !(int.TryParse(command.Last(), out delta_time)) ||
+                //            delta_time < 0 ||
+                //            !(float.TryParse(command[1], out x)) ||
+                //            !(float.TryParse(command[2], out y)) ||
+                //            !(float.TryParse(command[3], out z)))
+                //        {
+                //            Console.WriteLine("ERROR in move");
+                //        }
+                //        else
+                //        {
+                //            /* Calculate the change in angles per time tick */
+                //            gyro_change_per_time.x = (gyro_dat.x - gyro_dat_prev.x) / delta_time;
+                //            gyro_change_per_time.y = (gyro_dat.y - gyro_dat_prev.y) / delta_time;
+                //            gyro_change_per_time.z = (gyro_dat.z - gyro_dat_prev.z) / delta_time;
 
-                            /* Set first bit to be 1 to signal orientation data */
-                            time_dat |= ( 1 << (sizeof(int)*8) );
+                //            /* Set first bit to be 1 to signal orientation data */
+                //            time_dat |= (1 << (sizeof(int) * 8));
 
-                            /* Make sure that the last data sent is a multiple of ms_btw_send */
-                            for (int t = 0; t <= (delta_time + ms_btw_send - (delta_time % ms_btw_send)); t += ms_btw_send)
-                            {
-                                dispX.calc_next_disp(t);
-                                dispY.calc_next_disp(t);
-                                dispZ.calc_next_disp(t);
+                //            /* Make sure that the last data sent is a multiple of ms_btw_send */
+                //            for (int t = 0; t <= (delta_time); t += ms_btw_send)
+                //            {
+                //                //dispX.calc_next_disp(t);
+                //                //dispY.calc_next_disp(t);
+                //                //dispZ.calc_next_disp(t);
 
-                                /* set time of command */
-                                time_dat |= (t & 0x7F);
-                                /* Calculate and save quaterion data */
-                                
-                                /* Calculate and save gyro vector */
-                                gyro_dat.x += dispX.get_disp();
-                                gyro_dat.y += dispY.get_disp();
-                                gyro_dat.z += dispZ.get_disp();
-                                /* Get accel data */
+                //                /* set time of command */
+                //                time_dat &= 0x80;
+                //                time_dat |= (t & 0x7F);
+                //                /* Calculate and save quaterion data */
 
-                              /*  current_orient_command[TIME_B_START] |= (byte)((t >> 3) & 0x0000007F);
-                                current_orient_command[TIME_B_START + 1] = (byte)((t >> 2) & 0x000000FF);
-                                current_orient_command[TIME_B_START + 2] = (byte)((t >> 1) & 0x000000FF);
-                                current_orient_command[TIME_B_START + 3] = (byte)(t & 0x000000FF);
-                                
-                                current_orient_command[QUAT_B_START] += BitConverter.GetBytes(dispX.get_disp());
-                                current_orient_command[QUAT_B_START + 1] += (byte)dispY.get_disp();
-                                current_orient_command[3] += (byte)dispZ.get_disp();
-                                Console.WriteLine("X " + current_orient_command[1]);
-                                bin_command_list.Add(t, current_orient_command);
-                          */
-                            }
-                        }
+                //                /* Calculate and save gyro vector */
+                //                gyro_dat_prev.x += gyro_change_per_time.x;
+                //                gyro_dat_prev.y += gyro_change_per_time.y;
+                //                gyro_dat_prev.z += gyro_change_per_time.z;
 
-                        break;
-                    case SET_ACCEL_KW:
-                        break;
-                    case DELAY_KW:
-                        break;
-                    case ASYNC_KW:
-                        break;
-                    case EXPECT_KW:
-                        break;
-                    default:
-                        break;
-                }
+                //                /* Acceleration data is not changing in move command */
+                //                /* change all the structs to byte[] */
+                //                Marshal.StructureToPtr(time_dat, time_bytes, false);
+                //                Marshal.StructureToPtr(quat_dat, quat_bytes, false);
+                //                Marshal.StructureToPtr(gyro_dat_prev, gyro_bytes, false);
+                //                Marshal.StructureToPtr(accel_dat, accel_bytes, false);
+
+                //                /* Combine all the byte[] into one for saving into the dictionary */
+                //                System.Buffer.BlockCopy(time_bytes, 0, current_orient_command, TIME_B_START, sizeof(int));
+                //                /*  current_orient_command[TIME_B_START] |= (byte)((t >> 3) & 0x0000007F);
+                //                  current_orient_command[TIME_B_START + 1] = (byte)((t >> 2) & 0x000000FF);
+                //                  current_orient_command[TIME_B_START + 2] = (byte)((t >> 1) & 0x000000FF);
+                //                  current_orient_command[TIME_B_START + 3] = (byte)(t & 0x000000FF);
+                //                  current_orient_command[QUAT_B_START] += BitConverter.GetBytes(dispX.get_disp());
+                //                  current_orient_command[QUAT_B_START + 1] += (byte)dispY.get_disp();
+                //                  current_orient_command[3] += (byte)dispZ.get_disp();
+                //                  Console.WriteLine("X " + current_orient_command[1]);
+                //                  bin_command_list.Add(t, current_orient_command);
+                //            */
+                //            }
+                //        }
+
+                //        break;
+                //    case SET_ACCEL_KW:
+                //        break;
+                //    case DELAY_KW:
+                //        break;
+                //    case ASYNC_KW:
+                //        break;
+                //    case EXPECT_KW:
+                //        break;
+                //    default:
+                //        break;
+                //}
             }
             return len;
         }
@@ -178,17 +153,11 @@ namespace MyoSimGUI
             int current_time = 0;
             string[] lines = System.IO.File.ReadAllLines(@filename);
 
-            
+
             unsafe
             {
                 Parseline(lines, &current_time);
             }
-            
-           /* for (int i = 0; i < lines.Length; ++i)
-            {
-                Console.WriteLine(lines[i]);
-            }
-            */
             return len;
         }
 
@@ -248,8 +217,8 @@ namespace MyoSimGUI
             string command;
             System.IO.StreamReader file = null;
             
-            //ReadInputFile(@"C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\test_human_readable_input.txt");
-            ReadInputFile(@"D:\Fred\Source\Repos\MyoSim\MyoSimulatorForm\test_human_readable_input.txt");
+            ReadInputFile(@"C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\test_human_readable_input.txt");
+            //ReadInputFile(@"D:\Fred\Source\Repos\MyoSim\MyoSimulatorForm\test_human_readable_input.txt");
 
             try
             {
