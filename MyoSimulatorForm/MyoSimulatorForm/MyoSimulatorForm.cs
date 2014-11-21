@@ -158,16 +158,16 @@ namespace MyoSimGUI
                     test_orientation[1] = 0x00;
                     test_orientation[2] = 0x00;
                     test_orientation[3] = 0x19;
-                    test_orientation[4] = 0x14;
-                    test_orientation[5] = 0x14;
-                    test_orientation[6] = 0x14;
-                    test_orientation[7] = 0x14;
-                    test_orientation[8] = 0x1A;
-                    test_orientation[9] = 0x1A;
-                    test_orientation[10] = 0x1A;
-                    test_orientation[11] = 0x28;
-                    test_orientation[12] = 0x28;
-                    test_orientation[13] = 0x28;
+                    test_orientation[4] = (byte)10.1;
+                    test_orientation[5] = (byte)10.1;
+                    test_orientation[6] = (byte)10.1;
+                    test_orientation[7] = (byte)10.1;
+                    test_orientation[8] = (byte)25.2;
+                    test_orientation[9] = (byte)25.2;
+                    test_orientation[10] = (byte)25.2;
+                    test_orientation[11] = (byte)50.3;
+                    test_orientation[12] = (byte)50.3;
+                    test_orientation[13] = (byte)50.3;
 
 
                     //ComProtocolSend(test_pose, size);

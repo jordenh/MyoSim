@@ -162,9 +162,8 @@ namespace myoSim
 					
 					//get size of data
 					int data_size = (int) buffer[0];
-	
+	                
 					TCHAR event_type_temp[2];
-					TCHAR data[40];
 					TCHAR timeStamp_temp[4];
 
 					//get the data/event type(2 bytes)
@@ -173,29 +172,16 @@ namespace myoSim
 					{
 						event_type_temp[x] = buffer[x + 1];
 					}
-					//get the data if there is data(size > 0)
-					//if no data its handshake when open or close connection
+					
 					//first 4 bytes are data type and time stamp
-					if (data_size > 0)
+                    //get the time stamp(4 bytes), get rid of first bit(data type)
+						
+					for (int z = 0; z < 4; z++)
 					{
-						
-						for (int y = 0; y < data_size; y++)
-						{
-							data[y] = buffer[y+7];				
-						}
-                        data[data_size] = 0;
-						std::string tempP(data);
-						std::cout << "input::" + tempP << std::endl;
-						//get the time stamp(4 bytes), get rid of first bit(data type)
-						
-						for (int z = 0; z < 4; z++)
-						{
-							timeStamp_temp[z] = buffer[z+3];
-						
-						}
-		
-						
+						timeStamp_temp[z] = buffer[z+3];
+					
 					}
+
 					std::string event_type(event_type_temp);
                   					
 					SimEvent evt;
@@ -203,11 +189,16 @@ namespace myoSim
                     //based on different event type take different actions
 					if (event_type == "6")
 					{
+                        float orientation_data[10];
+                        for (int y = 0; y < data_size; y++)
+                        {
+                            orientation_data[y] = buffer[y + 7];
+                        }
 						std::cout << "Event Type 6" << std::endl;
 						evt.setEventType(myoSimEvent::orientation);
                         for (int xx = 0; xx < data_size; xx++)
                         {
-                            printf("Data: %i is %i",xx,(float)data[xx]);
+                            printf("Data: %i is %f\n", xx, (float)orientation_data[xx]);
                         }
                         /*
 						evt.setAccelerometerData(vectorIndex::first,data);
@@ -221,7 +212,15 @@ namespace myoSim
 					}
 					else if (event_type == "7")
 					{
-                        std::string message(data);
+                        TCHAR pose_data[10];
+                        for (int y = 0; y < data_size; y++)
+                        {
+                            pose_data[y] = buffer[y + 7];
+                        }
+                        pose_data[data_size] = 0;
+
+
+                        std::string message(pose_data);
                         evt.setEventType(myoSimEvent::pose);
 						std::cout << "Event Type 7 : pose" << std::endl;
                         std::cout << "input is : " + message<< std::endl;
