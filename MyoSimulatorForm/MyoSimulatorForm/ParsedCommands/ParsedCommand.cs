@@ -4,100 +4,63 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyoSimGUI
+namespace MyoSimGUI.ParsedCommands
 {
     /*
      * storage for the command read in from the human readable file format
      */
-    class parsed_command
+    class ParsedCommand
     {
-        public parsed_command(string line)
+        public enum CommandType { MOVE, SET_ACCELERATION, DELAY, ASYNC, EXPECT }
+
+        // Note: Arm Sync/Unsync is not listed here, because Arm Sync requires additional
+        // parameters. It should either be its own command, or we should allow optional extra
+        // parameters for some async commands.
+        public enum AsyncCommandCode { PAIR, UNPAIR, CONNECT, DISCONNECT, REST, FIST, 
+            WAVE_IN, WAVE_OUT, FINGERS_SPREAD, THUMB_TO_PINKY, UNKNOWN};
+
+        public enum ExpectCommandCode { VIBRATE, RSSI };
+
+        public static Dictionary<string, AsyncCommandCode> NameToAsyncCommand = new Dictionary<string, AsyncCommandCode>
         {
-            string[] command = line.Split(command_delim);
-            switch (command.First())
-            {
-                case MOVE_KW:
-                    if (command.Length == SIZEOF_MOVE_CMD &&
-                        (int.TryParse(command.Last(), out t)) &&
-                        t >= 0 &&
-                        (float.TryParse(command[1], out gyro_data.x)) &&
-                        (float.TryParse(command[2], out gyro_data.y)) &&
-                        (float.TryParse(command[3], out gyro_data.z)) )
-                    {
-                        keyword = MOVE_KW;
-                    }
-                    break;
-                case SET_ACCEL_KW:
-                    if (command.Length == SIZEOF_SET_ACC_CMD &&
-                        (float.TryParse(command[1], out accel_data.x)) &&
-                        (float.TryParse(command[2], out accel_data.y)) &&
-                        (float.TryParse(command[3], out accel_data.z)) )
-                    {
-                        keyword = SET_ACCEL_KW;
-                    }
-                    break;
-                case DELAY_KW:
-                    if (command.Length == SIZEOF_DELAY_CMD &&
-                        (int.TryParse(command[1], out delay)) &&
-                        delay >= 0 )
-                    {
-                        keyword = DELAY_KW;
-                    }
-                    break;
-                case ASYNC_KW:
-                    if (command.Length == SIZEOF_ASYNC_CMD)
-                    {
-                        if (int.TryParse(command.Last(), out t) &&
-                                t >= 0)
-                        {
-                            if ((int.TryParse(command[1], out async_cmd_num) &&
-                                async_cmd_num >= 0) )
-                                
-                            {
-                                keyword = ASYNC_KW;
-                            }
-                            else if (command[1] is string) 
-                            {
-                                keyword = ASYNC_KW;
-                                ev_name = String.Copy(command[1]);
-                            }
-                        }
-                        
-                            
+            {"pair", AsyncCommandCode.PAIR},
+            {"unpair", AsyncCommandCode.UNPAIR},
+            {"connect", AsyncCommandCode.CONNECT},
+            {"disconnect", AsyncCommandCode.DISCONNECT},
+            {"rest", AsyncCommandCode.REST},
+            {"fist", AsyncCommandCode.FIST},
+            {"wave_in", AsyncCommandCode.WAVE_IN},
+            {"wave_out", AsyncCommandCode.WAVE_OUT},
+            {"fingers_spread", AsyncCommandCode.FINGERS_SPREAD},
+            {"thumb_to_pinky", AsyncCommandCode.THUMB_TO_PINKY},
+            {"unknown", AsyncCommandCode.UNKNOWN}
+        };
 
-                    }
+        public static Dictionary<string, ExpectCommandCode> NameToExpectCommand = new Dictionary<string, ExpectCommandCode>
+        {
+            {"vibrate", ExpectCommandCode.VIBRATE},
+            {"rssi", ExpectCommandCode.RSSI}
+        };
 
-                    break;
-                case EXPECT_KW:
-                    if (command.Length == SIZEOF_EXPECT_CMD &&
-                        command[1] is string &&
-                        int.TryParse(command.Last(), out t))
-                    {
-                        keyword = EXPECT_KW;
-                    }
-                    break;
-                default:
-                    break;
-            }       
-            
+        private CommandType type;
 
+        public ParsedCommand(CommandType type)
+        {
+            this.type = type;
         }
 
-        ~parsed_command()
+        ~ParsedCommand()
         {
         }
 
-        /*
-         * Set the gyroscope x,y,z values
-         * @param   x   x vector of gyroscope data
-         * @param   y   y vector of gyroscope data
-         * @param   z   z vector of gyroscope data
-         */
-        public void set_gyro(float x, float y, float z)
+        public CommandType getType()
         {
-            gyro_data.x = x;
-            gyro_data.y = y;
-            gyro_data.z = z;
+            return type;
+        }
+
+        public override string ToString()
+        {
+            return "Type: " + type.ToString();
         }
 
         /*
@@ -195,43 +158,21 @@ namespace MyoSimGUI
 
         }
 
-        /*
-         * Print out the variables of this object.
-         * Used for checking correctness
-         */
-        public void print_debug()
-        {
-            Console.WriteLine("kw: " + keyword + " t: " + t + " delay: " +
-                delay + " async_cmd_num: " + async_cmd_num + " ev_name: " +
-                ev_name + "\n");
-        }
 
-        struct Quaternion
+        public struct Quaternion
         {
             public float x;
             public float y;
             public float z;
             public float w;
-
-            //string to_string()
-            //{
-
-            //}
         }
 
-        struct vector3
+        public struct vector3
         {
             public float x;
             public float y;
             public float z;
         }
-
-        /* static constants */
-        public const int SIZEOF_MOVE_CMD = 5;
-        public const int SIZEOF_SET_ACC_CMD = 2;
-        public const int SIZEOF_ASYNC_CMD = 3;
-        public const int SIZEOF_EXPECT_CMD = 3;
-        public const int SIZEOF_DELAY_CMD = 2;
 
         public const int TIME_B_START = 0;
         public const int QUAT_B_START = 4;
@@ -239,25 +180,5 @@ namespace MyoSimGUI
         public const int ACCL_B_START = 31;
 
         private static int ms_btw_send = 10;
-        
-        /* Keywords in our language. */
-        public const string MOVE_KW = "move";
-        public const string SET_ACCEL_KW = "set_accel";
-        public const string DELAY_KW = "delay";
-        public const string ASYNC_KW = "async";
-        public const string EXPECT_KW = "expect";
-        public const char command_delim = ' ';
-
-        private string keyword;
-        private int t;
-        private int delay;
-        private int async_cmd_num;
-        string ev_name;
-        private Quaternion quat_data;
-        private vector3 gyro_data;
-        private vector3 gyro_data_prev;
-        private vector3 accel_data;
-        private vector3 gyro_change_per_time;
-
     }
 }

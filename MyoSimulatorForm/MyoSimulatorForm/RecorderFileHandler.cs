@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MyoSimGUI.ParsedCommands;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,10 +14,10 @@ namespace MyoSimGUI
         {
             fileName = recorderFileName;
         }
-
-        public Dictionary<uint, CommandData> readRecorderFile()
+        /*
+        public Dictionary<uint, ParsedCommand> readRecorderFile()
         {
-            Dictionary<uint, CommandData> timestampToCommandDict = new Dictionary<uint, CommandData>();
+            Dictionary<uint, ParsedCommand> timestampToCommandDict = new Dictionary<uint, ParsedCommand>();
             using (BinaryReader br = new BinaryReader(File.Open(fileName, FileMode.Open)))
             {
                 while (br.BaseStream.Position != br.BaseStream.Length)
@@ -31,7 +32,7 @@ namespace MyoSimGUI
                     }
                     else
                     {
-                        MyoSimulatorForm.Quaternion orientationQuat;
+                        parsed_command.Quaternion orientationQuat;
                         MyoSimulatorForm.vector3 gyro;
                         MyoSimulatorForm.vector3 accel;
 
@@ -90,7 +91,7 @@ namespace MyoSimGUI
                 }
             }
         }
-
+        */
         private string fileName;
     }
 }

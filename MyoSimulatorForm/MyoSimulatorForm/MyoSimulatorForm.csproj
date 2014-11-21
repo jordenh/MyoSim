@@ -45,9 +45,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandData.cs" />
+    <Compile Include="MyoScriptParser.cs" />
+    <Compile Include="ParsedCommands\AsyncCommand.cs" />
+    <Compile Include="ParsedCommands\DelayCommand.cs" />
+    <Compile Include="ParsedCommands\ExpectCommand.cs" />
+    <Compile Include="ParsedCommands\MoveCommand.cs" />
+    <Compile Include="ParsedCommands\SetAccelerationCommand.cs" />
     <Compile Include="RecorderFileHandler.cs" />
-    <Compile Include="ParsedCommand.cs" />
+    <Compile Include="ParsedCommands\ParsedCommand.cs" />
     <Compile Include="DisplacementVariables.cs" />
     <Compile Include="MyoSimulatorForm.cs">
       <SubType>Form</SubType>
