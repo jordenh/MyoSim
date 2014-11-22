@@ -6,23 +6,23 @@ using System.Threading.Tasks;
 
 namespace MyoSimGUI
 {
-    class displacement_variables
+    class DisplacementVariables
     {
-        public displacement_variables(float d_prev=0, float d_next=0, float accel=0) 
+        public DisplacementVariables(float d_prev=0, float d_next=0, float accel=0) 
         {
             d = d_next - d_prev;
             v0 = 1;
             a = accel;
         }
 
-        ~displacement_variables() { }
+        ~DisplacementVariables() { }
 
         /*
          * Calculate the next displacement vector based on the next delta of time changed
          * @param   int t   time for this displacement
          * Formula: d = v0*t + (a*t^2)/2
          */
-        public void calc_next_disp(int t)
+        public void calcNextDisp(int t)
         {
             d = v0 * t + (a * t * t) / 2;
         }
@@ -31,7 +31,7 @@ namespace MyoSimGUI
          * Set the acceleration
          * @param   float a     acceleration
          */
-        public void set_accel(float accel)
+        public void setAccel(float accel)
         {
             a = accel;
         }
@@ -40,7 +40,7 @@ namespace MyoSimGUI
          * Get methods to return displacement
          * @return  float d
          */
-        public float get_disp()
+        public float getDisp()
         {
             return d;
         }
