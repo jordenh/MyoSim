@@ -12,48 +12,48 @@
 
 namespace myoSim {
 
-	class DeviceListener;
+    class DeviceListener;
 
-	/// @brief A Hub provides access to one or more Myo instances.
-	class Hub {
-	public:
-		/// Construct a hub.
-		Hub(const std::string& applicationIdentifier = "");
+    /// @brief A Hub provides access to one or more Myo instances.
+    class Hub {
+    public:
+        /// Construct a hub.
+        Hub(const std::string& applicationIdentifier = "");
 
-		/// Deallocate any resources associated with a Hub.
-		~Hub();
+        /// Deallocate any resources associated with a Hub.
+        ~Hub();
 
-		/// Wait for a Myo to become paired, or time out after \a timeout_ms milliseconds if provided.
-		/// If \a timeout_ms is zero, this function blocks until a Myo is found.
-		/// This function must not be called concurrently with run() or runOnce().
-		Myo* waitForMyo(unsigned int milliseconds = 0);
+        /// Wait for a Myo to become paired, or time out after \a timeout_ms milliseconds if provided.
+        /// If \a timeout_ms is zero, this function blocks until a Myo is found.
+        /// This function must not be called concurrently with run() or runOnce().
+        Myo* waitForMyo(unsigned int milliseconds = 0);
 
-		/// Register a listener to be called when device events occur.
-		void addListener(DeviceListener* listener);
+        /// Register a listener to be called when device events occur.
+        void addListener(DeviceListener* listener);
 
-		/// Remove a previously registered listener.
-		void removeListener(DeviceListener* listener);
+        /// Remove a previously registered listener.
+        void removeListener(DeviceListener* listener);
 
-		/// Run the event loop for the specified duration (in milliseconds).
-		void run(unsigned int duration_ms);
+        /// Run the event loop for the specified duration (in milliseconds).
+        void run(unsigned int duration_ms);
 
-		/// Run the event loop until a single event occurs, or the specified duration (in milliseconds) has elapsed.
-		void runOnce(unsigned int duration_ms);
+        /// Run the event loop until a single event occurs, or the specified duration (in milliseconds) has elapsed.
+        void runOnce(unsigned int duration_ms);
 
-	protected:
-		void onDeviceEvent(SimEvent simEvent);
+    protected:
+        void onDeviceEvent(SimEvent simEvent);
         Myo* lookupMyo(unsigned int myoIdentifier) const;
 
         Myo* addMyo(unsigned int identifier);
 
-		std::vector<Myo*> myos;
-		std::vector<DeviceListener*> listeners;
+        std::vector<Myo*> myos;
+        std::vector<DeviceListener*> listeners;
 
-		/// @endcond
+        /// @endcond
 
-	private:
-		// Not implemented
-		Hub(const Hub&);
-		Hub& operator=(const Hub&);
-	};
+    private:
+        // Not implemented
+        Hub(const Hub&);
+        Hub& operator=(const Hub&);
+    };
 } // namespace myo

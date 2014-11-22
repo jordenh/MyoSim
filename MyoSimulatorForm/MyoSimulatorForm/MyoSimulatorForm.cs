@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
+using System.Runtime.InteropServices;
+using MyoSimGUI.ParsedCommands;
 
 namespace MyoSimGUI
 {
@@ -17,6 +19,9 @@ namespace MyoSimGUI
     {
         public const char commandDelimiter = ';';
         private NamedPipeServerStream pipeStream;
+
+        /* Holds resulting binary commands which will be sorted using the time as the key */
+        private Dictionary<int, byte[]> bin_command_list = new Dictionary<int, byte[]>();
 
         static Dictionary<string, string> labelToCommand = new Dictionary<string, string>
         {
@@ -83,30 +88,36 @@ namespace MyoSimGUI
         private void loadFileButton_Click(object sender, EventArgs e)
         {
             string filename = saveFilename.Text;
-            string command;
-            System.IO.StreamReader file = null;
+            MyoScriptParser parser = new MyoScriptParser("..\\..\\test_human_readable_input.txt");
+
+            Multimap<uint, ParsedCommand> timestampToParsedCommands;
 
             try
             {
-                file = new System.IO.StreamReader(filename);
+                timestampToParsedCommands = parser.parseScript();
             }
             catch(ArgumentException except)
             {
-               MessageBox.Show(except.ToString(), string.Format("File does not exist"));
+                MessageBox.Show(except.ToString(), string.Format("File does not exist"));
+                return;
             }
             catch (FileNotFoundException except)
             {
                 MessageBox.Show(except.ToString(), string.Format("File not found"));
-            }
-            finally
+                return;
+            }   
+    
+            foreach (KeyValuePair<uint, List<ParsedCommand>> entry in timestampToParsedCommands.getUnderlyingDict())
             {
-                if (file != null)
+                uint time = entry.Key;
+                List<ParsedCommand> commands = entry.Value;
+
+                foreach (ParsedCommand cmd in commands)
                 {
-                    command = file.ReadLine();
-                    file.Close();
-                    commandChain.Text = command;
+                    string output = String.Format("Time {0}: {1}", time, cmd);
+                    System.Console.WriteLine(output);
                 }
-            }         
+            }
         }
 
         private void sendCommandButton_Click(object sender, EventArgs e)
@@ -142,6 +153,57 @@ namespace MyoSimGUI
         private void addGestureButton_Click(object sender, EventArgs e)
         {
             sendCommand(this.gestureList.SelectedItem.ToString(), labelToCommand);
+        }
+
+        private void MyoSimulatorForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // TODO: send a disconnect event instead once we get protocol sorted
+            string dc_signal = "DCed";
+            if (pipeStream.IsConnected)
+            {
+                pipeStream.Write(Encoding.ASCII.GetBytes(dc_signal), 0, dc_signal.Length);
+            }
+            Dispose();
+        }
+
+        private void readTestButton_Click(object sender, EventArgs e)
+        {
+            RecorderFileHandler fileHandler = new RecorderFileHandler("recorded_binary_test.rbm");
+
+            Multimap<uint, RecorderFileHandler.RecordedData> timestampToData = fileHandler.readRecorderFile();
+
+            foreach (KeyValuePair<uint, List<RecorderFileHandler.RecordedData>> entry in timestampToData.getUnderlyingDict())
+            {
+                uint time = entry.Key;
+                RecorderFileHandler.RecordedData command = entry.Value[0];
+
+                if (command.type == RecorderFileHandler.RecordedDataType.ASYNC)
+                {
+                    System.Console.WriteLine(String.Format("Time {0}: Async Command =  {1}", time, command.asyncCommand));
+                }
+                else
+                {
+                    System.Console.WriteLine(String.Format("Time {0}: Orientation Quat = {1}, Gyro Dat = {2}, Accel Data = {3}", time,
+                        command.orientationQuat, command.gyroDat, command.accelDat));
+                }
+            }
+        }
+
+        private void writeTestButton_Click(object sender, EventArgs e)
+        {
+            RecorderFileHandler fileHandler = new RecorderFileHandler("recorded_binary_test.rbm");
+
+            RecorderFileHandler.RecordedData fistGesture = new RecorderFileHandler.RecordedData(ParsedCommand.AsyncCommandCode.FIST);
+            RecorderFileHandler.RecordedData orientation1 = new RecorderFileHandler.RecordedData(new ParsedCommand.Quaternion(1, 2, 3, 4), 
+                new ParsedCommand.vector3(0.5f, 0.5f, 0.5f), new ParsedCommand.vector3(0.2f, 0.6f, 0.8f));
+            RecorderFileHandler.RecordedData fingersSpreadGesture = new RecorderFileHandler.RecordedData(ParsedCommand.AsyncCommandCode.FINGERS_SPREAD); 
+
+            Multimap<uint, RecorderFileHandler.RecordedData> timestampToData = new Multimap<uint, RecorderFileHandler.RecordedData>();
+            timestampToData.Add(0, fistGesture);
+            timestampToData.Add(10, orientation1);
+            timestampToData.Add(20, fingersSpreadGesture);
+
+            fileHandler.writeRecorderFile(timestampToData);
         }
     }
 }

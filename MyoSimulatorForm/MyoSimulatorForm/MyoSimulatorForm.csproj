@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -44,6 +45,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Multimap.cs" />
+    <Compile Include="MyoScriptParser.cs" />
+    <Compile Include="ParsedCommands\AsyncCommand.cs" />
+    <Compile Include="ParsedCommands\DelayCommand.cs" />
+    <Compile Include="ParsedCommands\ExpectCommand.cs" />
+    <Compile Include="ParsedCommands\MoveCommand.cs" />
+    <Compile Include="ParsedCommands\SetAccelerationCommand.cs" />
+    <Compile Include="RecorderFileHandler.cs" />
+    <Compile Include="ParsedCommands\ParsedCommand.cs" />
+    <Compile Include="DisplacementVariables.cs" />
     <Compile Include="MyoSimulatorForm.cs">
       <SubType>Form</SubType>
     </Compile>
