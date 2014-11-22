@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Multimap.cs" />
     <Compile Include="MyoScriptParser.cs" />
     <Compile Include="ParsedCommands\AsyncCommand.cs" />
     <Compile Include="ParsedCommands\DelayCommand.cs" />

@@ -36,6 +36,8 @@
             this.gestureLabel = new System.Windows.Forms.Label();
             this.addGestureButton = new System.Windows.Forms.Button();
             this.gestureList = new System.Windows.Forms.ListBox();
+            this.readTestButton = new System.Windows.Forms.Button();
+            this.writeTestButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // sendCommandButton
@@ -111,11 +113,33 @@
             this.gestureList.Size = new System.Drawing.Size(120, 121);
             this.gestureList.TabIndex = 17;
             // 
+            // readTestButton
+            // 
+            this.readTestButton.Location = new System.Drawing.Point(430, 185);
+            this.readTestButton.Name = "readTestButton";
+            this.readTestButton.Size = new System.Drawing.Size(75, 23);
+            this.readTestButton.TabIndex = 18;
+            this.readTestButton.Text = "Read Test";
+            this.readTestButton.UseVisualStyleBackColor = true;
+            this.readTestButton.Click += new System.EventHandler(this.readTestButton_Click);
+            // 
+            // writeTestButton
+            // 
+            this.writeTestButton.Location = new System.Drawing.Point(430, 156);
+            this.writeTestButton.Name = "writeTestButton";
+            this.writeTestButton.Size = new System.Drawing.Size(75, 23);
+            this.writeTestButton.TabIndex = 19;
+            this.writeTestButton.Text = "Write Test";
+            this.writeTestButton.UseVisualStyleBackColor = true;
+            this.writeTestButton.Click += new System.EventHandler(this.writeTestButton_Click);
+            // 
             // MyoSimulatorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(520, 307);
+            this.Controls.Add(this.writeTestButton);
+            this.Controls.Add(this.readTestButton);
             this.Controls.Add(this.gestureList);
             this.Controls.Add(this.addGestureButton);
             this.Controls.Add(this.gestureLabel);
@@ -142,6 +166,8 @@
         private System.Windows.Forms.Label gestureLabel;
         private System.Windows.Forms.Button addGestureButton;
         private System.Windows.Forms.ListBox gestureList;
+        private System.Windows.Forms.Button readTestButton;
+        private System.Windows.Forms.Button writeTestButton;
 
     }
 }

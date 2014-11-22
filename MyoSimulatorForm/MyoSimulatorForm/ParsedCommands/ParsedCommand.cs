@@ -161,6 +161,18 @@ namespace MyoSimGUI.ParsedCommands
 
         public struct Quaternion
         {
+            public Quaternion(float x, float y, float z, float w)
+            {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+                this.w = w;
+            }
+
+            public override string ToString()
+            {
+                return String.Format("({0}, {1}, {2}, {3})", x, y, z, w);
+            }
             public float x;
             public float y;
             public float z;
@@ -169,6 +181,18 @@ namespace MyoSimGUI.ParsedCommands
 
         public struct vector3
         {
+            public vector3(float x, float y, float z)
+            {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+
+            public override string ToString()
+            {
+                return String.Format("({0}, {1}, {2})", x, y, z);
+            }
+
             public float x;
             public float y;
             public float z;

@@ -32,10 +32,10 @@ namespace MyoSimGUI
             scriptFileName = filename;
         }
 
-        public Dictionary<uint, List<ParsedCommand>> parseScript()
+        public Multimap<uint, ParsedCommand> parseScript()
         {
             System.IO.StreamReader scriptFile = new System.IO.StreamReader(scriptFileName);
-            Dictionary<uint, List<ParsedCommand>> timestampToCommandDict = new Dictionary<uint, List<ParsedCommand>>();
+            Multimap<uint, ParsedCommand> timestampToCommandDict = new Multimap<uint, ParsedCommand>();
             string line;
 
             uint currentTime = 0;
@@ -74,7 +74,7 @@ namespace MyoSimGUI
             return timestampToCommandDict;
         }
 
-        private bool parseMoveEvent(string[] command, ref uint currentTime, Dictionary<uint, List<ParsedCommand>> timestampToCommandDict)
+        private bool parseMoveEvent(string[] command, ref uint currentTime, Multimap<uint, ParsedCommand> timestampToCommandDict)
         {
             ParsedCommand.vector3 gyroData;
             bool parseSuccess = true;
@@ -90,14 +90,14 @@ namespace MyoSimGUI
             if (parseSuccess)
             {
                 ParsedCommand parsedCommand = new MoveCommand(gyroData, duration);
-                addParsedCommand(timestampToCommandDict, currentTime, parsedCommand);
+                timestampToCommandDict.Add(currentTime, parsedCommand);
                 currentTime += duration;
             }
 
             return parseSuccess;
         }
 
-        private bool parseSetAccelEvent(string[] command, uint currentTime, Dictionary<uint, List<ParsedCommand>> timestampToCommandDict)
+        private bool parseSetAccelEvent(string[] command, uint currentTime, Multimap<uint, ParsedCommand> timestampToCommandDict)
         {
             ParsedCommand.vector3 accelData;
             bool parseSuccess = true;
@@ -119,7 +119,7 @@ namespace MyoSimGUI
             if (parseSuccess)
             {
                 ParsedCommand parsedCommand = new SetAccelerationCommand(accelData);
-                addParsedCommand(timestampToCommandDict, currentTime + relativeSetTime, parsedCommand);
+                timestampToCommandDict.Add(currentTime + relativeSetTime, parsedCommand);
             }
 
             return parseSuccess;
@@ -140,7 +140,7 @@ namespace MyoSimGUI
             return false;
         }
 
-        private bool parseAsyncEvent(string[] command, uint currentTime, Dictionary<uint, List<ParsedCommand>> timestampToCommandDict)
+        private bool parseAsyncEvent(string[] command, uint currentTime, Multimap<uint, ParsedCommand> timestampToCommandDict)
         {
             if (command.Length < SIZEOF_ASYNC_CMD) return false;
 
@@ -163,12 +163,12 @@ namespace MyoSimGUI
             }
 
             parsedCommand = new AsyncCommand((ParsedCommand.AsyncCommandCode) asyncCommandNum);
-            addParsedCommand(timestampToCommandDict, currentTime + relativeSetTime, parsedCommand);
+            timestampToCommandDict.Add(currentTime + relativeSetTime, parsedCommand);
 
             return true;
         }
 
-        private bool parseExpectEvent(string[] command, uint currentTime, Dictionary<uint, List<ParsedCommand>> timestampToCommandDict)
+        private bool parseExpectEvent(string[] command, uint currentTime, Multimap<uint, ParsedCommand> timestampToCommandDict)
         {
             ParsedCommand parsedCommand;
             bool parseSuccess = true;
@@ -182,28 +182,10 @@ namespace MyoSimGUI
             {
                 ParsedCommand.ExpectCommandCode commandCode = ParsedCommand.NameToExpectCommand[command[1]];
                 parsedCommand = new ExpectCommand(commandCode, waitTime);
-                addParsedCommand(timestampToCommandDict, currentTime, parsedCommand);
+                timestampToCommandDict.Add(currentTime, parsedCommand);
             }
 
             return parseSuccess;
-        }
-
-        private void addParsedCommand(Dictionary<uint, List<ParsedCommand>> timestampToCommandDict, uint time,
-            ParsedCommand parsedCommand)
-        {
-            List<ParsedCommand> parsedCommandList;
-
-            if (timestampToCommandDict.ContainsKey(time))
-            {
-                parsedCommandList = timestampToCommandDict[time];
-            }
-            else
-            {
-                parsedCommandList = new List<ParsedCommand>();
-                timestampToCommandDict.Add(time, parsedCommandList);
-            }
-
-            parsedCommandList.Add(parsedCommand);
         }
     }
 }
