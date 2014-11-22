@@ -157,54 +157,54 @@ void Hub::run(unsigned int duration_ms)
                 std::string message(buffer);
                 SimEvent evt;
 
-				if (message == "DCed")
-				{
-					evt.setEventType(myoSimEvent::disconnected);
-				}
+                if (message == "DCed")
+                {
+                    evt.setEventType(myoSimEvent::disconnected);
+                }
                 // TODO: For now, all data received is pose data. Must change to support all data. 
                 // Will do that once protocol has been decided.
-				else
-				{
-					evt.setEventType(myoSimEvent::pose);
-					// TODO: Have a proper way of dealing with this. Do it in 
-					// a different class. Perhaps have the Myo class convert
-					// messages to events first.
-					if (message == "rest")
-					{
-						myo::Pose pose(myo::Pose::rest);
-						evt.setPose(pose);
-					}
-					else if (message == "fist")
-					{
-						myo::Pose pose(myo::Pose::fist);
-						evt.setPose(pose);
-					}
-					else if (message == "waveIn")
-					{
-						myo::Pose pose(myo::Pose::waveIn);
-						evt.setPose(pose);
-					}
-					else if (message == "waveOut")
-					{
-						myo::Pose pose(myo::Pose::waveOut);
-						evt.setPose(pose);
-					}
-					else if (message == "fingersSpread")
-					{
-						myo::Pose pose(myo::Pose::fingersSpread);
-						evt.setPose(pose);
-					}
-					else if (message == "thumbToPinky")
-					{
-						myo::Pose pose(myo::Pose::thumbToPinky);
-						evt.setPose(pose);
-					}
-					else
-					{
-						myo::Pose pose(myo::Pose::unknown);
-						evt.setPose(pose);
-					}
-				} // if (message == "DCed")
+                else
+                {
+                    evt.setEventType(myoSimEvent::pose);
+                    // TODO: Have a proper way of dealing with this. Do it in 
+                    // a different class. Perhaps have the Myo class convert
+                    // messages to events first.
+                    if (message == "rest")
+                    {
+                        myo::Pose pose(myo::Pose::rest);
+                        evt.setPose(pose);
+                    }
+                    else if (message == "fist")
+                    {
+                        myo::Pose pose(myo::Pose::fist);
+                        evt.setPose(pose);
+                    }
+                    else if (message == "waveIn")
+                    {
+                        myo::Pose pose(myo::Pose::waveIn);
+                        evt.setPose(pose);
+                    }
+                    else if (message == "waveOut")
+                    {
+                        myo::Pose pose(myo::Pose::waveOut);
+                        evt.setPose(pose);
+                    }
+                    else if (message == "fingersSpread")
+                    {
+                        myo::Pose pose(myo::Pose::fingersSpread);
+                        evt.setPose(pose);
+                    }
+                    else if (message == "thumbToPinky")
+                    {
+                        myo::Pose pose(myo::Pose::thumbToPinky);
+                        evt.setPose(pose);
+                    }
+                    else
+                    {
+                        myo::Pose pose(myo::Pose::unknown);
+                        evt.setPose(pose);
+                    }
+                } // if (message == "DCed")
 
                 evt.setTimestamp(GetTickCount());
                 evt.setMyoIdentifier((*it)->getIdentifier());
