@@ -13,34 +13,41 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using MyoSimGUI.ParsedCommands;
 
+
 namespace MyoSimGUI
 {
     public partial class MyoSimulatorForm : Form
     {
-        public const char commandDelimiter = ';';
-        private NamedPipeServerStream pipeStream;
+        public const string commandDelimiter = ", ";
 
         /* Holds resulting binary commands which will be sorted using the time as the key */
         private Dictionary<int, byte[]> bin_command_list = new Dictionary<int, byte[]>();
 
-        static Dictionary<string, string> labelToCommand = new Dictionary<string, string>
+        static Dictionary<string, HubCommunicator.Pose> labelToCommand = new Dictionary<string, HubCommunicator.Pose>
         {
-            {"Rest", "rest"},
-            {"Fist", "fist"},
-            {"Wave In", "waveIn"},
-            {"Wave Out", "waveOut"},
-            {"Fingers Spread", "fingersSpread"},
-            {"Reserved 1", "reserved1"},
-            {"Thumb to Pinky", "thumbToPinky"},
-            {"Unknown", "unknown"}
+            {"Rest", HubCommunicator.Pose.REST},
+            {"Fist", HubCommunicator.Pose.FIST},
+            {"Wave In", HubCommunicator.Pose.WAVE_IN},
+            {"Wave Out", HubCommunicator.Pose.WAVE_OUT},
+            {"Fingers Spread", HubCommunicator.Pose.FINGERS_SPREAD},
+            {"Reserved 1", HubCommunicator.Pose.RESERVED1},
+            {"Thumb to Pinky", HubCommunicator.Pose.THUMB_TO_PINKY},
+            {"Unknown", HubCommunicator.Pose.UNKNOWN}
         };
+
+        private HubCommunicator hubCommunicator;
+        private List<HubCommunicator.Pose> poseList;
+        private CommandRunner commandRunner;
 
         public MyoSimulatorForm(NamedPipeServerStream pipeStream)
         {
-            this.pipeStream = pipeStream;
+            hubCommunicator = new HubCommunicator(pipeStream);
+            poseList = new List<HubCommunicator.Pose>();
+            commandRunner = new CommandRunner(hubCommunicator);
             InitializeComponent();
+            
             this.sendCommandButton.Enabled = false;
-            foreach (string key in labelToCommand.Keys) 
+            foreach (string key in labelToCommand.Keys)
             {
                 this.gestureList.Items.Add(key);
             }
@@ -49,18 +56,20 @@ namespace MyoSimGUI
         public void enableSendCommand()
         {
             this.sendCommandButton.Enabled = true;
+            CommunicationBegin();
         }
 
-        private void sendCommand(string label, Dictionary<string, string> labelToCommandMap)
+        private void sendCommand(string label, Dictionary<string, HubCommunicator.Pose> labelToCommandMap)
         {
-            string command;
+            HubCommunicator.Pose command;
             if (labelToCommandMap.TryGetValue(label, out command))
             {
-                commandChain.Text = string.Concat(commandChain.Text, command + commandDelimiter);
+                poseList.Add(command);
+                commandChain.Text = string.Concat(commandChain.Text, label + commandDelimiter);
             }
         }
 
-        private void callMyoSim(string command)
+        private void call_myo_sim(string command)
         {
 
         }
@@ -96,7 +105,7 @@ namespace MyoSimGUI
             {
                 timestampToParsedCommands = parser.parseScript();
             }
-            catch(ArgumentException except)
+            catch (ArgumentException except)
             {
                 MessageBox.Show(except.ToString(), string.Format("File does not exist"));
                 return;
@@ -105,49 +114,37 @@ namespace MyoSimGUI
             {
                 MessageBox.Show(except.ToString(), string.Format("File not found"));
                 return;
-            }   
-    
-            foreach (KeyValuePair<uint, List<ParsedCommand>> entry in timestampToParsedCommands.getUnderlyingDict())
-            {
-                uint time = entry.Key;
-                List<ParsedCommand> commands = entry.Value;
-              
-                foreach (ParsedCommand cmd in commands)
-                {
-                    string output = String.Format("Time {0}: {1}", time, cmd);
-                    System.Console.WriteLine(output);
-                }
             }
+
+            commandRunner.runCommands(timestampToParsedCommands);
         }
 
         private void sendCommandButton_Click(object sender, EventArgs e)
         {
             string command = commandChain.Text;
 
-            if (command[command.Length - 1] == commandDelimiter)
+            try
             {
-                command = command.Remove(command.Length - 1);
-            }
-
-            System.Console.WriteLine("String to send: " + command);
-            string[] words = command.Split(commandDelimiter);
-
-            foreach (string word in words)
-            {
-                System.Console.WriteLine(word);
-
-                if (!pipeStream.IsConnected)
+                foreach (HubCommunicator.Pose pose in poseList)
                 {
-                    System.Console.WriteLine("Failed to connect!!");
-                    return;
+                    System.Console.WriteLine("Pose to send: " + pose);
+
+                    if (!hubCommunicator.isConnected())
+                    {
+                        System.Console.WriteLine("Failed to connect!!");
+                        return;
+                    }
+
+                    hubCommunicator.SendPose(pose);
                 }
-
-                System.Console.WriteLine("Connected!!");
-
-                pipeStream.Write(Encoding.ASCII.GetBytes(word), 0, word.Length);
-
-                System.Console.WriteLine("Message Sent!!");
             }
+            catch (Exception error)
+            {
+                MessageBox.Show(error.ToString(), string.Format("Named pipe server disconnected, please save your commands and start the GUI and the server"));
+                this.sendCommandButton.Enabled = false;
+
+            }
+
         }
 
         private void addGestureButton_Click(object sender, EventArgs e)
@@ -157,12 +154,6 @@ namespace MyoSimGUI
 
         private void MyoSimulatorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // TODO: send a disconnect event instead once we get protocol sorted
-            string dc_signal = "DCed";
-            if (pipeStream.IsConnected)
-            {
-                pipeStream.Write(Encoding.ASCII.GetBytes(dc_signal), 0, dc_signal.Length);
-            }
             Dispose();
         }
 
@@ -171,22 +162,7 @@ namespace MyoSimGUI
             RecorderFileHandler fileHandler = new RecorderFileHandler("recorded_binary_test.rbm");
 
             Multimap<uint, RecorderFileHandler.RecordedData> timestampToData = fileHandler.readRecorderFile();
-
-            foreach (KeyValuePair<uint, List<RecorderFileHandler.RecordedData>> entry in timestampToData.getUnderlyingDict())
-            {
-                uint time = entry.Key;
-                RecorderFileHandler.RecordedData command = entry.Value[0];
-
-                if (command.type == RecorderFileHandler.RecordedDataType.ASYNC)
-                {
-                    System.Console.WriteLine(String.Format("Time {0}: Async Command =  {1}", time, command.asyncCommand));
-                }
-                else
-                {
-                    System.Console.WriteLine(String.Format("Time {0}: Orientation Quat = {1}, Gyro Dat = {2}, Accel Data = {3}", time,
-                        command.orientationQuat, command.gyroDat, command.accelDat));
-                }
-            }
+            commandRunner.runCommands(timestampToData);
         }
 
         private void writeTestButton_Click(object sender, EventArgs e)
@@ -204,6 +180,22 @@ namespace MyoSimGUI
             timestampToData.Add(20, fingersSpreadGesture);
 
             fileHandler.writeRecorderFile(timestampToData);
+        }
+
+        public void CommunicationBegin()
+        {
+            // Sends three messages: Paired, Connected and Arm Recognized.
+            hubCommunicator.SendPaired();
+            hubCommunicator.SendConnected();
+            // TODO: Make Arm and XDirection configurable.
+            hubCommunicator.SendArmRecognized(HubCommunicator.Arm.RIGHT, HubCommunicator.XDirection.FACING_WRIST);
+        }
+
+        public void CommunicationEnd()
+        {
+            hubCommunicator.SendArmLost();
+            hubCommunicator.SendDisconnected();
+            hubCommunicator.SendUnpaired();
         }
     }
 }

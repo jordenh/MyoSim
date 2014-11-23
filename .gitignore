@@ -35,5 +35,10 @@ TemporaryGeneratedFile*.cs
 *.cache
 *.suo
 
-Debug
-!*\lib
+*.sdf
+*.opensdf
+*Debug
+*/ipch
+!*/lib/MyoSharp.dll
+!*/lib/x64/myo.dll
+!*/lib/x86/myo.dll

@@ -12,6 +12,13 @@ namespace MyoSimGUI
     {
         private const uint ORIENTATION_DELAY = 10;
 
+        private HubCommunicator hubCommunicator;
+
+        public CommandRunner(HubCommunicator hubCommunicator)
+        {
+            this.hubCommunicator = hubCommunicator;
+        }
+
         public void runCommands(Multimap<uint, RecorderFileHandler.RecordedData> timeToRecordedData)
         {
             List<uint> timeList = timeToRecordedData.getUnderlyingDict().Keys.ToList();
@@ -25,8 +32,38 @@ namespace MyoSimGUI
                 List<RecorderFileHandler.RecordedData> recordedDataList = timeToRecordedData[time];
                 foreach (RecorderFileHandler.RecordedData recordedData in recordedDataList)
                 {
-                    // TODO: Actually send the data using the pipe.
-                    System.Console.WriteLine(String.Format("{0}: {1}", time, recordedData.ToString()));
+                    if (recordedData.type == RecorderFileHandler.RecordedDataType.SYNC)
+                    {
+                        hubCommunicator.SendSyncData(recordedData.orientationQuat, recordedData.gyroDat, recordedData.accelDat);
+                    }
+                    else
+                    {
+                        switch (recordedData.asyncCommand)
+                        {
+                            case ParsedCommand.AsyncCommandCode.CONNECT:
+                                hubCommunicator.SendConnected();
+                                break;
+                            case ParsedCommand.AsyncCommandCode.DISCONNECT:
+                                hubCommunicator.SendDisconnected();
+                                break;
+                            case ParsedCommand.AsyncCommandCode.PAIR:
+                                hubCommunicator.SendPaired();
+                                break;
+                            case ParsedCommand.AsyncCommandCode.UNPAIR:
+                                hubCommunicator.SendUnpaired();
+                                break;
+                            case ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED:
+                                // Temporary
+                                hubCommunicator.SendArmRecognized(HubCommunicator.Arm.RIGHT, HubCommunicator.XDirection.FACING_ELBOW);
+                                break;
+                            case ParsedCommand.AsyncCommandCode.ARM_LOST:
+                                hubCommunicator.SendArmLost();
+                                break;
+                            default:
+                                hubCommunicator.SendPose(HubCommunicator.asyncCommandCodeToPose(recordedData.asyncCommand));
+                                break;
+                        }
+                    }
                 }
 
                 Thread.Sleep((int) delay);

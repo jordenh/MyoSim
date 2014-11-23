@@ -43,7 +43,7 @@ public:
     void onDisconnect(Myo* myo, uint64_t timestamp)
     {
         std::string temp;
-        std::cout << "unknown received" << std::endl;
+        std::cout << "On Disconnect!" << std::endl;
         isDisconnected = true;
         std::cin >> temp;
 
@@ -52,17 +52,24 @@ public:
     // making a fist, or not making a fist anymore.
     void onPose(Myo* myo, uint64_t timestamp, Pose pose)
     {
-        if (currentPose.type() != pose.type())
-        {
-            std::string poseString = pose.toString();
-            std::cout << "Current pose: " << poseString << std::endl;
-        }
+        std::cout << "Pose: " << pose.toString() << " *****************************************************************" << std::endl;
+    }
 
-        currentPose = pose;
-        // Vibrate the Myo whenever we've detected that the user has made a fist.
-        if (pose == Pose::fist) {
-            myo->vibrate(Myo::vibrationMedium);
-        }
+    void onOrientationData(Myo* myo, uint64_t timestamp, const Quaternion<float>& rotation) 
+    {
+        std::cout << "Orientation: (" << rotation.x() << ", " << rotation.y() << ", " << rotation.z() << ", " << rotation.w() << ")" << std::endl;
+    }
+
+    /// Called when a paired Myo has provided new accelerometer data in units of g.
+    void onAccelerometerData(Myo* myo, uint64_t timestamp, const Vector3<float>& accel) 
+    {
+        std::cout << "Accelerometer: (" << accel.x() << ", " << accel.y() << ", " << accel.z() << std::endl;
+    }
+
+    /// Called when a paired Myo has provided new gyroscope data in units of deg/s.
+    void onGyroscopeData(Myo* myo, uint64_t timestamp, const Vector3<float>& gyro) 
+    {
+        std::cout << "Gyro: (" << gyro.x() << ", " << gyro.y() << ", " << gyro.z() << std::endl;
     }
 
     Pose currentPose;
@@ -74,9 +81,10 @@ int main(int argc, char** argv)
         Hub hub("com.example.hello-myo");
         std::cout << "Attempting to find a Myo..." << std::endl;
 
-        Myo* myo = hub.waitForMyo(10000);
-
+        Myo* myo = hub.waitForMyo(1000);
+       
         if (!myo) {
+
             throw std::runtime_error("Unable to find a Myo!");
         }
 
