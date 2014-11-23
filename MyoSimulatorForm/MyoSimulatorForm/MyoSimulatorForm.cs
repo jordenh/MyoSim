@@ -111,13 +111,17 @@ namespace MyoSimGUI
             {
                 uint time = entry.Key;
                 List<ParsedCommand> commands = entry.Value;
-
+              
                 foreach (ParsedCommand cmd in commands)
                 {
                     string output = String.Format("Time {0}: {1}", time, cmd);
                     System.Console.WriteLine(output);
                 }
             }
+
+            System.Console.WriteLine("Running the Command Runner on binary file!");
+            CommandRunner runner = new CommandRunner();
+            runner.runCommands(timestampToParsedCommands);
         }
 
         private void sendCommandButton_Click(object sender, EventArgs e)
@@ -187,6 +191,10 @@ namespace MyoSimGUI
                         command.orientationQuat, command.gyroDat, command.accelDat));
                 }
             }
+
+            System.Console.WriteLine("Running the Command Runner on binary file!");
+            CommandRunner runner = new CommandRunner();
+            runner.runCommands(timestampToData);
         }
 
         private void writeTestButton_Click(object sender, EventArgs e)

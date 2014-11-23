@@ -1,0 +1,156 @@
+﻿using MyoSimGUI.ParsedCommands;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace MyoSimGUI
+{
+    class CommandRunner
+    {
+        private const uint ORIENTATION_DELAY = 10;
+
+        public void runCommands(Multimap<uint, RecorderFileHandler.RecordedData> timeToRecordedData)
+        {
+            List<uint> timeList = timeToRecordedData.getUnderlyingDict().Keys.ToList();
+            timeList.Sort();
+
+            for (int i = 0; i < timeList.Count - 1; i++)
+            {
+                uint time = timeList[i];
+                uint delay = timeList[i + 1] - timeList[i];
+
+                List<RecorderFileHandler.RecordedData> recordedDataList = timeToRecordedData[time];
+                foreach (RecorderFileHandler.RecordedData recordedData in recordedDataList)
+                {
+                    // TODO: Actually send the data using the pipe.
+                    System.Console.WriteLine(String.Format("{0}: {1}", time, recordedData.ToString()));
+                }
+
+                Thread.Sleep((int) delay);
+            }
+        }
+
+        public void runCommands(Multimap<uint, ParsedCommand> timeToParsedCommand)
+        {
+            runCommands(setTimeToRecordedData(timeToParsedCommand));
+        }
+
+        private Multimap<uint, RecorderFileHandler.RecordedData> setTimeToRecordedData(Multimap<uint, ParsedCommand> timeToParsedCommand)
+        {
+            Multimap<uint, RecorderFileHandler.RecordedData> timeToRecordedData = new Multimap<uint, RecorderFileHandler.RecordedData>();
+            List<uint> timeList = timeToParsedCommand.getUnderlyingDict().Keys.ToList();
+            timeList.Sort();
+            uint maxTime = timeList.Last();
+            ParsedCommand.vector3 currentOrientation = new ParsedCommand.vector3(0, 0, 0);
+            ParsedCommand.vector3 lastMoveDelta = new ParsedCommand.vector3(0, 0, 0);
+            ParsedCommand.vector3 currentAcceleration = new ParsedCommand.vector3(0, 0, 0);
+            ParsedCommand.vector3 currentGyro = new ParsedCommand.vector3(0, 0, 0);
+
+            // Add multiples of 10 to the time list.
+            for (uint i = 0; i <= maxTime; i+=10)
+            {
+                timeList.Add(i);
+            }
+
+            List<uint> distinctTimes = new List<uint>(timeList.Distinct());
+            distinctTimes.Sort();
+            uint lastMoveTime = 0;
+            uint lastDuration = 0;
+
+            foreach (uint time in distinctTimes)
+            {
+                if (timeToParsedCommand.getUnderlyingDict().ContainsKey(time))
+                {
+                    // Need to do a preliminary check to set Gyro and Acceleration information.
+                    List<ParsedCommand> commands = timeToParsedCommand[time];
+
+                    foreach (ParsedCommand command in commands)
+                    {
+                        if (command.getType() == ParsedCommand.CommandType.MOVE)
+                        {
+                            MoveCommand moveCommand = (MoveCommand)command;
+                            ParsedCommand.vector3 yawPitchRoll = moveCommand.getGyroData();
+                            uint duration = moveCommand.getDuration();
+                            currentGyro.x = yawPitchRoll.x / duration;
+                            currentGyro.y = yawPitchRoll.y / duration;
+                            currentGyro.z = yawPitchRoll.z / duration;
+                        }
+                        else if (command.getType() == ParsedCommand.CommandType.SET_ACCELERATION)
+                        {
+                            SetAccelerationCommand setAccelCommand = (SetAccelerationCommand)command;
+                            currentAcceleration = setAccelCommand.getAccelerationData();
+                        }
+                    }
+                }
+
+                if (time % 10 == 0)
+                {
+                    if (time - lastMoveTime <= lastDuration && lastDuration != 0)
+                    {
+                        currentOrientation.x = (((float)lastMoveDelta.x) / lastDuration) * 10 + currentOrientation.x;
+                        currentOrientation.y = (((float)lastMoveDelta.y) / lastDuration) * 10 + currentOrientation.y;
+                        currentOrientation.z = (((float)lastMoveDelta.z) / lastDuration) * 10 + currentOrientation.z;
+                    }
+
+                    ParsedCommand.Quaternion newOrientation = getQuatFromAngles(currentOrientation);
+                    RecorderFileHandler.RecordedData orientationDat = new RecorderFileHandler.RecordedData(newOrientation,
+                        currentGyro, currentAcceleration);
+                    timeToRecordedData.Add(time, orientationDat);
+                }
+
+                if (timeToParsedCommand.getUnderlyingDict().ContainsKey(time))
+                {
+                    // Deal with setting a MOVE and ASYNC commands.
+                    List<ParsedCommand> commands = timeToParsedCommand[time];
+
+                    foreach (ParsedCommand command in commands)
+                    {
+                        if (command.getType() == ParsedCommand.CommandType.MOVE)
+                        {
+                            MoveCommand moveCommand = (MoveCommand)command;
+                            ParsedCommand.vector3 yawPitchRoll = moveCommand.getGyroData();
+                            uint duration = moveCommand.getDuration();
+                            lastDuration = duration;
+                            lastMoveTime = time;
+                            lastMoveDelta = yawPitchRoll;
+                        }
+                        else if (command.getType() == ParsedCommand.CommandType.ASYNC)
+                        {
+                            AsyncCommand asyncCommand = (AsyncCommand)command;
+                            RecorderFileHandler.RecordedData asyncDat = new RecorderFileHandler.RecordedData(asyncCommand.getAsyncCommand());
+                            timeToRecordedData.Add(time, asyncDat);
+                        }
+                        else
+                        {
+                            // TODO: Deal with Expect
+                        }
+                    }
+                }
+            }
+
+            return timeToRecordedData;
+        }
+
+        private ParsedCommand.Quaternion getQuatFromAngles(ParsedCommand.vector3 yawPitchRoll)
+        {
+            ParsedCommand.Quaternion orientation;
+            float cyaw = (float) Math.Cos(yawPitchRoll.x / 2.0);
+            float cpitch = (float) Math.Cos(yawPitchRoll.y / 2.0);
+            float croll = (float) Math.Cos(yawPitchRoll.z / 2.0);
+
+            float syaw = (float) Math.Sin(yawPitchRoll.x / 2.0);
+            float spitch = (float) Math.Sin(yawPitchRoll.y / 2.0);
+            float sroll = (float) Math.Sin(yawPitchRoll.z / 2.0);
+
+            orientation.x = cyaw * cpitch * croll + syaw * spitch * sroll;
+            orientation.y = cyaw * cpitch * sroll - syaw * spitch * croll;
+            orientation.z = cyaw * spitch * croll + syaw * cpitch * sroll;
+            orientation.w = syaw * cpitch * croll - cyaw * spitch * sroll;
+
+            return orientation;
+        }
+    }
+}

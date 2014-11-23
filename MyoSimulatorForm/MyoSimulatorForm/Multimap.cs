@@ -16,6 +16,11 @@ namespace MyoSimGUI
             multimapDict = new Dictionary<T, List<V>>();
         }
 
+        public Multimap(Multimap<T, V> m)
+        {
+            multimapDict = new Dictionary<T, List<V>>(m.getUnderlyingDict());
+        }
+
         public void Add(T key, V value)
         {
             List<V> values;

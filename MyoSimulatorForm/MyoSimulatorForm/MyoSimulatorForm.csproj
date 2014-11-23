@@ -45,10 +45,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandRunner.cs" />
     <Compile Include="Multimap.cs" />
     <Compile Include="MyoScriptParser.cs" />
     <Compile Include="ParsedCommands\AsyncCommand.cs" />
-    <Compile Include="ParsedCommands\DelayCommand.cs" />
     <Compile Include="ParsedCommands\ExpectCommand.cs" />
     <Compile Include="ParsedCommands\MoveCommand.cs" />
     <Compile Include="ParsedCommands\SetAccelerationCommand.cs" />

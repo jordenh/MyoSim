@@ -40,6 +40,18 @@ namespace MyoSimGUI
                 this.asyncCommand = new ParsedCommand.AsyncCommandCode();
             }
 
+            public override string ToString()
+            {
+                if (type == RecordedDataType.ASYNC)
+                {
+                    return "Async Command Code: " + asyncCommand.ToString();
+                }
+                else
+                {
+                    return String.Format("Orientation: {0}, Yaw/Pitch/Roll: {1}, Accel: {2}", orientationQuat.ToString(), gyroDat.ToString(), accelDat.ToString());
+                }
+            }
+
             public RecordedDataType type;
             public ParsedCommand.AsyncCommandCode asyncCommand;
             public ParsedCommand.Quaternion orientationQuat;

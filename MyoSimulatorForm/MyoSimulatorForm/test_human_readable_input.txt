@@ -1,6 +1,7 @@
-move 5 -5.3 10.6 50
-async 3 20
-move -10 15 4 100
-async fist 25
-expect vibrate 50
+async 3 1000
+move 5 -5.3 10.6 2000
+async fist 100
+set_accel 2.3 -1 4
+move -10 15 4 500
 delay 50
+expect vibrate 50
