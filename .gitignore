@@ -36,3 +36,4 @@ TemporaryGeneratedFile*.cs
 *.suo
 
 Debug
+!*\lib
