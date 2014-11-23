@@ -35,5 +35,5 @@ TemporaryGeneratedFile*.cs
 *.cache
 *.suo
 
-Debug
+*Debug
 !*\lib

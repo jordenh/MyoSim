@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandRunner.cs" />
+    <Compile Include="HubCommunicator.cs" />
     <Compile Include="Multimap.cs" />
     <Compile Include="MyoRecorder.cs" />
     <Compile Include="MyoScriptParser.cs" />

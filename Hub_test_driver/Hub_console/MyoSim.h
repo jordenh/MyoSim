@@ -22,6 +22,8 @@ namespace myoSim {
         bool connectToPipe(unsigned int timeout);
         bool readFromPipe(TCHAR* buffer, unsigned int numBytes, DWORD* actualBytes);
         unsigned int getIdentifier() const;
+        void setReadTimeout(unsigned int timeout);
+        DWORD getReadTimeout();
 
     private:
         unsigned int identifier;

@@ -55,6 +55,25 @@ namespace myoSim
         return true;
     }
 
+    void Myo::setReadTimeout(unsigned int timeout)
+    {
+        COMMTIMEOUTS timeouts;
+        timeouts.ReadIntervalTimeout = 0;
+        timeouts.ReadTotalTimeoutMultiplier = 0;
+        timeouts.ReadTotalTimeoutConstant = timeout;
+        timeouts.WriteTotalTimeoutConstant = timeouts.WriteTotalTimeoutMultiplier = 0;
+
+        SetCommTimeouts(pipe, &timeouts);
+    }
+
+    DWORD Myo::getReadTimeout()
+    {
+        COMMTIMEOUTS timeouts;
+        GetCommTimeouts(pipe, &timeouts);
+
+        return timeouts.ReadTotalTimeoutConstant;
+    }
+
     bool Myo::readFromPipe(TCHAR* buffer, unsigned int numBytes, DWORD* actualBytes)
     {
         //TODO: Come up with a protocol to read from the pipe (I.E. send the size

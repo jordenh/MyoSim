@@ -9,10 +9,13 @@
 #include "MyoSim.h"
 #include "myo/myo.hpp"
 #include <vector>
+#include <map>
 
 namespace myoSim {
 
     class DeviceListener;
+
+    enum EventType { ET_PAIRED, ET_UNPAIRED, ET_CONNECTED, ET_DISCONNECTED, ET_ARM_RECOGNIZED, ET_ARM_LOST, ET_SYNC_DAT, ET_POSE };
 
     /// @brief A Hub provides access to one or more Myo instances.
     class Hub {
@@ -55,5 +58,8 @@ namespace myoSim {
         // Not implemented
         Hub(const Hub&);
         Hub& operator=(const Hub&);
+        float extractFloat(TCHAR* bytes);
+        unsigned short extractUnsignedShort(TCHAR* bytes);
+        static std::map<EventType, myoSimEvent> eventTypeToEventMap;
     };
 } // namespace myo

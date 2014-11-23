@@ -1,11 +1,23 @@
 #include "stdafx.h"
 #include "HubSim.hpp"
 #include "DeviceListenerSim.h"
-
-// TODO: This will change when we come up with a protocol.
-#define MAX_MESSAGE_LEN 50
+#include <string>
+#include <iostream>
+#include <map>
+#include <cfloat>
 
 using namespace myoSim;
+
+std::map<EventType, myoSimEvent> Hub::eventTypeToEventMap = {
+        { ET_PAIRED, myoSimEvent::paired },
+        { ET_UNPAIRED, myoSimEvent::unpaired },
+        { ET_CONNECTED, myoSimEvent::connected },
+        { ET_DISCONNECTED, myoSimEvent::disconnected },
+        { ET_ARM_RECOGNIZED, myoSimEvent::armRecognized },
+        { ET_ARM_LOST, myoSimEvent::armLost },
+        { ET_SYNC_DAT, myoSimEvent::orientation },
+        { ET_POSE, myoSimEvent::pose }
+};
 
 Hub::Hub(const std::string& applicationIdentifier)
 {
@@ -130,6 +142,20 @@ Myo* Hub::addMyo(unsigned int identifier)
     return myo;
 }
 
+unsigned short Hub::extractUnsignedShort(TCHAR* bytes)
+{
+    unsigned short us;
+    memcpy(&us, bytes, sizeof(us));
+    return us;
+}
+
+float Hub::extractFloat(TCHAR* bytes)
+{
+    float f;
+    memcpy(&f, bytes, sizeof(f));
+    return f;
+}
+
 void Hub::run(unsigned int duration_ms)
 {
     // Run for duration_ms, read from named pipe for events, form a SimEvent
@@ -143,69 +169,76 @@ void Hub::run(unsigned int duration_ms)
 
         for (it = myos.begin(); it != myos.end(); it++)
         {
-            // TODO: Implement some way of data packing, so that we don't
-            // have to read the raw data here.
-            TCHAR buffer[MAX_MESSAGE_LEN];
-            unsigned int numBytes = MAX_MESSAGE_LEN;
             DWORD actualBytes;
-            ZeroMemory(buffer, MAX_MESSAGE_LEN);
 
-            bool success = (*it)->readFromPipe(buffer, numBytes, &actualBytes);
+            if ((*it)->getReadTimeout() != duration_ms)
+            {
+                (*it)->setReadTimeout(duration_ms);
+            }
+
+            // Read 
+            TCHAR header[3];
+            bool success = (*it)->readFromPipe(header, 3, &actualBytes);
+
+            if (!success) continue;
+
+            unsigned char dataSize = header[0];
+            unsigned short eventType = extractUnsignedShort(&(header[1]));
 
             if (success)
-            {
-                std::string message(buffer);
+            {                             
                 SimEvent evt;
 
-                if (message == "DCed")
+                //TODO: Check that dataSize agrees with the expected sizes.
+                if (eventType == ET_SYNC_DAT)
                 {
-                    evt.setEventType(myoSimEvent::disconnected);
+                    TCHAR dat[40];
+                    success = (*it)->readFromPipe(dat, 40, &actualBytes);
+
+                    if (!success) continue;
+
+                    float floatData[10];
+                    for (int i = 0; i < 10; i++)
+                    {
+                        floatData[i] = extractFloat(&(dat[i * 4]));
+                    }
+
+                    evt.setEventType(myoSimEvent::orientation);
+                    evt.setOrientation(floatData[0], floatData[1], floatData[2], floatData[3]);
+                    evt.setGyroscopeData(vectorIndex::first, floatData[4]);
+                    evt.setGyroscopeData(vectorIndex::second, floatData[5]);
+                    evt.setGyroscopeData(vectorIndex::third, floatData[6]);
+                    evt.setAccelerometerData(vectorIndex::first, floatData[7]);
+                    evt.setAccelerometerData(vectorIndex::second, floatData[8]);
+                    evt.setAccelerometerData(vectorIndex::third, floatData[9]);
                 }
-                // TODO: For now, all data received is pose data. Must change to support all data. 
-                // Will do that once protocol has been decided.
+                else if (eventType == ET_POSE)
+                {
+                    TCHAR dat[2];
+                    success = (*it)->readFromPipe(dat, 2, &actualBytes);
+
+                    if (!success) continue;
+
+                    unsigned short poseType = extractUnsignedShort(dat);
+
+                    evt.setEventType(myoSimEvent::pose);
+                    evt.setPose(Pose((Pose::Type) poseType));
+                }
+                else if (eventType == ET_ARM_RECOGNIZED)
+                {
+                    TCHAR dat[2];
+                    success = (*it)->readFromPipe(dat, 2, &actualBytes);
+
+                    if (!success) continue;
+                    evt.setArm((Arm) dat[0]);
+                    evt.setXDirection((XDirection) dat[1]);
+                    evt.setEventType(myoSimEvent::armRecognized);
+                }
                 else
                 {
-                    evt.setEventType(myoSimEvent::pose);
-                    // TODO: Have a proper way of dealing with this. Do it in 
-                    // a different class. Perhaps have the Myo class convert
-                    // messages to events first.
-                    if (message == "rest")
-                    {
-                        myo::Pose pose(myo::Pose::rest);
-                        evt.setPose(pose);
-                    }
-                    else if (message == "fist")
-                    {
-                        myo::Pose pose(myo::Pose::fist);
-                        evt.setPose(pose);
-                    }
-                    else if (message == "waveIn")
-                    {
-                        myo::Pose pose(myo::Pose::waveIn);
-                        evt.setPose(pose);
-                    }
-                    else if (message == "waveOut")
-                    {
-                        myo::Pose pose(myo::Pose::waveOut);
-                        evt.setPose(pose);
-                    }
-                    else if (message == "fingersSpread")
-                    {
-                        myo::Pose pose(myo::Pose::fingersSpread);
-                        evt.setPose(pose);
-                    }
-                    else if (message == "thumbToPinky")
-                    {
-                        myo::Pose pose(myo::Pose::thumbToPinky);
-                        evt.setPose(pose);
-                    }
-                    else
-                    {
-                        myo::Pose pose(myo::Pose::unknown);
-                        evt.setPose(pose);
-                    }
-                } // if (message == "DCed")
-
+                    evt.setEventType(eventTypeToEventMap[(EventType) eventType]);
+                }
+                                            
                 evt.setTimestamp(GetTickCount());
                 evt.setMyoIdentifier((*it)->getIdentifier());
 

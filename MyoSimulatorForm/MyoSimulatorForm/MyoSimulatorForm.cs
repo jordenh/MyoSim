@@ -13,12 +13,12 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using MyoSimGUI.ParsedCommands;
 
+
 namespace MyoSimGUI
 {
     public partial class MyoSimulatorForm : Form
     {
         public const char commandDelimiter = ';';
-        private NamedPipeServerStream pipeStream;
 
         /* Holds resulting binary commands which will be sorted using the time as the key */
         private Dictionary<int, byte[]> bin_command_list = new Dictionary<int, byte[]>();
@@ -35,12 +35,15 @@ namespace MyoSimGUI
             {"Unknown", "unknown"}
         };
 
+        private HubCommunicator hubCommunicator;
+
         public MyoSimulatorForm(NamedPipeServerStream pipeStream)
         {
-            this.pipeStream = pipeStream;
+            hubCommunicator = new HubCommunicator(pipeStream);
             InitializeComponent();
+            
             this.sendCommandButton.Enabled = false;
-            foreach (string key in labelToCommand.Keys) 
+            foreach (string key in labelToCommand.Keys)
             {
                 this.gestureList.Items.Add(key);
             }
@@ -49,6 +52,7 @@ namespace MyoSimGUI
         public void enableSendCommand()
         {
             this.sendCommandButton.Enabled = true;
+            CommunicationBegin();
         }
 
         private void sendCommand(string label, Dictionary<string, string> labelToCommandMap)
@@ -60,7 +64,7 @@ namespace MyoSimGUI
             }
         }
 
-        private void callMyoSim(string command)
+        private void call_myo_sim(string command)
         {
 
         }
@@ -96,7 +100,7 @@ namespace MyoSimGUI
             {
                 timestampToParsedCommands = parser.parseScript();
             }
-            catch(ArgumentException except)
+            catch (ArgumentException except)
             {
                 MessageBox.Show(except.ToString(), string.Format("File does not exist"));
                 return;
@@ -131,23 +135,38 @@ namespace MyoSimGUI
 
             System.Console.WriteLine("String to send: " + command);
             string[] words = command.Split(commandDelimiter);
-
-            foreach (string word in words)
+            try
             {
-                System.Console.WriteLine(word);
-
-                if (!pipeStream.IsConnected)
+                foreach (string word in words)
                 {
-                    System.Console.WriteLine("Failed to connect!!");
-                    return;
+                    System.Console.WriteLine(word);
+
+                    if (!hubCommunicator.isConnected())
+                    {
+                        System.Console.WriteLine("Failed to connect!!");
+                        return;
+                    }
+
+                    System.Console.WriteLine("Connected!!");
+
+                    //pipeStream.Write(Encoding.ASCII.GetBytes(word), 0, word.Length);
+
+                    ParsedCommand.Quaternion orientation = new ParsedCommand.Quaternion(0.25f, 0.5f, -0.2f, 1.4f);
+                    ParsedCommand.vector3 gyro = new ParsedCommand.vector3(0.75f, 0.33f, 0.222f);
+                    ParsedCommand.vector3 accel = new ParsedCommand.vector3(1, 2, 3);
+                    hubCommunicator.SendSyncData(orientation, gyro, accel);
+                    hubCommunicator.SendPose(HubCommunicator.Pose.FIST);
+
+                    System.Console.WriteLine("Messages Sent!!");
                 }
-
-                System.Console.WriteLine("Connected!!");
-
-                pipeStream.Write(Encoding.ASCII.GetBytes(word), 0, word.Length);
-
-                System.Console.WriteLine("Message Sent!!");
             }
+            catch (Exception error)
+            {
+                MessageBox.Show(error.ToString(), string.Format("Named pipe server disconnected, please save your commands and start the GUI and the server"));
+                this.sendCommandButton.Enabled = false;
+
+            }
+
         }
 
         private void addGestureButton_Click(object sender, EventArgs e)
@@ -157,12 +176,7 @@ namespace MyoSimGUI
 
         private void MyoSimulatorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // TODO: send a disconnect event instead once we get protocol sorted
-            string dc_signal = "DCed";
-            if (pipeStream.IsConnected)
-            {
-                pipeStream.Write(Encoding.ASCII.GetBytes(dc_signal), 0, dc_signal.Length);
-            }
+            CommunicationEnd();
             Dispose();
         }
 
@@ -204,6 +218,22 @@ namespace MyoSimGUI
             timestampToData.Add(20, fingersSpreadGesture);
 
             fileHandler.writeRecorderFile(timestampToData);
+        }
+
+        public void CommunicationBegin()
+        {
+            // Sends three messages: Paired, Connected and Arm Recognized.
+            hubCommunicator.SendPaired();
+            hubCommunicator.SendConnected();
+            // TODO: Make Arm and XDirection configurable.
+            hubCommunicator.SendArmRecognized(HubCommunicator.Arm.RIGHT, HubCommunicator.XDirection.FACING_WRIST);
+        }
+
+        public void CommunicationEnd()
+        {
+            hubCommunicator.SendArmLost();
+            hubCommunicator.SendDisconnected();
+            hubCommunicator.SendUnpaired();
         }
     }
 }
