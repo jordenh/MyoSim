@@ -38,8 +38,8 @@ namespace myoSim
         void setXDirection(XDirection xDirection);
         void setOrientation(float xOrientation, float yOrientation,
             float zOrientation, float wOrientation);
-        void setAccelerometerData(vectorIndex index, float data);
-        void setGyroscopeData(vectorIndex index, float data);
+        void setAccelerometerData(float xAccel, float yAccel, float zAccel);
+        void setGyroscopeData(float yawPerSecond, float pitchPerSecond, float rollPerSecond);
         void setPose(Pose pose);
 
         myoSimEvent getEventType() const;
@@ -53,8 +53,13 @@ namespace myoSim
         float getZOrientation() const;
         float getWOrientation() const;
 
-        float getAccelerometerData(vectorIndex index) const;
-        float getGyroscopeData(vectorIndex index) const;
+        float getAccelerometerX() const;
+        float getAccelerometerY() const;
+        float getAccelerometerZ() const;
+
+        float getGyroscopeYawPerSecond() const;
+        float getGyroscopePitchPerSecond() const;
+        float getGyroscopeRollPerSecond() const;
 
         Pose getPose() const;
         int8_t getRssi() const;
@@ -66,8 +71,8 @@ namespace myoSim
         Arm arm;
         XDirection xDirection;
         float xOrientation, yOrientation, zOrientation, wOrientation;
-        float accelerometerData[ACCELEROMETER_MAX_INDEX];
-        float gyroscopeData[GYROSCOPE_MAX_INDEX];
+        float accelX, accelY, accelZ;
+        float gyroYaw, gyroPitch, gyroRoll;
         Pose pose;
         int8_t rssi;
     };

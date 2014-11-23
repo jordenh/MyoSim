@@ -6,6 +6,12 @@
 #include <map>
 #include <cfloat>
 
+#define PIPE_COMM_HEADER_SIZE 3
+#define SYNC_DATA_NUM_BYTES 40
+#define SYNC_DATA_NUM_FLOATS 10
+#define POSE_DATA_NUM_BYTES 2
+#define ARM_RECOGNIZED_DATA_NUM_BYTES 2
+
 using namespace myoSim;
 
 std::map<EventType, myoSimEvent> Hub::eventTypeToEventMap = {
@@ -112,12 +118,12 @@ void Hub::onDeviceEvent(SimEvent simEvent)
                 simEvent.getYOrientation(), simEvent.getZOrientation(), simEvent.getWOrientation());
             listener->onOrientationData(myo, timestamp, orientation);
 
-            myo::Vector3<float> accelerometerData = myo::Vector3<float>(simEvent.getAccelerometerData(vectorIndex::first),
-                simEvent.getAccelerometerData(vectorIndex::second), simEvent.getAccelerometerData(vectorIndex::third));
+            myo::Vector3<float> accelerometerData = myo::Vector3<float>(simEvent.getAccelerometerX(),
+                simEvent.getAccelerometerY(), simEvent.getAccelerometerZ());
             listener->onAccelerometerData(myo, timestamp, accelerometerData);
 
-            myo::Vector3<float> gyroData = myo::Vector3<float>(simEvent.getGyroscopeData(vectorIndex::first),
-                simEvent.getGyroscopeData(vectorIndex::second), simEvent.getGyroscopeData(vectorIndex::third));
+            myo::Vector3<float> gyroData = myo::Vector3<float>(simEvent.getGyroscopeYawPerSecond(),
+                simEvent.getGyroscopePitchPerSecond(), simEvent.getGyroscopeRollPerSecond());
             listener->onGyroscopeData(myo, timestamp, gyroData);
             break;
         }
@@ -159,8 +165,7 @@ float Hub::extractFloat(TCHAR* bytes)
 void Hub::run(unsigned int duration_ms)
 {
     // Run for duration_ms, read from named pipe for events, form a SimEvent
-    // object based on received information, dispatch events to onDeviceEvent
-    
+    // object based on received information, dispatch events to onDeviceEvent  
     std::vector<Myo*>::iterator it;
     DWORD startTime = GetTickCount();
     while (true)
@@ -177,73 +182,67 @@ void Hub::run(unsigned int duration_ms)
             }
 
             // Read 
-            TCHAR header[3];
-            bool success = (*it)->readFromPipe(header, 3, &actualBytes);
+            TCHAR header[PIPE_COMM_HEADER_SIZE];
+            bool success = (*it)->readFromPipe(header, PIPE_COMM_HEADER_SIZE, &actualBytes);
 
             if (!success) continue;
 
             unsigned char dataSize = header[0];
             unsigned short eventType = extractUnsignedShort(&(header[1]));
 
-            if (success)
-            {                             
-                SimEvent evt;
+            SimEvent evt;
 
-                //TODO: Check that dataSize agrees with the expected sizes.
-                if (eventType == ET_SYNC_DAT)
+            //TODO: Check that dataSize agrees with the expected sizes.
+            if (eventType == ET_SYNC_DAT)
+            {
+                TCHAR dat[SYNC_DATA_NUM_BYTES];
+                success = (*it)->readFromPipe(dat, SYNC_DATA_NUM_BYTES, &actualBytes);
+
+                if (!success) continue;
+
+                float floatData[SYNC_DATA_NUM_FLOATS];
+                for (int i = 0; i < SYNC_DATA_NUM_FLOATS; i++)
                 {
-                    TCHAR dat[40];
-                    success = (*it)->readFromPipe(dat, 40, &actualBytes);
-
-                    if (!success) continue;
-
-                    float floatData[10];
-                    for (int i = 0; i < 10; i++)
-                    {
-                        floatData[i] = extractFloat(&(dat[i * 4]));
-                    }
-
-                    evt.setEventType(myoSimEvent::orientation);
-                    evt.setOrientation(floatData[0], floatData[1], floatData[2], floatData[3]);
-                    evt.setGyroscopeData(vectorIndex::first, floatData[4]);
-                    evt.setGyroscopeData(vectorIndex::second, floatData[5]);
-                    evt.setGyroscopeData(vectorIndex::third, floatData[6]);
-                    evt.setAccelerometerData(vectorIndex::first, floatData[7]);
-                    evt.setAccelerometerData(vectorIndex::second, floatData[8]);
-                    evt.setAccelerometerData(vectorIndex::third, floatData[9]);
+                    floatData[i] = extractFloat(&(dat[i * sizeof(float)]));
                 }
-                else if (eventType == ET_POSE)
-                {
-                    TCHAR dat[2];
-                    success = (*it)->readFromPipe(dat, 2, &actualBytes);
 
-                    if (!success) continue;
-
-                    unsigned short poseType = extractUnsignedShort(dat);
-
-                    evt.setEventType(myoSimEvent::pose);
-                    evt.setPose(Pose((Pose::Type) poseType));
-                }
-                else if (eventType == ET_ARM_RECOGNIZED)
-                {
-                    TCHAR dat[2];
-                    success = (*it)->readFromPipe(dat, 2, &actualBytes);
-
-                    if (!success) continue;
-                    evt.setArm((Arm) dat[0]);
-                    evt.setXDirection((XDirection) dat[1]);
-                    evt.setEventType(myoSimEvent::armRecognized);
-                }
-                else
-                {
-                    evt.setEventType(eventTypeToEventMap[(EventType) eventType]);
-                }
-                                            
-                evt.setTimestamp(GetTickCount());
-                evt.setMyoIdentifier((*it)->getIdentifier());
-
-                onDeviceEvent(evt);
+                evt.setEventType(myoSimEvent::orientation);
+                evt.setOrientation(floatData[0], floatData[1], floatData[2], floatData[3]);
+                evt.setGyroscopeData(floatData[4], floatData[5], floatData[6]);
+                evt.setAccelerometerData(floatData[7], floatData[8], floatData[9]);
+ 
             }
+            else if (eventType == ET_POSE)
+            {
+                TCHAR dat[POSE_DATA_NUM_BYTES];
+                success = (*it)->readFromPipe(dat, POSE_DATA_NUM_BYTES, &actualBytes);
+
+                if (!success) continue;
+
+                unsigned short poseType = extractUnsignedShort(dat);
+
+                evt.setEventType(myoSimEvent::pose);
+                evt.setPose(Pose((Pose::Type) poseType));
+            }
+            else if (eventType == ET_ARM_RECOGNIZED)
+            {
+                TCHAR dat[ARM_RECOGNIZED_DATA_NUM_BYTES];
+                success = (*it)->readFromPipe(dat, ARM_RECOGNIZED_DATA_NUM_BYTES, &actualBytes);
+
+                if (!success) continue;
+                evt.setArm((Arm) dat[0]);
+                evt.setXDirection((XDirection) dat[1]);
+                evt.setEventType(myoSimEvent::armRecognized);
+            }
+            else
+            {
+                evt.setEventType(eventTypeToEventMap[(EventType) eventType]);
+            }
+                                            
+            evt.setTimestamp(GetTickCount());
+            evt.setMyoIdentifier((*it)->getIdentifier());
+
+            onDeviceEvent(evt);        
         }
     }
 }

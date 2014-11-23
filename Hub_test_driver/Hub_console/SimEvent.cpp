@@ -47,14 +47,48 @@ namespace myoSim
         this->wOrientation = wOrientation;
     }
 
-    void SimEvent::setAccelerometerData(vectorIndex index, float data)
+    float SimEvent::getAccelerometerX() const
     {
-        accelerometerData[static_cast<int>(index)] = data;
+        return accelX;
     }
 
-    void SimEvent::setGyroscopeData(vectorIndex index, float data)
+    float SimEvent::getAccelerometerY() const
     {
-        gyroscopeData[static_cast<int>(index)] = data;
+        return accelY;
+    }
+
+    float SimEvent::getAccelerometerZ() const
+    {
+        return accelZ;
+    }
+
+    float SimEvent::getGyroscopeYawPerSecond() const
+    {
+        return gyroYaw;
+    }
+
+    float SimEvent::getGyroscopePitchPerSecond() const
+    {
+        return gyroPitch;
+    }
+
+    float SimEvent::getGyroscopeRollPerSecond() const
+    {
+        return gyroRoll;
+    }
+
+    void SimEvent::setAccelerometerData(float xAccel, float yAccel, float zAccel)
+    {
+        accelX = xAccel;
+        accelY = yAccel;
+        accelZ = zAccel;
+    }
+
+    void SimEvent::setGyroscopeData(float yawPerSecond, float pitchPerSecond, float rollPerSecond)
+    {
+        gyroYaw = yawPerSecond;
+        gyroPitch = pitchPerSecond;
+        gyroRoll = rollPerSecond;
     }
 
     void SimEvent::setPose(Pose pose)
@@ -105,39 +139,6 @@ namespace myoSim
     float SimEvent::getWOrientation() const
     {
         return wOrientation;
-    }
-
-    float SimEvent::getAccelerometerData(vectorIndex index) const
-    {
-
-        switch (index)
-        {
-        case vectorIndex::first:
-            return accelerometerData[0];
-            break;
-        case vectorIndex::second:
-            return accelerometerData[1];
-            break;
-        default:
-            return accelerometerData[2];
-            break;
-        }
-    }
-
-    float SimEvent::getGyroscopeData(vectorIndex index) const
-    {
-        switch (index)
-        {
-        case vectorIndex::first:
-            return gyroscopeData[0];
-            break;
-        case vectorIndex::second:
-            return gyroscopeData[1];
-            break;
-        default:
-            return gyroscopeData[2];
-            break;
-        }
     }
 
     Pose SimEvent::getPose() const
