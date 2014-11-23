@@ -35,5 +35,8 @@ TemporaryGeneratedFile*.cs
 *.cache
 *.suo
 
+*.sdf
+*.opensdf
 *Debug
+*/ipch
 !*\lib
