@@ -25,6 +25,7 @@ namespace myoSim
 
     Myo* Hub::waitForMyo(unsigned int milliseconds)
     {
+      //  Sleep(15000);
         // For now, only support one simulated myo (one-to-one connection to GUI). 
         // Look into changing this later, leave as a vector of myos.
         if (myos.size()) return NULL;
@@ -189,7 +190,7 @@ namespace myoSim
                     //based on different event type take different actions
 					if (event_type == "6")
 					{
-                        float orientation_data[10];
+                        float orientation_data[44];
                         for (int y = 0; y < data_size; y++)
                         {
                             orientation_data[y] = buffer[y + 7];
@@ -200,15 +201,15 @@ namespace myoSim
                         {
                             printf("Data: %i is %f\n", xx, (float)orientation_data[xx]);
                         }
-                        /*
-						evt.setAccelerometerData(vectorIndex::first,data);
-                        evt.setAccelerometerData(vectorIndex::second,data);
-                        evt.setAccelerometerData(vectorIndex::third,data);
-						evt.setGyroscopeData(vectorIndex::first,data);
-                        evt.setGyroscopeData(vectorIndex::second,data);
-                        evt.setGyroscopeData(vectorIndex::third,data);
-						evt.setOrientation(x,y,z,w);
-                        */
+
+                        evt.setOrientation((float)orientation_data[0], (float)orientation_data[1], (float)orientation_data[2], (float)orientation_data[3]);
+                        evt.setAccelerometerData(vectorIndex::first, (float)orientation_data[4]);
+                        evt.setAccelerometerData(vectorIndex::second, (float)orientation_data[5]);
+                        evt.setAccelerometerData(vectorIndex::third, (float)orientation_data[6]);
+                        evt.setGyroscopeData(vectorIndex::first, (float)orientation_data[7]);
+                        evt.setGyroscopeData(vectorIndex::second, (float)orientation_data[8]);
+                        evt.setGyroscopeData(vectorIndex::third, (float)orientation_data[9]);
+                       
 					}
 					else if (event_type == "7")
 					{

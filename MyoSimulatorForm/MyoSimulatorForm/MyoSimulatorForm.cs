@@ -35,7 +35,7 @@ namespace MyoSimGUI
         {
             this.pipeStream = pipeStream;
             InitializeComponent();
-           // ComHandShake();
+            ComHandShake(0);
             this.sendCommandButton.Enabled = false;
             foreach (string key in labelToCommand.Keys)
             {
@@ -158,6 +158,10 @@ namespace MyoSimGUI
                     test_orientation[1] = 0x00;
                     test_orientation[2] = 0x00;
                     test_orientation[3] = 0x19;
+                    for(int x = 0; x< Encoding.ASCII.GetBytes("xx").Length; x++)
+                    {
+
+                    }
                     test_orientation[4] = (byte)10.1;
                     test_orientation[5] = (byte)10.1;
                     test_orientation[6] = (byte)10.1;
@@ -242,48 +246,87 @@ namespace MyoSimGUI
        
 
         //This function sends the three handshake calls to the myo_hub 
-        public void ComHandShake()
+        //if status = 0, start connection, if status = 1 end connection
+        public void ComHandShake( int status)
         {
-           	// libmyo_event_paired 		= 0, ///< Successfully paired with a Myo.
-            // libmyo_event_connected 		= 2, ///< A Myo has successfully connected.
-            // libmyo_event_arm_recognized = 4, ///< A Myo has recognized that it is now on an arm.
+            /*
+           		libmyo_event_paired 		= 0, ///< Successfully paired with a Myo.
+                libmyo_event_unpaired 		= 1, ///< Successfully unpaired from a Myo.
+                libmyo_event_connected 		= 2, ///< A Myo has successfully connected.
+                libmyo_event_disconnected 	= 3, ///< A Myo has been disconnected.
+                libmyo_event_arm_recognized = 4, ///< A Myo has recognized that it is now on an arm.
+                libmyo_event_arm_lost		= 5, ///< A Myo has been moved or removed from the arm.
+            
+             */
+            
+            byte[] data = new byte[17];
+            data[0] = (byte) 0; //size of the data is zero(only event type)
 
-            byte[] data = new byte[47];
-           
-
-            data[0] = Encoding.ASCII.GetBytes("0")[0];
-     
-            int count = 0;
-            string event_type = "0";
-           
-            int pos;
-            while (count < 3)
+            if (status == 0)
             {
-                pos = 1;
-                for (int y = 0; y < Encoding.ASCII.GetBytes(event_type).Length; y++)
+                int count = 0;
+                string event_type = "0";
+
+                
+                while (count < 3)
                 {
-                    data[pos] = Encoding.ASCII.GetBytes(event_type)[y];
-                    pos++;
+                    
+                    for (int y = 0; y < Encoding.ASCII.GetBytes(event_type).Length; y++)
+                    {
+                        data[y+1] = Encoding.ASCII.GetBytes(event_type)[y];
+                        
+                    }
+
+                    pipeStream.Write(data, 0, data.Length);
+                    count++;
+
+                    if (count == 1)
+                    {
+                        event_type = "2";
+                    }
+                    else if (count == 2)
+                    {
+                        event_type = "4";
+                    }
+                    else
+                    {
+                        count = 3;
+                    }
                 }
 
-                pipeStream.Write(data, 0, data.Length);
-                count++;
-                
-                if(count == 1)
+            }else
+            {
+                int count = 0;
+                string event_type = "1";
+
+
+                while (count < 3)
                 {
-                    event_type = "2";
-                }
-                else if(count == 2)
-                {
-                    event_type = "4";
-                }
-                else
-                {
-                    count = 3;
+
+                    for (int y = 0; y < Encoding.ASCII.GetBytes(event_type).Length; y++)
+                    {
+                        data[y + 1] = Encoding.ASCII.GetBytes(event_type)[y];
+
+                    }
+
+                    pipeStream.Write(data, 0, data.Length);
+                    count++;
+
+                    if (count == 1)
+                    {
+                        event_type = "3";
+                    }
+                    else if (count == 2)
+                    {
+                        event_type = "5";
+                    }
+                    else
+                    {
+                        count = 3;
+                    }
                 }
             }
-
-                                
+          
 
         }
     }
