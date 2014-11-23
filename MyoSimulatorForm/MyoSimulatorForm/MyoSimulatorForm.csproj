@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MyoSharp">
+      <HintPath>lib\MyoSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,10 +48,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandRunner.cs" />
     <Compile Include="Multimap.cs" />
+    <Compile Include="MyoRecorder.cs" />
     <Compile Include="MyoScriptParser.cs" />
     <Compile Include="ParsedCommands\AsyncCommand.cs" />
-    <Compile Include="ParsedCommands\DelayCommand.cs" />
     <Compile Include="ParsedCommands\ExpectCommand.cs" />
     <Compile Include="ParsedCommands\MoveCommand.cs" />
     <Compile Include="ParsedCommands\SetAccelerationCommand.cs" />

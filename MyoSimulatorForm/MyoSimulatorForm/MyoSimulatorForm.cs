@@ -111,7 +111,7 @@ namespace MyoSimGUI
             {
                 uint time = entry.Key;
                 List<ParsedCommand> commands = entry.Value;
-
+              
                 foreach (ParsedCommand cmd in commands)
                 {
                     string output = String.Format("Time {0}: {1}", time, cmd);
