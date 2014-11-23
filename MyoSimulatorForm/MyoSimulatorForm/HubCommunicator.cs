@@ -56,6 +56,40 @@ namespace MyoSimGUI
             this.pipeStream = pipeStream;
         }
 
+        public static Pose asyncCommandCodeToPose(ParsedCommand.AsyncCommandCode commandCode)
+        {
+            Pose pose;
+            switch (commandCode)
+            {
+                case ParsedCommand.AsyncCommandCode.REST:
+                    pose = Pose.REST;
+                    break;
+                case ParsedCommand.AsyncCommandCode.FIST:
+                    pose = Pose.FIST;
+                    break;
+                case ParsedCommand.AsyncCommandCode.WAVE_IN:
+                    pose = Pose.WAVE_IN;
+                    break;
+                case ParsedCommand.AsyncCommandCode.WAVE_OUT:
+                    pose = Pose.WAVE_OUT;
+                    break;
+                case ParsedCommand.AsyncCommandCode.FINGERS_SPREAD:
+                    pose = Pose.FINGERS_SPREAD;
+                    break;
+                case ParsedCommand.AsyncCommandCode.RESERVED1:
+                    pose = Pose.RESERVED1;
+                    break;
+                case ParsedCommand.AsyncCommandCode.THUMB_TO_PINKY:
+                    pose = Pose.THUMB_TO_PINKY;
+                    break;
+                default:
+                    pose = Pose.UNKNOWN;
+                    break;
+            }
+
+            return pose;
+        }
+
         public void SendPaired()
         {
             SendSimpleCommand(EventType.PAIRED);
@@ -142,7 +176,7 @@ namespace MyoSimGUI
             return pipeStream.IsConnected;
         }
 
-        private void SendSimpleCommand(EventType type)
+        public void SendSimpleCommand(EventType type)
         {
             MemoryStream s = new MemoryStream();
             
@@ -157,7 +191,10 @@ namespace MyoSimGUI
 
         private void Send(byte[] data)
         {
-            pipeStream.Write(data, 0, data.Length);
+            if (isConnected())
+            {
+                pipeStream.Write(data, 0, data.Length);
+            }
         }
     }
 }

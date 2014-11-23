@@ -43,7 +43,7 @@ public:
     void onDisconnect(Myo* myo, uint64_t timestamp)
     {
         std::string temp;
-        std::cout << "unknown received" << std::endl;
+        std::cout << "On Disconnect!" << std::endl;
         isDisconnected = true;
         std::cin >> temp;
 
@@ -52,17 +52,7 @@ public:
     // making a fist, or not making a fist anymore.
     void onPose(Myo* myo, uint64_t timestamp, Pose pose)
     {
-        if (currentPose.type() != pose.type())
-        {
-            std::string poseString = pose.toString();
-            std::cout << "Current pose: " << poseString << std::endl;
-        }
-
-        currentPose = pose;
-        // Vibrate the Myo whenever we've detected that the user has made a fist.
-        if (pose == Pose::fist) {
-            myo->vibrate(Myo::vibrationMedium);
-        }
+        std::cout << "Pose: " << pose.toString() << " *****************************************************************" << std::endl;
     }
 
     void onOrientationData(Myo* myo, uint64_t timestamp, const Quaternion<float>& rotation) 

@@ -18,28 +18,32 @@ namespace MyoSimGUI
 {
     public partial class MyoSimulatorForm : Form
     {
-        public const char commandDelimiter = ';';
+        public const string commandDelimiter = ", ";
 
         /* Holds resulting binary commands which will be sorted using the time as the key */
         private Dictionary<int, byte[]> bin_command_list = new Dictionary<int, byte[]>();
 
-        static Dictionary<string, string> labelToCommand = new Dictionary<string, string>
+        static Dictionary<string, HubCommunicator.Pose> labelToCommand = new Dictionary<string, HubCommunicator.Pose>
         {
-            {"Rest", "rest"},
-            {"Fist", "fist"},
-            {"Wave In", "waveIn"},
-            {"Wave Out", "waveOut"},
-            {"Fingers Spread", "fingersSpread"},
-            {"Reserved 1", "reserved1"},
-            {"Thumb to Pinky", "thumbToPinky"},
-            {"Unknown", "unknown"}
+            {"Rest", HubCommunicator.Pose.REST},
+            {"Fist", HubCommunicator.Pose.FIST},
+            {"Wave In", HubCommunicator.Pose.WAVE_IN},
+            {"Wave Out", HubCommunicator.Pose.WAVE_OUT},
+            {"Fingers Spread", HubCommunicator.Pose.FINGERS_SPREAD},
+            {"Reserved 1", HubCommunicator.Pose.RESERVED1},
+            {"Thumb to Pinky", HubCommunicator.Pose.THUMB_TO_PINKY},
+            {"Unknown", HubCommunicator.Pose.UNKNOWN}
         };
 
         private HubCommunicator hubCommunicator;
+        private List<HubCommunicator.Pose> poseList;
+        private CommandRunner commandRunner;
 
         public MyoSimulatorForm(NamedPipeServerStream pipeStream)
         {
             hubCommunicator = new HubCommunicator(pipeStream);
+            poseList = new List<HubCommunicator.Pose>();
+            commandRunner = new CommandRunner(hubCommunicator);
             InitializeComponent();
             
             this.sendCommandButton.Enabled = false;
@@ -55,12 +59,13 @@ namespace MyoSimGUI
             CommunicationBegin();
         }
 
-        private void sendCommand(string label, Dictionary<string, string> labelToCommandMap)
+        private void sendCommand(string label, Dictionary<string, HubCommunicator.Pose> labelToCommandMap)
         {
-            string command;
+            HubCommunicator.Pose command;
             if (labelToCommandMap.TryGetValue(label, out command))
             {
-                commandChain.Text = string.Concat(commandChain.Text, command + commandDelimiter);
+                poseList.Add(command);
+                commandChain.Text = string.Concat(commandChain.Text, label + commandDelimiter);
             }
         }
 
@@ -109,37 +114,20 @@ namespace MyoSimGUI
             {
                 MessageBox.Show(except.ToString(), string.Format("File not found"));
                 return;
-            }   
-    
-            foreach (KeyValuePair<uint, List<ParsedCommand>> entry in timestampToParsedCommands.getUnderlyingDict())
-            {
-                uint time = entry.Key;
-                List<ParsedCommand> commands = entry.Value;
-              
-                foreach (ParsedCommand cmd in commands)
-                {
-                    string output = String.Format("Time {0}: {1}", time, cmd);
-                    System.Console.WriteLine(output);
-                }
             }
+
+            commandRunner.runCommands(timestampToParsedCommands);
         }
 
         private void sendCommandButton_Click(object sender, EventArgs e)
         {
             string command = commandChain.Text;
 
-            if (command[command.Length - 1] == commandDelimiter)
-            {
-                command = command.Remove(command.Length - 1);
-            }
-
-            System.Console.WriteLine("String to send: " + command);
-            string[] words = command.Split(commandDelimiter);
             try
             {
-                foreach (string word in words)
+                foreach (HubCommunicator.Pose pose in poseList)
                 {
-                    System.Console.WriteLine(word);
+                    System.Console.WriteLine("Pose to send: " + pose);
 
                     if (!hubCommunicator.isConnected())
                     {
@@ -147,17 +135,7 @@ namespace MyoSimGUI
                         return;
                     }
 
-                    System.Console.WriteLine("Connected!!");
-
-                    //pipeStream.Write(Encoding.ASCII.GetBytes(word), 0, word.Length);
-
-                    ParsedCommand.Quaternion orientation = new ParsedCommand.Quaternion(0.25f, 0.5f, -0.2f, 1.4f);
-                    ParsedCommand.vector3 gyro = new ParsedCommand.vector3(0.75f, 0.33f, 0.222f);
-                    ParsedCommand.vector3 accel = new ParsedCommand.vector3(1, 2, 3);
-                    hubCommunicator.SendSyncData(orientation, gyro, accel);
-                    hubCommunicator.SendPose(HubCommunicator.Pose.FIST);
-
-                    System.Console.WriteLine("Messages Sent!!");
+                    hubCommunicator.SendPose(pose);
                 }
             }
             catch (Exception error)
@@ -176,7 +154,6 @@ namespace MyoSimGUI
 
         private void MyoSimulatorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            CommunicationEnd();
             Dispose();
         }
 
@@ -185,22 +162,7 @@ namespace MyoSimGUI
             RecorderFileHandler fileHandler = new RecorderFileHandler("recorded_binary_test.rbm");
 
             Multimap<uint, RecorderFileHandler.RecordedData> timestampToData = fileHandler.readRecorderFile();
-
-            foreach (KeyValuePair<uint, List<RecorderFileHandler.RecordedData>> entry in timestampToData.getUnderlyingDict())
-            {
-                uint time = entry.Key;
-                RecorderFileHandler.RecordedData command = entry.Value[0];
-
-                if (command.type == RecorderFileHandler.RecordedDataType.ASYNC)
-                {
-                    System.Console.WriteLine(String.Format("Time {0}: Async Command =  {1}", time, command.asyncCommand));
-                }
-                else
-                {
-                    System.Console.WriteLine(String.Format("Time {0}: Orientation Quat = {1}, Gyro Dat = {2}, Accel Data = {3}", time,
-                        command.orientationQuat, command.gyroDat, command.accelDat));
-                }
-            }
+            commandRunner.runCommands(timestampToData);
         }
 
         private void writeTestButton_Click(object sender, EventArgs e)
