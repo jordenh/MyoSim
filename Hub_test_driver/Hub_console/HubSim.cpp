@@ -210,7 +210,7 @@ void Hub::run(unsigned int duration_ms)
                 evt.setOrientation(floatData[0], floatData[1], floatData[2], floatData[3]);
                 evt.setGyroscopeData(floatData[4], floatData[5], floatData[6]);
                 evt.setAccelerometerData(floatData[7], floatData[8], floatData[9]);
- 
+
             }
             else if (eventType == ET_POSE)
             {

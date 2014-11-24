@@ -89,12 +89,20 @@ namespace MyoSimGUI
 
             if (parseSuccess)
             {
+                gyroData.x = degreesToRadians(gyroData.x);
+                gyroData.y = degreesToRadians(gyroData.y);
+                gyroData.z = degreesToRadians(gyroData.z);
                 ParsedCommand parsedCommand = new MoveCommand(gyroData, duration);
                 timestampToCommandDict.Add(currentTime, parsedCommand);
                 currentTime += duration;
             }
 
             return parseSuccess;
+        }
+
+        private float degreesToRadians(float angle)
+        {
+            return (float) (Math.PI / 180.0) * angle;
         }
 
         private bool parseSetAccelEvent(string[] command, uint currentTime, Multimap<uint, ParsedCommand> timestampToCommandDict)
@@ -150,7 +158,7 @@ namespace MyoSimGUI
 
             if (command.Length <= 2 || !uint.TryParse(command[2], out relativeSetTime))
             {
-                // If the user does not supply a time to set the acceleration,
+                // If the user does not supply a time to set the async event,
                 // set it at the current time.
                 relativeSetTime = 0;
             }

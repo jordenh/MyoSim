@@ -75,12 +75,37 @@ namespace MyoSimGUI
             runCommands(setTimeToRecordedData(timeToParsedCommand));
         }
 
+        private uint getMaxTime(List<uint> timeList, Multimap<uint, ParsedCommand> timeToParsedCommand)
+        {
+            uint maxTime = 0;
+
+            foreach (uint time in timeList)
+            {
+                List<ParsedCommand> commands = timeToParsedCommand[time];
+
+                foreach (ParsedCommand command in commands)
+                {
+                    uint currTime = time;
+                    if (command.getType() == ParsedCommand.CommandType.MOVE)
+                    {
+                        currTime += ((MoveCommand)command).getDuration();
+                    }
+
+                    if (currTime > maxTime)
+                    {
+                        maxTime = currTime;
+                    }
+                }
+            }
+
+            return maxTime;
+        }
+
         private Multimap<uint, RecorderFileHandler.RecordedData> setTimeToRecordedData(Multimap<uint, ParsedCommand> timeToParsedCommand)
         {
             Multimap<uint, RecorderFileHandler.RecordedData> timeToRecordedData = new Multimap<uint, RecorderFileHandler.RecordedData>();
             List<uint> timeList = timeToParsedCommand.getUnderlyingDict().Keys.ToList();
-            timeList.Sort();
-            uint maxTime = timeList.Last();
+            uint maxTime = getMaxTime(timeList, timeToParsedCommand);
             ParsedCommand.vector3 currentOrientation = new ParsedCommand.vector3(0, 0, 0);
             ParsedCommand.vector3 lastMoveDelta = new ParsedCommand.vector3(0, 0, 0);
             ParsedCommand.vector3 currentAcceleration = new ParsedCommand.vector3(0, 0, 0);

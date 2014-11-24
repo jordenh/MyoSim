@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         Hub hub("com.example.hello-myo");
         std::cout << "Attempting to find a Myo..." << std::endl;
 
-        Myo* myo = hub.waitForMyo(1000);
+        Myo* myo = hub.waitForMyo(10000);
        
         if (!myo) {
 

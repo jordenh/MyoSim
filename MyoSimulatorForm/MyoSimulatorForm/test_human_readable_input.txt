@@ -1,7 +1,7 @@
-async 8 1000
-move 5 -5.3 10.6 2000
-async fist 100
-set_accel 2.3 -1 4
-move -10 15 4 500
-delay 50
-expect vibrate 50
+async thumb_to_pinky
+delay 200
+async wave_in
+delay 200
+async wave_out
+delay 200
+move 30 35 0 1000
