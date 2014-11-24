@@ -29,15 +29,20 @@
         private void InitializeComponent()
         {
             this.sendCommandButton = new System.Windows.Forms.Button();
-            this.saveButton = new System.Windows.Forms.Button();
-            this.saveFilename = new System.Windows.Forms.TextBox();
+            this.scriptPath = new System.Windows.Forms.TextBox();
             this.commandChain = new System.Windows.Forms.TextBox();
-            this.loadFileButton = new System.Windows.Forms.Button();
             this.gestureLabel = new System.Windows.Forms.Label();
             this.addGestureButton = new System.Windows.Forms.Button();
             this.gestureList = new System.Windows.Forms.ListBox();
-            this.readTestButton = new System.Windows.Forms.Button();
-            this.writeTestButton = new System.Windows.Forms.Button();
+            this.menu = new System.Windows.Forms.MenuStrip();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recorderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.startRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.playRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.runScriptButton = new System.Windows.Forms.Button();
+            this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
             // sendCommandButton
@@ -50,22 +55,13 @@
             this.sendCommandButton.UseVisualStyleBackColor = true;
             this.sendCommandButton.Click += new System.EventHandler(this.sendCommandButton_Click);
             // 
-            // saveButton
+            // scriptPath
             // 
-            this.saveButton.Location = new System.Drawing.Point(430, 243);
-            this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(75, 23);
-            this.saveButton.TabIndex = 10;
-            this.saveButton.Text = "Save";
-            this.saveButton.UseVisualStyleBackColor = true;
-            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
-            // 
-            // saveFilename
-            // 
-            this.saveFilename.Location = new System.Drawing.Point(12, 245);
-            this.saveFilename.Name = "saveFilename";
-            this.saveFilename.Size = new System.Drawing.Size(382, 20);
-            this.saveFilename.TabIndex = 11;
+            this.scriptPath.Location = new System.Drawing.Point(12, 245);
+            this.scriptPath.Name = "scriptPath";
+            this.scriptPath.ReadOnly = true;
+            this.scriptPath.Size = new System.Drawing.Size(382, 20);
+            this.scriptPath.TabIndex = 11;
             // 
             // commandChain
             // 
@@ -76,20 +72,10 @@
             this.commandChain.TabIndex = 0;
             this.commandChain.Tag = "";
             // 
-            // loadFileButton
-            // 
-            this.loadFileButton.Location = new System.Drawing.Point(430, 214);
-            this.loadFileButton.Name = "loadFileButton";
-            this.loadFileButton.Size = new System.Drawing.Size(75, 23);
-            this.loadFileButton.TabIndex = 12;
-            this.loadFileButton.Text = "Load";
-            this.loadFileButton.UseVisualStyleBackColor = true;
-            this.loadFileButton.Click += new System.EventHandler(this.loadFileButton_Click);
-            // 
             // gestureLabel
             // 
             this.gestureLabel.AutoSize = true;
-            this.gestureLabel.Location = new System.Drawing.Point(12, 19);
+            this.gestureLabel.Location = new System.Drawing.Point(12, 42);
             this.gestureLabel.Name = "gestureLabel";
             this.gestureLabel.Size = new System.Drawing.Size(77, 13);
             this.gestureLabel.TabIndex = 15;
@@ -97,7 +83,7 @@
             // 
             // addGestureButton
             // 
-            this.addGestureButton.Location = new System.Drawing.Point(141, 83);
+            this.addGestureButton.Location = new System.Drawing.Point(12, 185);
             this.addGestureButton.Name = "addGestureButton";
             this.addGestureButton.Size = new System.Drawing.Size(75, 23);
             this.addGestureButton.TabIndex = 16;
@@ -108,49 +94,97 @@
             // gestureList
             // 
             this.gestureList.FormattingEnabled = true;
-            this.gestureList.Location = new System.Drawing.Point(15, 35);
+            this.gestureList.Location = new System.Drawing.Point(12, 58);
             this.gestureList.Name = "gestureList";
             this.gestureList.Size = new System.Drawing.Size(120, 121);
             this.gestureList.TabIndex = 17;
             // 
-            // readTestButton
+            // menu
             // 
-            this.readTestButton.Location = new System.Drawing.Point(430, 185);
-            this.readTestButton.Name = "readTestButton";
-            this.readTestButton.Size = new System.Drawing.Size(75, 23);
-            this.readTestButton.TabIndex = 18;
-            this.readTestButton.Text = "Read Test";
-            this.readTestButton.UseVisualStyleBackColor = true;
-            this.readTestButton.Click += new System.EventHandler(this.readTestButton_Click);
+            this.menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem,
+            this.recorderToolStripMenuItem});
+            this.menu.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
+            this.menu.Location = new System.Drawing.Point(0, 0);
+            this.menu.Name = "menu";
+            this.menu.Size = new System.Drawing.Size(520, 24);
+            this.menu.TabIndex = 20;
+            this.menu.Text = "menuStrip1";
             // 
-            // writeTestButton
+            // fileToolStripMenuItem
             // 
-            this.writeTestButton.Location = new System.Drawing.Point(430, 156);
-            this.writeTestButton.Name = "writeTestButton";
-            this.writeTestButton.Size = new System.Drawing.Size(75, 23);
-            this.writeTestButton.TabIndex = 19;
-            this.writeTestButton.Text = "Write Test";
-            this.writeTestButton.UseVisualStyleBackColor = true;
-            this.writeTestButton.Click += new System.EventHandler(this.writeTestButton_Click);
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loadScriptToolStripMenuItem,
+            this.saveScriptToolStripMenuItem});
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Text = "File";
+            // 
+            // loadScriptToolStripMenuItem
+            // 
+            this.loadScriptToolStripMenuItem.Name = "loadScriptToolStripMenuItem";
+            this.loadScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.loadScriptToolStripMenuItem.Text = "Load Script";
+            this.loadScriptToolStripMenuItem.Click += new System.EventHandler(this.loadScriptToolStripMenuItem_Click);
+            // 
+            // saveScriptToolStripMenuItem
+            // 
+            this.saveScriptToolStripMenuItem.Name = "saveScriptToolStripMenuItem";
+            this.saveScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveScriptToolStripMenuItem.Text = "Save Script";
+            // 
+            // recorderToolStripMenuItem
+            // 
+            this.recorderToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.startRecordingToolStripMenuItem,
+            this.playRecordingToolStripMenuItem});
+            this.recorderToolStripMenuItem.Name = "recorderToolStripMenuItem";
+            this.recorderToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
+            this.recorderToolStripMenuItem.Text = "Recorder";
+            // 
+            // startRecordingToolStripMenuItem
+            // 
+            this.startRecordingToolStripMenuItem.Name = "startRecordingToolStripMenuItem";
+            this.startRecordingToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.startRecordingToolStripMenuItem.Text = "Start Recording";
+            this.startRecordingToolStripMenuItem.Click += new System.EventHandler(this.startRecordingToolStripMenuItem_Click);
+            // 
+            // playRecordingToolStripMenuItem
+            // 
+            this.playRecordingToolStripMenuItem.Name = "playRecordingToolStripMenuItem";
+            this.playRecordingToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.playRecordingToolStripMenuItem.Text = "Play Recording";
+            this.playRecordingToolStripMenuItem.Click += new System.EventHandler(this.playRecordingToolStripMenuItem_Click);
+            // 
+            // runScriptButton
+            // 
+            this.runScriptButton.Location = new System.Drawing.Point(430, 245);
+            this.runScriptButton.Name = "runScriptButton";
+            this.runScriptButton.Size = new System.Drawing.Size(75, 23);
+            this.runScriptButton.TabIndex = 21;
+            this.runScriptButton.Text = "Run Script";
+            this.runScriptButton.UseVisualStyleBackColor = true;
+            this.runScriptButton.Click += new System.EventHandler(this.runScriptButton_Click);
             // 
             // MyoSimulatorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(520, 307);
-            this.Controls.Add(this.writeTestButton);
-            this.Controls.Add(this.readTestButton);
+            this.Controls.Add(this.runScriptButton);
             this.Controls.Add(this.gestureList);
             this.Controls.Add(this.addGestureButton);
             this.Controls.Add(this.gestureLabel);
-            this.Controls.Add(this.loadFileButton);
-            this.Controls.Add(this.saveFilename);
-            this.Controls.Add(this.saveButton);
+            this.Controls.Add(this.scriptPath);
             this.Controls.Add(this.sendCommandButton);
             this.Controls.Add(this.commandChain);
+            this.Controls.Add(this.menu);
+            this.MainMenuStrip = this.menu;
             this.Name = "MyoSimulatorForm";
             this.Text = "Myo Simulator";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MyoSimulatorForm_FormClosing);
+            this.menu.ResumeLayout(false);
+            this.menu.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -159,15 +193,19 @@
         #endregion
 
         private System.Windows.Forms.Button sendCommandButton;
-        private System.Windows.Forms.Button saveButton;
-        private System.Windows.Forms.TextBox saveFilename;
+        private System.Windows.Forms.TextBox scriptPath;
         private System.Windows.Forms.TextBox commandChain;
-        private System.Windows.Forms.Button loadFileButton;
         private System.Windows.Forms.Label gestureLabel;
         private System.Windows.Forms.Button addGestureButton;
         private System.Windows.Forms.ListBox gestureList;
-        private System.Windows.Forms.Button readTestButton;
-        private System.Windows.Forms.Button writeTestButton;
+        private System.Windows.Forms.MenuStrip menu;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadScriptToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveScriptToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem recorderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem startRecordingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem playRecordingToolStripMenuItem;
+        private System.Windows.Forms.Button runScriptButton;
 
     }
 }
