@@ -173,27 +173,6 @@ namespace MyoSimGUI
             return dialogResult.getResult();
         }
 
-        public class OpenFileDialogResult
-        {
-            private OpenFileDialog openFileDialog;
-            private DialogResult result;
-
-            public OpenFileDialogResult(OpenFileDialog dialog)
-            {
-                openFileDialog = dialog;
-            }
-
-            public DialogResult getResult()
-            {
-                return result;
-            }
-
-            public void threadShowDialog()
-            {
-                result = openFileDialog.ShowDialog();
-            }
-        }
-
         private void startRecordingToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // TODO: Add the recording feature.
@@ -239,6 +218,27 @@ namespace MyoSimGUI
                 }
 
                 commandRunner.runCommands(timestampToParsedCommands);
+            }
+        }
+
+        public class OpenFileDialogResult
+        {
+            private OpenFileDialog openFileDialog;
+            private DialogResult result;
+
+            public OpenFileDialogResult(OpenFileDialog dialog)
+            {
+                openFileDialog = dialog;
+            }
+
+            public DialogResult getResult()
+            {
+                return result;
+            }
+
+            public void threadShowDialog()
+            {
+                result = openFileDialog.ShowDialog();
             }
         }
     }
