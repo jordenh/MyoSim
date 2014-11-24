@@ -4,4 +4,5 @@ async wave_in
 delay 200
 async wave_out
 delay 200
-move 30 35 0 1000
+move 30 35 35 10
+move 0 0 0 10
