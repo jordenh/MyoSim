@@ -24,10 +24,14 @@ namespace MyoSimGUI
             List<uint> timeList = timeToRecordedData.getUnderlyingDict().Keys.ToList();
             timeList.Sort();
 
-            for (int i = 0; i < timeList.Count - 1; i++)
+            for (int i = 0; i < timeList.Count; i++)
             {
                 uint time = timeList[i];
-                uint delay = timeList[i + 1] - timeList[i];
+                uint delay = 0;
+                if (i < timeList.Count - 1)
+                { 
+                    delay = timeList[i + 1] - timeList[i];
+                }
 
                 List<RecorderFileHandler.RecordedData> recordedDataList = timeToRecordedData[time];
                 foreach (RecorderFileHandler.RecordedData recordedData in recordedDataList)
@@ -66,7 +70,10 @@ namespace MyoSimGUI
                     }
                 }
 
-                Thread.Sleep((int) delay);
+                if (delay > 0)
+                {
+                    Thread.Sleep((int)delay);
+                }
             }
         }
 
@@ -157,7 +164,8 @@ namespace MyoSimGUI
                         currentOrientation.z = (((float)lastMoveDelta.z) / lastDuration) * 10 + currentOrientation.z;
                     }
 
-                    ParsedCommand.Quaternion newOrientation = getQuatFromAngles(currentOrientation);
+                    ParsedCommand.vector3 convertedToMyo = new ParsedCommand.vector3(currentOrientation.z, currentOrientation.y, currentOrientation.x);
+                    ParsedCommand.Quaternion newOrientation = getQuatFromAngles(convertedToMyo);
                     RecorderFileHandler.RecordedData orientationDat = new RecorderFileHandler.RecordedData(newOrientation,
                         currentGyro, currentAcceleration);
                     timeToRecordedData.Add(time, orientationDat);
@@ -196,16 +204,16 @@ namespace MyoSimGUI
             return timeToRecordedData;
         }
 
-        private ParsedCommand.Quaternion getQuatFromAngles(ParsedCommand.vector3 yawPitchRoll)
+        private ParsedCommand.Quaternion getQuatFromAngles(ParsedCommand.vector3 rollPitchYaw)
         {
             ParsedCommand.Quaternion orientation;
-            float cyaw = (float) Math.Cos(yawPitchRoll.x / 2.0);
-            float cpitch = (float) Math.Cos(yawPitchRoll.y / 2.0);
-            float croll = (float) Math.Cos(yawPitchRoll.z / 2.0);
+            float cyaw = (float)Math.Cos(rollPitchYaw.x / 2.0);
+            float cpitch = (float)Math.Cos(rollPitchYaw.y / 2.0);
+            float croll = (float)Math.Cos(rollPitchYaw.z / 2.0);
 
-            float syaw = (float) Math.Sin(yawPitchRoll.x / 2.0);
-            float spitch = (float) Math.Sin(yawPitchRoll.y / 2.0);
-            float sroll = (float) Math.Sin(yawPitchRoll.z / 2.0);
+            float syaw = (float)Math.Sin(rollPitchYaw.x / 2.0);
+            float spitch = (float)Math.Sin(rollPitchYaw.y / 2.0);
+            float sroll = (float)Math.Sin(rollPitchYaw.z / 2.0);
 
             orientation.x = cyaw * cpitch * croll + syaw * spitch * sroll;
             orientation.y = cyaw * cpitch * sroll - syaw * spitch * croll;

@@ -56,7 +56,6 @@ namespace MyoSimGUI
         public void enableSendCommand()
         {
             this.sendCommandButton.Enabled = true;
-            CommunicationBegin();
         }
 
         private void sendCommand(string label, Dictionary<string, HubCommunicator.Pose> labelToCommandMap)
