@@ -10,7 +10,7 @@ namespace MyoSimGUI
 {
     class CommandRunner
     {
-        private const uint ORIENTATION_DELAY = 10;
+        private const uint ORIENTATION_DELAY = 20;
 
         private HubCommunicator hubCommunicator;
 
@@ -118,8 +118,8 @@ namespace MyoSimGUI
             ParsedCommand.vector3 currentAcceleration = new ParsedCommand.vector3(0, 0, 0);
             ParsedCommand.vector3 currentGyro = new ParsedCommand.vector3(0, 0, 0);
 
-            // Add multiples of 10 to the time list.
-            for (uint i = 0; i <= maxTime; i+=10)
+            // Add multiples of ORIENTATION_DELAY to the time list.
+            for (uint i = 0; i <= maxTime; i += ORIENTATION_DELAY)
             {
                 timeList.Add(i);
             }
@@ -155,13 +155,13 @@ namespace MyoSimGUI
                     }
                 }
 
-                if (time % 10 == 0)
+                if (time % ORIENTATION_DELAY == 0)
                 {
                     if (time - lastMoveTime <= lastDuration && lastDuration != 0)
                     {
-                        currentOrientation.x = (((float)lastMoveDelta.x) / lastDuration) * 10 + currentOrientation.x;
-                        currentOrientation.y = (((float)lastMoveDelta.y) / lastDuration) * 10 + currentOrientation.y;
-                        currentOrientation.z = (((float)lastMoveDelta.z) / lastDuration) * 10 + currentOrientation.z;
+                        currentOrientation.x = (((float)lastMoveDelta.x) / lastDuration) * ORIENTATION_DELAY + currentOrientation.x;
+                        currentOrientation.y = (((float)lastMoveDelta.y) / lastDuration) * ORIENTATION_DELAY + currentOrientation.y;
+                        currentOrientation.z = (((float)lastMoveDelta.z) / lastDuration) * ORIENTATION_DELAY + currentOrientation.z;
                     }
 
                     ParsedCommand.vector3 convertedToMyo = new ParsedCommand.vector3(currentOrientation.z, currentOrientation.y, currentOrientation.x);

@@ -8,16 +8,16 @@ async wave_in
 delay 200
 async wave_out
 delay 200
-move 50 0 0 1000
-delay 2000
-move -50 0 0 1000
-move 0 50 0 1000
-delay 2000
-move 0 -50 0 1000
-move -50 0 0 1000
-delay 2000
-move 50 0 0 1000
-move 0 -50 0 1000
-delay 2000
+move 40 0 0 1000
+delay 1500
+move -40 0 0 1000
+move 0 40 0 1000
+delay 1500
+move 0 -40 0 1000
+move -40 0 0 1000
+delay 1500
+move 40 0 0 1000
+move 0 -40 0 1000
+delay 1500
 async thumb_to_pinky
 delay 100
