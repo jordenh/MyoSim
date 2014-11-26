@@ -19,6 +19,8 @@ namespace MyoSimGUI
     public partial class MyoSimulatorForm : Form
     {
         public const string commandDelimiter = ", ";
+        public const string stopRecordingLabel = "Stop Recording";
+        public const string startRecordingLabel = "Start Recording";
 
         /* Holds resulting binary commands which will be sorted using the time as the key */
         private Dictionary<int, byte[]> bin_command_list = new Dictionary<int, byte[]>();
@@ -181,38 +183,27 @@ namespace MyoSimGUI
             if (!currentlyRecording)
             {
                 currentlyRecording = true;
-                startRecordingToolStripMenuItem.Text = "Stop Recording";
+                startRecordingToolStripMenuItem.Text = stopRecordingLabel;
                 recorder = new MyoRecorder();
                 recorder.Record();
+                System.Console.WriteLine("Beginning recording!");
             }
             else
             {
                 if (recorder != null)
                 {
                     currentlyRecording = false;
-                    startRecordingToolStripMenuItem.Text = "Start Recording";
+                    startRecordingToolStripMenuItem.Text = startRecordingLabel;
                     Multimap<uint, RecorderFileHandler.RecordedData> timeToDataMap = recorder.StopRecording();
 
+                    // Testing
+                    // TODO: Allow the user to specify a file.
                     RecorderFileHandler fileHandler = new RecorderFileHandler("recorded_binary_test.rbm");
                     fileHandler.writeRecorderFile(timeToDataMap);
+
+                    System.Console.WriteLine("Ended recording!");
                 }
             }
-
-            System.Console.WriteLine("Beginning recording!");
-            /*
-            RecorderFileHandler fileHandler = new RecorderFileHandler("recorded_binary_test.rbm");
-
-            RecorderFileHandler.RecordedData fistGesture = new RecorderFileHandler.RecordedData(ParsedCommand.AsyncCommandCode.FIST);
-            RecorderFileHandler.RecordedData orientation1 = new RecorderFileHandler.RecordedData(new ParsedCommand.Quaternion(1, 2, 3, 4),
-                new ParsedCommand.vector3(0.5f, 0.5f, 0.5f), new ParsedCommand.vector3(0.2f, 0.6f, 0.8f));
-            RecorderFileHandler.RecordedData fingersSpreadGesture = new RecorderFileHandler.RecordedData(ParsedCommand.AsyncCommandCode.FINGERS_SPREAD);
-
-            Multimap<uint, RecorderFileHandler.RecordedData> timestampToData = new Multimap<uint, RecorderFileHandler.RecordedData>();
-            timestampToData.Add(0, fistGesture);
-            timestampToData.Add(10, orientation1);
-            timestampToData.Add(20, fingersSpreadGesture);
-
-            fileHandler.writeRecorderFile(timestampToData); */
         }
 
         private void runScriptButton_Click(object sender, EventArgs e)
