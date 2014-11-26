@@ -204,7 +204,7 @@ namespace MyoSimGUI
             return timeToRecordedData;
         }
 
-        private ParsedCommand.Quaternion getQuatFromAngles(ParsedCommand.vector3 rollPitchYaw)
+        public static ParsedCommand.Quaternion getQuatFromAngles(ParsedCommand.vector3 rollPitchYaw)
         {
             ParsedCommand.Quaternion orientation;
             float cyaw = (float)Math.Cos(rollPitchYaw.x / 2.0);

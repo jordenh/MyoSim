@@ -38,9 +38,12 @@ namespace MyoSimGUI
         private HubCommunicator hubCommunicator;
         private List<HubCommunicator.Pose> poseList;
         private CommandRunner commandRunner;
+        private Boolean currentlyRecording;
+        private MyoRecorder recorder;
 
         public MyoSimulatorForm(NamedPipeServerStream pipeStream)
         {
+            currentlyRecording = false;
             hubCommunicator = new HubCommunicator(pipeStream);
             poseList = new List<HubCommunicator.Pose>();
             commandRunner = new CommandRunner(hubCommunicator);
@@ -124,7 +127,7 @@ namespace MyoSimGUI
 
         private void playRecordingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-             OpenFileDialog openFileDialog = new OpenFileDialog();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Title = "Open Recorded Binary Midas (RBM) File";
             openFileDialog.Filter = "RBM files|*.rbm";
             openFileDialog.InitialDirectory = @"C:\";
@@ -175,7 +178,28 @@ namespace MyoSimGUI
         private void startRecordingToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // TODO: Add the recording feature.
+            if (!currentlyRecording)
+            {
+                currentlyRecording = true;
+                startRecordingToolStripMenuItem.Text = "Stop Recording";
+                recorder = new MyoRecorder();
+                recorder.Record();
+            }
+            else
+            {
+                if (recorder != null)
+                {
+                    currentlyRecording = false;
+                    startRecordingToolStripMenuItem.Text = "Start Recording";
+                    Multimap<uint, RecorderFileHandler.RecordedData> timeToDataMap = recorder.StopRecording();
 
+                    RecorderFileHandler fileHandler = new RecorderFileHandler("recorded_binary_test.rbm");
+                    fileHandler.writeRecorderFile(timeToDataMap);
+                }
+            }
+
+            System.Console.WriteLine("Beginning recording!");
+            /*
             RecorderFileHandler fileHandler = new RecorderFileHandler("recorded_binary_test.rbm");
 
             RecorderFileHandler.RecordedData fistGesture = new RecorderFileHandler.RecordedData(ParsedCommand.AsyncCommandCode.FIST);
@@ -188,7 +212,7 @@ namespace MyoSimGUI
             timestampToData.Add(10, orientation1);
             timestampToData.Add(20, fingersSpreadGesture);
 
-            fileHandler.writeRecorderFile(timestampToData);
+            fileHandler.writeRecorderFile(timestampToData); */
         }
 
         private void runScriptButton_Click(object sender, EventArgs e)

@@ -11,7 +11,6 @@ C:\Users\Jeremy\GitProjects\MyoSim\MyoSimulatorForm\MyoSimulatorForm\bin\Debug\M
 C:\Users\Jeremy\GitProjects\MyoSim\MyoSimulatorForm\MyoSimulatorForm\bin\Debug\MyoSimGUI.exe
 C:\Users\Jeremy\GitProjects\MyoSim\MyoSimulatorForm\MyoSimulatorForm\bin\Debug\MyoSimGUI.pdb
 C:\Users\Jeremy\GitProjects\MyoSim\MyoSimulatorForm\MyoSimulatorForm\bin\Debug\MyoSharp.dll
-C:\Users\Jeremy\GitProjects\MyoSim\MyoSimulatorForm\MyoSimulatorForm\obj\Debug\MyoSimulatorForm.csprojResolveAssemblyReference.cache
 C:\Users\Jeremy\GitProjects\MyoSim\MyoSimulatorForm\MyoSimulatorForm\obj\Debug\MyoSimGUI.MyoSimulatorForm.resources
 C:\Users\Jeremy\GitProjects\MyoSim\MyoSimulatorForm\MyoSimulatorForm\obj\Debug\MyoSimGUI.Properties.Resources.resources
 C:\Users\Jeremy\GitProjects\MyoSim\MyoSimulatorForm\MyoSimulatorForm\obj\Debug\MyoSimulatorForm.csproj.GenerateResource.Cache
