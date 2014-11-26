@@ -21,6 +21,8 @@
 *.la
 *.a
 *.lib
+!gtestd.lib
+!gtest_main-mdd.lib
 
 # Executables
 *.exe
