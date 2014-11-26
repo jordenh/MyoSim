@@ -82,10 +82,6 @@ namespace MyoSimGUI
             uint time = (uint)(timestamp - firstTime);
             RecorderFileHandler.RecordedData syncDat = 
                 new RecorderFileHandler.RecordedData(storedOrientation, storedGyro, storedAccel);
-            if (time > 10000)
-            {
-                System.Console.WriteLine("Got a large one!");
-            }
             timestampToData.Add(time, syncDat);
         }
 
@@ -113,10 +109,6 @@ namespace MyoSimGUI
         {
             long millis = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             uint time = (uint)(millis - firstTime);
-            if (time > 10000)
-            {
-                System.Console.WriteLine("Got a large one!");
-            }
             timestampToData.Add(time, 
                 new RecorderFileHandler.RecordedData(
                     ParsedCommands.ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED));
@@ -126,10 +118,6 @@ namespace MyoSimGUI
         {
             long millis = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             uint time = (uint)(millis - firstTime);
-            if (time > 10000)
-            {
-                System.Console.WriteLine("Got a large one!");
-            }
             timestampToData.Add(time,
                 new RecorderFileHandler.RecordedData(
                     ParsedCommands.ParsedCommand.AsyncCommandCode.ARM_LOST));
@@ -139,10 +127,6 @@ namespace MyoSimGUI
         {
             long millis = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             uint time = (uint)(millis - firstTime);
-            if (time > 10000)
-            {
-                System.Console.WriteLine("Got a large one!");
-            }
             timestampToData.Add(time,
                 new RecorderFileHandler.RecordedData(
                     translateMyoSharpPoseToAsyncCommand(e.Pose)));
