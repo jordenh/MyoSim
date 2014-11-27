@@ -18,3 +18,13 @@ C:\Users\Owen\Documents\GitHub\MyoSim\MyoSimulatorForm\MyoSimulatorForm\bin\Debu
 C:\Users\Owen\Documents\GitHub\MyoSim\MyoSimulatorForm\MyoSimulatorForm\bin\Debug\MyoSimGUI.dll.config
 C:\Users\Owen\Documents\GitHub\MyoSim\MyoSimulatorForm\MyoSimulatorForm\bin\Debug\MyoSimGUI.dll
 C:\Users\Owen\Documents\GitHub\MyoSim\MyoSimulatorForm\MyoSimulatorForm\obj\Debug\MyoSimGUI.dll
+C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\MyoSimulatorForm\bin\Debug\MyoSimGUI.dll.config
+C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\MyoSimulatorForm\bin\Debug\MyoSimGUI.dll
+C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\MyoSimulatorForm\bin\Debug\MyoSimGUI.pdb
+C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\MyoSimulatorForm\bin\Debug\MyoSharp.dll
+C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\MyoSimulatorForm\obj\Debug\MyoSimulatorForm.csprojResolveAssemblyReference.cache
+C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\MyoSimulatorForm\obj\Debug\MyoSimGUI.MyoSimulatorForm.resources
+C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\MyoSimulatorForm\obj\Debug\MyoSimGUI.Properties.Resources.resources
+C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\MyoSimulatorForm\obj\Debug\MyoSimulatorForm.csproj.GenerateResource.Cache
+C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\MyoSimulatorForm\obj\Debug\MyoSimGUI.dll
+C:\Users\Frederick\Source\Repos\MyoSim\MyoSimulatorForm\MyoSimulatorForm\obj\Debug\MyoSimGUI.pdb
