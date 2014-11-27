@@ -39,7 +39,7 @@
             this.loadScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.recorderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.startRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.startStopRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.runScriptButton = new System.Windows.Forms.Button();
             this.menu.SuspendLayout();
@@ -123,31 +123,31 @@
             // loadScriptToolStripMenuItem
             // 
             this.loadScriptToolStripMenuItem.Name = "loadScriptToolStripMenuItem";
-            this.loadScriptToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.loadScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.loadScriptToolStripMenuItem.Text = "Load Script";
             this.loadScriptToolStripMenuItem.Click += new System.EventHandler(this.loadScriptToolStripMenuItem_Click);
             // 
             // saveScriptToolStripMenuItem
             // 
             this.saveScriptToolStripMenuItem.Name = "saveScriptToolStripMenuItem";
-            this.saveScriptToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.saveScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.saveScriptToolStripMenuItem.Text = "Save Script";
             // 
             // recorderToolStripMenuItem
             // 
             this.recorderToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.startRecordingToolStripMenuItem,
+            this.startStopRecordingToolStripMenuItem,
             this.playRecordingToolStripMenuItem});
             this.recorderToolStripMenuItem.Name = "recorderToolStripMenuItem";
             this.recorderToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
             this.recorderToolStripMenuItem.Text = "Recorder";
             // 
-            // startRecordingToolStripMenuItem
+            // startStopRecordingToolStripMenuItem
             // 
-            this.startRecordingToolStripMenuItem.Name = "startRecordingToolStripMenuItem";
-            this.startRecordingToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-            this.startRecordingToolStripMenuItem.Text = "Start Recording";
-            this.startRecordingToolStripMenuItem.Click += new System.EventHandler(this.startRecordingToolStripMenuItem_Click);
+            this.startStopRecordingToolStripMenuItem.Name = "startStopRecordingToolStripMenuItem";
+            this.startStopRecordingToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.startStopRecordingToolStripMenuItem.Text = "Start Recording";
+            this.startStopRecordingToolStripMenuItem.Click += new System.EventHandler(this.startStopRecordingToolStripMenuItem_Click);
             // 
             // playRecordingToolStripMenuItem
             // 
@@ -203,7 +203,7 @@
         private System.Windows.Forms.ToolStripMenuItem loadScriptToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveScriptToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recorderToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem startRecordingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem startStopRecordingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem playRecordingToolStripMenuItem;
         private System.Windows.Forms.Button runScriptButton;
 

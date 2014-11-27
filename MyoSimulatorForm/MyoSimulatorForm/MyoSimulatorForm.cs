@@ -177,13 +177,13 @@ namespace MyoSimGUI
             return dialogResult.getResult();
         }
 
-        private void startRecordingToolStripMenuItem_Click(object sender, EventArgs e)
+        private void startStopRecordingToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // TODO: Add the recording feature.
             if (!currentlyRecording)
             {
                 currentlyRecording = true;
-                startRecordingToolStripMenuItem.Text = stopRecordingLabel;
+                startStopRecordingToolStripMenuItem.Text = stopRecordingLabel;
                 recorder = new MyoRecorder();
                 recorder.Record();
                 System.Console.WriteLine("Beginning recording!");
@@ -193,7 +193,7 @@ namespace MyoSimGUI
                 if (recorder != null)
                 {
                     currentlyRecording = false;
-                    startRecordingToolStripMenuItem.Text = startRecordingLabel;
+                    startStopRecordingToolStripMenuItem.Text = startRecordingLabel;
                     Multimap<uint, RecorderFileHandler.RecordedData> timeToDataMap = recorder.StopRecording();
 
                     // Testing

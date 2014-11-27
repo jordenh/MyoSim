@@ -59,6 +59,10 @@ namespace MyoSimGUI
                 hub.MyoDisconnected += (sender, e) =>
                 {
                     Console.WriteLine("Myo has disconnected!", e.Myo.Arm);
+                    long millis = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+                    uint time = (uint)(millis - firstTime);
+                    timestampToData.Add(time, new RecorderFileHandler.RecordedData(
+                        ParsedCommands.ParsedCommand.AsyncCommandCode.DISCONNECT));
                     if (connectedMyo != null)
                     {
                         unregisterMyoEvents(connectedMyo);
