@@ -11,7 +11,7 @@ namespace MyoSimGUI.ParsedCommands
      */
     class ParsedCommand
     {
-        public enum CommandType { MOVE, SET_ACCELERATION, ASYNC, EXPECT }
+        public enum CommandType { MOVE, SET_ACCELERATION, ASYNC, EXPECT, PADDING }
 
         // Note: Arm Sync/Unsync is not listed here, because Arm Sync requires additional
         // parameters. It should either be its own command, or we should allow optional extra

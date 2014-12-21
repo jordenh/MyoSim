@@ -19,6 +19,8 @@ namespace MyoSimGUI
     public partial class MyoSimulatorForm : Form
     {
         public const string commandDelimiter = ", ";
+        public const string stopRecordingLabel = "Stop Recording";
+        public const string startRecordingLabel = "Start Recording";
 
         /* Holds resulting binary commands which will be sorted using the time as the key */
         private Dictionary<int, byte[]> bin_command_list = new Dictionary<int, byte[]>();
@@ -38,9 +40,12 @@ namespace MyoSimGUI
         private HubCommunicator hubCommunicator;
         private List<HubCommunicator.Pose> poseList;
         private CommandRunner commandRunner;
+        private Boolean currentlyRecording;
+        private MyoRecorder recorder;
 
         public MyoSimulatorForm(NamedPipeServerStream pipeStream)
         {
+            currentlyRecording = false;
             hubCommunicator = new HubCommunicator(pipeStream);
             poseList = new List<HubCommunicator.Pose>();
             commandRunner = new CommandRunner(hubCommunicator);
@@ -56,7 +61,6 @@ namespace MyoSimGUI
         public void enableSendCommand()
         {
             this.sendCommandButton.Enabled = true;
-            CommunicationBegin();
         }
 
         private void sendCommand(string label, Dictionary<string, HubCommunicator.Pose> labelToCommandMap)
@@ -125,7 +129,7 @@ namespace MyoSimGUI
 
         private void playRecordingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-             OpenFileDialog openFileDialog = new OpenFileDialog();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Title = "Open Recorded Binary Midas (RBM) File";
             openFileDialog.Filter = "RBM files|*.rbm";
             openFileDialog.InitialDirectory = @"C:\";
@@ -173,23 +177,33 @@ namespace MyoSimGUI
             return dialogResult.getResult();
         }
 
-        private void startRecordingToolStripMenuItem_Click(object sender, EventArgs e)
+        private void startStopRecordingToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // TODO: Add the recording feature.
+            if (!currentlyRecording)
+            {
+                currentlyRecording = true;
+                startStopRecordingToolStripMenuItem.Text = stopRecordingLabel;
+                recorder = new MyoRecorder();
+                recorder.Record();
+                System.Console.WriteLine("Beginning recording!");
+            }
+            else
+            {
+                if (recorder != null)
+                {
+                    currentlyRecording = false;
+                    startStopRecordingToolStripMenuItem.Text = startRecordingLabel;
+                    Multimap<uint, RecorderFileHandler.RecordedData> timeToDataMap = recorder.StopRecording();
 
-            RecorderFileHandler fileHandler = new RecorderFileHandler("recorded_binary_test.rbm");
+                    // Testing
+                    // TODO: Allow the user to specify a file.
+                    RecorderFileHandler fileHandler = new RecorderFileHandler("recorded_binary_test.rbm");
+                    fileHandler.writeRecorderFile(timeToDataMap);
 
-            RecorderFileHandler.RecordedData fistGesture = new RecorderFileHandler.RecordedData(ParsedCommand.AsyncCommandCode.FIST);
-            RecorderFileHandler.RecordedData orientation1 = new RecorderFileHandler.RecordedData(new ParsedCommand.Quaternion(1, 2, 3, 4),
-                new ParsedCommand.vector3(0.5f, 0.5f, 0.5f), new ParsedCommand.vector3(0.2f, 0.6f, 0.8f));
-            RecorderFileHandler.RecordedData fingersSpreadGesture = new RecorderFileHandler.RecordedData(ParsedCommand.AsyncCommandCode.FINGERS_SPREAD);
-
-            Multimap<uint, RecorderFileHandler.RecordedData> timestampToData = new Multimap<uint, RecorderFileHandler.RecordedData>();
-            timestampToData.Add(0, fistGesture);
-            timestampToData.Add(10, orientation1);
-            timestampToData.Add(20, fingersSpreadGesture);
-
-            fileHandler.writeRecorderFile(timestampToData);
+                    System.Console.WriteLine("Ended recording!");
+                }
+            }
         }
 
         private void runScriptButton_Click(object sender, EventArgs e)

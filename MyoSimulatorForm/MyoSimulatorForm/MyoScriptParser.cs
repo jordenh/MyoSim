@@ -39,6 +39,7 @@ namespace MyoSimGUI
             string line;
 
             uint currentTime = 0;
+            string lastCmd = "";
             while ((line = scriptFile.ReadLine()) != null)
             {
                 string[] command = line.Split(commandDelim);
@@ -69,6 +70,15 @@ namespace MyoSimGUI
                 {
                     // TODO: Throw an exception.
                 }
+
+                lastCmd = command.First();
+            }
+
+            if (lastCmd == DELAY_KW)
+            {
+                // If the last seen command is a delay, add a PADDING 
+                // event at the end to ensure that the script runs until the end of this delay.
+                timestampToCommandDict.Add(currentTime, new ParsedCommand(ParsedCommand.CommandType.PADDING));
             }
 
             return timestampToCommandDict;
@@ -89,7 +99,7 @@ namespace MyoSimGUI
 
             if (parseSuccess)
             {
-                gyroData.x = degreesToRadians(gyroData.x);
+                gyroData.x = -degreesToRadians(gyroData.x);
                 gyroData.y = degreesToRadians(gyroData.y);
                 gyroData.z = degreesToRadians(gyroData.z);
                 ParsedCommand parsedCommand = new MoveCommand(gyroData, duration);

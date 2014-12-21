@@ -133,7 +133,7 @@ namespace MyoSimGUI
                 br.Write(gyro.x);
                 br.Write(gyro.y);
                 br.Write(gyro.z);
-
+                
                 br.Write(accelData.x);
                 br.Write(accelData.y);
                 br.Write(accelData.z);
@@ -161,6 +161,7 @@ namespace MyoSimGUI
         {
             MemoryStream s = new MemoryStream();
 
+            System.Console.WriteLine("Sending Pose: " + pose);
             using (BinaryWriter br = new BinaryWriter(s))
             {
                 br.Write((byte) 2);
