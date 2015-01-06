@@ -103,28 +103,121 @@ namespace myoSim
          *  @param[in] rollPerSecond
          */
         void setGyroscopeData(float yawPerSecond, float pitchPerSecond, float rollPerSecond);
+        /**
+         *  Set the pose for this event
+         *
+         *  @param[in]  pose    A pose from the Pose class
+         */
         void setPose(Pose pose);
 
+        /**
+         *  Get the type of this event
+         *
+         *  @return The event type of this event found in the enum myoSimEvent
+         */
         myoSimEvent getEventType() const;
+        /**
+         *  Get the timestamp of the event
+         *
+         *  @return The timestamp of the event in milliseconds
+         */
         uint64_t getEventTimestamp() const;
+        /**
+         *  Get the identifier number of the Myo
+         *
+         *  @return The identifier for the Myo device
+         */
         unsigned int getMyoIdentifier() const;
+        /**
+         *  Get the arm the Myo is currently on
+         *
+         *  @return The value corresponding to the arm the Myo is on
+         */
         Arm getArm() const;
+        /**
+         *  Get the xDirection orientation of the Myo
+         *
+         *  @return The orientation of the Myo on the arm
+         */
         XDirection getXDirection() const;
 
+        /**
+         *  Get the X coordinate of the quaternion
+         *
+         *  @return A float corresponding the X coordinate value
+         */
         float getXOrientation() const;
+        /**
+         *  Get the Y coordinate of the quaternion
+         *
+         *  @return A float corresponding the Y coordinate value
+         */
         float getYOrientation() const;
+        /**
+         *  Get the Z coordinate of the quaternion
+         *
+         *  @return A float corresponding the Z coordinate value
+         */
         float getZOrientation() const;
+        /**
+         *  Get the angle of the quaternion
+         *
+         *  @return A float corresponding the angle
+         */
         float getWOrientation() const;
 
+        /**
+         *  Get the X coordinate of the acceleration
+         *
+         *  @return A float cooresponding to the X coordinate of the
+         *          acceleration
+         */
         float getAccelerometerX() const;
+        /**
+         *  Get the X coordinate of the acceleration
+         *
+         *  @return A float cooresponding to the Y coordinate of the
+         *          acceleration
+         */
         float getAccelerometerY() const;
+        /**
+         *  Get the Z coordinate of the acceleration
+         *
+         *  @return A float cooresponding to the Z coordinate of the
+         *          acceleration
+         */
         float getAccelerometerZ() const;
 
+        /**
+         *  Get the yaw portion of the gyroscope data
+         *
+         *  @return A float corresponding to the yaw of the gyroscope
+         */
         float getGyroscopeYawPerSecond() const;
+        /**
+         *  Get the pitch portion of the gyroscope data
+         *
+         *  @return A float corresponding to the pitch of the gyroscope
+         */
         float getGyroscopePitchPerSecond() const;
+        /**
+         *  Get the roll portion of the gyroscope data
+         *
+         *  @return A float corresponding to the roll of the gyroscope
+         */
         float getGyroscopeRollPerSecond() const;
 
+        /**
+         *  Get the pose of this event
+         *
+         *  @return A pose from the class Pose
+         */
         Pose getPose() const;
+        /**
+         *  Get the RSSI of the Myo
+         *
+         *  @return A number corresponding to the RSSI
+         */
         int8_t getRssi() const;
 
     private:
