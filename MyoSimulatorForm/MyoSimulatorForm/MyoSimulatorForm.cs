@@ -255,5 +255,19 @@ namespace MyoSimGUI
                 result = openFileDialog.ShowDialog();
             }
         }
+
+        private void saveScriptToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "Save Script File";
+            saveFileDialog.Filter = "TXT files|*.txt";
+            saveFileDialog.InitialDirectory = @"C:\";
+            
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                // Need code for saving 
+                //scriptPath.Text = saveFileDialog.FileName;
+            }
+        }
     }
 }

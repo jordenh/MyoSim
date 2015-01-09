@@ -29,8 +29,6 @@
         private void InitializeComponent()
         {
             this.sendCommandButton = new System.Windows.Forms.Button();
-            this.scriptPath = new System.Windows.Forms.TextBox();
-            this.commandChain = new System.Windows.Forms.TextBox();
             this.gestureLabel = new System.Windows.Forms.Label();
             this.addGestureButton = new System.Windows.Forms.Button();
             this.gestureList = new System.Windows.Forms.ListBox();
@@ -41,36 +39,27 @@
             this.recorderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startStopRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.runScriptButton = new System.Windows.Forms.Button();
+            this.XYZLabel = new System.Windows.Forms.Label();
+            this.XYZTextBox = new System.Windows.Forms.TextBox();
+            this.AddXYZButton = new System.Windows.Forms.Button();
+            this.delayLabel = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.timeBox = new System.Windows.Forms.TextBox();
+            this.timeLabel = new System.Windows.Forms.Label();
+            this.commandChain = new System.Windows.Forms.TextBox();
+            this.addDelayButton = new System.Windows.Forms.Button();
             this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
             // sendCommandButton
             // 
-            this.sendCommandButton.Location = new System.Drawing.Point(430, 272);
+            this.sendCommandButton.Location = new System.Drawing.Point(433, 360);
             this.sendCommandButton.Name = "sendCommandButton";
             this.sendCommandButton.Size = new System.Drawing.Size(75, 23);
             this.sendCommandButton.TabIndex = 9;
             this.sendCommandButton.Text = "Send";
             this.sendCommandButton.UseVisualStyleBackColor = true;
             this.sendCommandButton.Click += new System.EventHandler(this.sendCommandButton_Click);
-            // 
-            // scriptPath
-            // 
-            this.scriptPath.Location = new System.Drawing.Point(12, 245);
-            this.scriptPath.Name = "scriptPath";
-            this.scriptPath.ReadOnly = true;
-            this.scriptPath.Size = new System.Drawing.Size(382, 20);
-            this.scriptPath.TabIndex = 11;
-            // 
-            // commandChain
-            // 
-            this.commandChain.Location = new System.Drawing.Point(12, 275);
-            this.commandChain.Name = "commandChain";
-            this.commandChain.ReadOnly = true;
-            this.commandChain.Size = new System.Drawing.Size(382, 20);
-            this.commandChain.TabIndex = 0;
-            this.commandChain.Tag = "";
             // 
             // gestureLabel
             // 
@@ -123,15 +112,16 @@
             // loadScriptToolStripMenuItem
             // 
             this.loadScriptToolStripMenuItem.Name = "loadScriptToolStripMenuItem";
-            this.loadScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.loadScriptToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.loadScriptToolStripMenuItem.Text = "Load Script";
             this.loadScriptToolStripMenuItem.Click += new System.EventHandler(this.loadScriptToolStripMenuItem_Click);
             // 
             // saveScriptToolStripMenuItem
             // 
             this.saveScriptToolStripMenuItem.Name = "saveScriptToolStripMenuItem";
-            this.saveScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveScriptToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.saveScriptToolStripMenuItem.Text = "Save Script";
+            this.saveScriptToolStripMenuItem.Click += new System.EventHandler(this.saveScriptToolStripMenuItem_Click);
             // 
             // recorderToolStripMenuItem
             // 
@@ -156,26 +146,98 @@
             this.playRecordingToolStripMenuItem.Text = "Play Recording";
             this.playRecordingToolStripMenuItem.Click += new System.EventHandler(this.playRecordingToolStripMenuItem_Click);
             // 
-            // runScriptButton
+            // XYZLabel
             // 
-            this.runScriptButton.Location = new System.Drawing.Point(430, 245);
-            this.runScriptButton.Name = "runScriptButton";
-            this.runScriptButton.Size = new System.Drawing.Size(75, 23);
-            this.runScriptButton.TabIndex = 21;
-            this.runScriptButton.Text = "Run Script";
-            this.runScriptButton.UseVisualStyleBackColor = true;
-            this.runScriptButton.Click += new System.EventHandler(this.runScriptButton_Click);
+            this.XYZLabel.AutoSize = true;
+            this.XYZLabel.Location = new System.Drawing.Point(12, 211);
+            this.XYZLabel.Name = "XYZLabel";
+            this.XYZLabel.Size = new System.Drawing.Size(34, 13);
+            this.XYZLabel.TabIndex = 21;
+            this.XYZLabel.Text = "X Y Z";
+            // 
+            // XYZTextBox
+            // 
+            this.XYZTextBox.Location = new System.Drawing.Point(12, 227);
+            this.XYZTextBox.Name = "XYZTextBox";
+            this.XYZTextBox.Size = new System.Drawing.Size(120, 20);
+            this.XYZTextBox.TabIndex = 22;
+            // 
+            // AddXYZButton
+            // 
+            this.AddXYZButton.Location = new System.Drawing.Point(12, 292);
+            this.AddXYZButton.Name = "AddXYZButton";
+            this.AddXYZButton.Size = new System.Drawing.Size(75, 23);
+            this.AddXYZButton.TabIndex = 23;
+            this.AddXYZButton.Text = "Add Position";
+            this.AddXYZButton.UseVisualStyleBackColor = true;
+            // 
+            // delayLabel
+            // 
+            this.delayLabel.AutoSize = true;
+            this.delayLabel.Location = new System.Drawing.Point(12, 318);
+            this.delayLabel.Name = "delayLabel";
+            this.delayLabel.Size = new System.Drawing.Size(34, 13);
+            this.delayLabel.TabIndex = 24;
+            this.delayLabel.Text = "Delay";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(12, 334);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(120, 20);
+            this.textBox1.TabIndex = 25;
+            // 
+            // timeBox
+            // 
+            this.timeBox.Location = new System.Drawing.Point(12, 266);
+            this.timeBox.Name = "timeBox";
+            this.timeBox.Size = new System.Drawing.Size(120, 20);
+            this.timeBox.TabIndex = 26;
+            // 
+            // timeLabel
+            // 
+            this.timeLabel.AutoSize = true;
+            this.timeLabel.Location = new System.Drawing.Point(12, 250);
+            this.timeLabel.Name = "timeLabel";
+            this.timeLabel.Size = new System.Drawing.Size(30, 13);
+            this.timeLabel.TabIndex = 27;
+            this.timeLabel.Text = "Time";
+            // 
+            // commandChain
+            // 
+            this.commandChain.Location = new System.Drawing.Point(138, 58);
+            this.commandChain.Multiline = true;
+            this.commandChain.Name = "commandChain";
+            this.commandChain.ReadOnly = true;
+            this.commandChain.Size = new System.Drawing.Size(370, 296);
+            this.commandChain.TabIndex = 0;
+            this.commandChain.Tag = "";
+            // 
+            // addDelayButton
+            // 
+            this.addDelayButton.Location = new System.Drawing.Point(12, 360);
+            this.addDelayButton.Name = "addDelayButton";
+            this.addDelayButton.Size = new System.Drawing.Size(75, 23);
+            this.addDelayButton.TabIndex = 28;
+            this.addDelayButton.Text = "Add Delay";
+            this.addDelayButton.UseVisualStyleBackColor = true;
             // 
             // MyoSimulatorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(520, 307);
-            this.Controls.Add(this.runScriptButton);
+            this.ClientSize = new System.Drawing.Size(520, 393);
+            this.Controls.Add(this.addDelayButton);
+            this.Controls.Add(this.timeLabel);
+            this.Controls.Add(this.timeBox);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.delayLabel);
+            this.Controls.Add(this.AddXYZButton);
+            this.Controls.Add(this.XYZTextBox);
+            this.Controls.Add(this.XYZLabel);
             this.Controls.Add(this.gestureList);
             this.Controls.Add(this.addGestureButton);
             this.Controls.Add(this.gestureLabel);
-            this.Controls.Add(this.scriptPath);
             this.Controls.Add(this.sendCommandButton);
             this.Controls.Add(this.commandChain);
             this.Controls.Add(this.menu);
@@ -193,8 +255,6 @@
         #endregion
 
         private System.Windows.Forms.Button sendCommandButton;
-        private System.Windows.Forms.TextBox scriptPath;
-        private System.Windows.Forms.TextBox commandChain;
         private System.Windows.Forms.Label gestureLabel;
         private System.Windows.Forms.Button addGestureButton;
         private System.Windows.Forms.ListBox gestureList;
@@ -205,7 +265,15 @@
         private System.Windows.Forms.ToolStripMenuItem recorderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startStopRecordingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem playRecordingToolStripMenuItem;
-        private System.Windows.Forms.Button runScriptButton;
+        private System.Windows.Forms.Label XYZLabel;
+        private System.Windows.Forms.TextBox XYZTextBox;
+        private System.Windows.Forms.Button AddXYZButton;
+        private System.Windows.Forms.Label delayLabel;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox timeBox;
+        private System.Windows.Forms.Label timeLabel;
+        private System.Windows.Forms.TextBox commandChain;
+        private System.Windows.Forms.Button addDelayButton;
 
     }
 }
