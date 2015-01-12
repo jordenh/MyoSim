@@ -18,7 +18,7 @@ namespace MyoSimGUI
 {
     public partial class MyoSimulatorForm : Form
     {
-        public const string commandDelimiter = ", ";
+        public const string commandDelimiter = "\n";
         public const string stopRecordingLabel = "Stop Recording";
         public const string startRecordingLabel = "Start Recording";
 
@@ -69,28 +69,26 @@ namespace MyoSimGUI
             if (labelToCommandMap.TryGetValue(label, out command))
             {
                 poseList.Add(command);
-                commandChain.Text = string.Concat(commandChain.Text, label + commandDelimiter);
+                commandChain.Text += "async " + label + commandDelimiter;
+                //commandChain.Text = string.Concat(commandChain.Text, label + commandDelimiter);
             }
         }
 
         private void sendCommandButton_Click(object sender, EventArgs e)
         {
             string command = commandChain.Text;
+            MyoScriptParser parser = new MyoScriptParser(command, false);
+            Multimap<uint, ParsedCommand> timestampToParsedCommands;
 
             try
             {
-                foreach (HubCommunicator.Pose pose in poseList)
+                timestampToParsedCommands = parser.parseScript();
+                if (!hubCommunicator.isConnected())
                 {
-                    System.Console.WriteLine("Pose to send: " + pose);
-
-                    if (!hubCommunicator.isConnected())
-                    {
-                        System.Console.WriteLine("Failed to connect!!");
-                        return;
-                    }
-
-                    hubCommunicator.SendPose(pose);
+                    System.Console.WriteLine("Failed to connect!!");
+                    return;
                 }
+                commandRunner.runCommands(timestampToParsedCommands);
             }
             catch (Exception error)
             {
@@ -162,7 +160,10 @@ namespace MyoSimGUI
             openFileDialog.InitialDirectory = @"C:\";
             if (getOpenFileDialogResult(openFileDialog) == DialogResult.OK)
             {
-                scriptPath.Text = openFileDialog.FileName;
+                StreamReader sr = new StreamReader(openFileDialog.FileName);
+                string commands = sr.ReadToEnd();
+                commandChain.Text = commands;
+                // script path is dead replace by copying script over to run box scriptPath.Text = openFileDialog.FileName;
             }
         }
 
@@ -206,6 +207,7 @@ namespace MyoSimGUI
             }
         }
 
+/* This button does not exist anymore remove when not needed
         private void runScriptButton_Click(object sender, EventArgs e)
         {
             string fileName = scriptPath.Text;
@@ -234,6 +236,7 @@ namespace MyoSimGUI
                 commandRunner.runCommands(timestampToParsedCommands);
             }
         }
+*/
 
         public class OpenFileDialogResult
         {

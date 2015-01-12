@@ -26,13 +26,35 @@ namespace MyoSimGUI
         public const int SIZEOF_DELAY_CMD = 2;
 
         private string scriptFileName;
+        private string scriptText;
+        private bool fromFile;
 
-        public MyoScriptParser(string filename)
+        public MyoScriptParser(string filename, bool isFilename)
         {
-            scriptFileName = filename;
+            if (isFilename)
+            {
+                scriptFileName = filename;
+            }
+            else
+            {
+                /* actual script text. I.e. what's written in the file */
+                scriptText = filename;
+            }
         }
 
         public Multimap<uint, ParsedCommand> parseScript()
+        {
+            if (fromFile)
+            {
+                return parseScriptFile();
+            }
+            else
+            {
+                return parseScriptText();
+            }
+        }
+
+        private Multimap<uint, ParsedCommand> parseScriptFile()
         {
             System.IO.StreamReader scriptFile = new System.IO.StreamReader(scriptFileName);
             Multimap<uint, ParsedCommand> timestampToCommandDict = new Multimap<uint, ParsedCommand>();
@@ -42,36 +64,35 @@ namespace MyoSimGUI
             string lastCmd = "";
             while ((line = scriptFile.ReadLine()) != null)
             {
-                string[] command = line.Split(commandDelim);
-                bool parseSuccess = true;
-
-                switch (command.First())
+                unsafe
                 {
-                    case MOVE_KW:
-                        parseSuccess = parseMoveEvent(command, ref currentTime, timestampToCommandDict);
-                        break;
-                    case SET_ACCEL_KW:
-                        parseSuccess = parseSetAccelEvent(command, currentTime, timestampToCommandDict);
-                        break;
-                    case DELAY_KW:
-                        parseSuccess = parseDelayEvent(command, ref currentTime);
-                        break;
-                    case ASYNC_KW:
-                        parseSuccess = parseAsyncEvent(command, currentTime, timestampToCommandDict);
-                        break;
-                    case EXPECT_KW:
-                        parseSuccess = parseExpectEvent(command, currentTime, timestampToCommandDict);
-                        break;
-                    default:
-                        break;
+                    parseLine(line, lastCmd, &currentTime, timestampToCommandDict);
                 }
+            }
 
-                if (!parseSuccess)
+            if (lastCmd == DELAY_KW)
+            {
+                // If the last seen command is a delay, add a PADDING 
+                // event at the end to ensure that the script runs until the end of this delay.
+                timestampToCommandDict.Add(currentTime, new ParsedCommand(ParsedCommand.CommandType.PADDING));
+            }
+
+            return timestampToCommandDict;
+        }
+        private Multimap<uint, ParsedCommand> parseScriptText()
+        {
+            System.IO.StringReader scriptFile = new System.IO.StringReader(scriptText);
+            Multimap<uint, ParsedCommand> timestampToCommandDict = new Multimap<uint, ParsedCommand>();
+            string line;
+
+            uint currentTime = 0;
+            string lastCmd = "";
+            while ((line = scriptFile.ReadLine()) != null)
+            {
+                unsafe
                 {
-                    // TODO: Throw an exception.
+                    parseLine(line, lastCmd, &currentTime, timestampToCommandDict);
                 }
-
-                lastCmd = command.First();
             }
 
             if (lastCmd == DELAY_KW)
@@ -84,6 +105,41 @@ namespace MyoSimGUI
             return timestampToCommandDict;
         }
 
+        unsafe private void parseLine(string line, string lastCmd, uint* currentTime,
+            Multimap<uint, ParsedCommand> timestampToCommandDict)
+        {
+            string[] command = line.Split(commandDelim);
+            bool parseSuccess = true;
+
+            switch (command.First())
+            {
+                case MOVE_KW:
+                    parseSuccess = parseMoveEvent(command, ref *currentTime, timestampToCommandDict);
+                    break;
+                case SET_ACCEL_KW:
+                    parseSuccess = parseSetAccelEvent(command, *currentTime, timestampToCommandDict);
+                    break;
+                case DELAY_KW:
+                    parseSuccess = parseDelayEvent(command, ref *currentTime);
+                    break;
+                case ASYNC_KW:
+                    parseSuccess = parseAsyncEvent(command, *currentTime, timestampToCommandDict);
+                    break;
+                case EXPECT_KW:
+                    parseSuccess = parseExpectEvent(command, *currentTime, timestampToCommandDict);
+                    break;
+                default:
+                    break;
+            }
+
+            if (!parseSuccess)
+            {
+                // TODO: Throw an exception.
+            }
+
+            lastCmd = command.First();
+        }
+        
         private bool parseMoveEvent(string[] command, ref uint currentTime, Multimap<uint, ParsedCommand> timestampToCommandDict)
         {
             ParsedCommand.vector3 gyroData;

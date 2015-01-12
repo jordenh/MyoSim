@@ -112,14 +112,14 @@
             // loadScriptToolStripMenuItem
             // 
             this.loadScriptToolStripMenuItem.Name = "loadScriptToolStripMenuItem";
-            this.loadScriptToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.loadScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.loadScriptToolStripMenuItem.Text = "Load Script";
             this.loadScriptToolStripMenuItem.Click += new System.EventHandler(this.loadScriptToolStripMenuItem_Click);
             // 
             // saveScriptToolStripMenuItem
             // 
             this.saveScriptToolStripMenuItem.Name = "saveScriptToolStripMenuItem";
-            this.saveScriptToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.saveScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.saveScriptToolStripMenuItem.Text = "Save Script";
             this.saveScriptToolStripMenuItem.Click += new System.EventHandler(this.saveScriptToolStripMenuItem_Click);
             // 
@@ -157,6 +157,8 @@
             // 
             // XYZTextBox
             // 
+            this.XYZTextBox.AcceptsReturn = true;
+            this.XYZTextBox.AcceptsTab = true;
             this.XYZTextBox.Location = new System.Drawing.Point(12, 227);
             this.XYZTextBox.Name = "XYZTextBox";
             this.XYZTextBox.Size = new System.Drawing.Size(120, 20);
