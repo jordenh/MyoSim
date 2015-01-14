@@ -43,7 +43,7 @@
             this.XYZTextBox = new System.Windows.Forms.TextBox();
             this.AddXYZButton = new System.Windows.Forms.Button();
             this.delayLabel = new System.Windows.Forms.Label();
-            this.delayBox = new System.Windows.Forms.TextBox();
+            this.delayTextBox = new System.Windows.Forms.TextBox();
             this.timeBox = new System.Windows.Forms.TextBox();
             this.timeLabel = new System.Windows.Forms.Label();
             this.commandChain = new System.Windows.Forms.TextBox();
@@ -185,14 +185,14 @@
             this.delayLabel.TabIndex = 24;
             this.delayLabel.Text = "Delay (ms)";
             // 
-            // delayBox
+            // delayTextBox
             // 
-            this.delayBox.AcceptsReturn = true;
-            this.delayBox.AcceptsTab = true;
-            this.delayBox.Location = new System.Drawing.Point(12, 334);
-            this.delayBox.Name = "delayBox";
-            this.delayBox.Size = new System.Drawing.Size(120, 20);
-            this.delayBox.TabIndex = 24;
+            this.delayTextBox.AcceptsReturn = true;
+            this.delayTextBox.AcceptsTab = true;
+            this.delayTextBox.Location = new System.Drawing.Point(12, 334);
+            this.delayTextBox.Name = "delayTextBox";
+            this.delayTextBox.Size = new System.Drawing.Size(120, 20);
+            this.delayTextBox.TabIndex = 24;
             // 
             // timeBox
             // 
@@ -231,6 +231,7 @@
             this.addDelayButton.TabStop = false;
             this.addDelayButton.Text = "Add Delay";
             this.addDelayButton.UseVisualStyleBackColor = true;
+            this.addDelayButton.Click += new System.EventHandler(this.addDelayButton_Click);
             // 
             // MyoSimulatorForm
             // 
@@ -240,7 +241,7 @@
             this.Controls.Add(this.addDelayButton);
             this.Controls.Add(this.timeLabel);
             this.Controls.Add(this.timeBox);
-            this.Controls.Add(this.delayBox);
+            this.Controls.Add(this.delayTextBox);
             this.Controls.Add(this.delayLabel);
             this.Controls.Add(this.AddXYZButton);
             this.Controls.Add(this.XYZTextBox);
@@ -281,7 +282,7 @@
         private System.Windows.Forms.TextBox timeBox;
         private System.Windows.Forms.Button AddXYZButton;
         private System.Windows.Forms.Label delayLabel;
-        private System.Windows.Forms.TextBox delayBox;
+        private System.Windows.Forms.TextBox delayTextBox;
         private System.Windows.Forms.TextBox commandChain;
         private System.Windows.Forms.Button addDelayButton;
     }

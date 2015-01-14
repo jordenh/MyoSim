@@ -63,16 +63,16 @@ namespace MyoSimGUI
             string line;
 
             uint currentTime = 0;
-            string lastCmd = "";
+            bool lastCmd = false;
             while ((line = scriptFile.ReadLine()) != null)
             {
                 unsafe
                 {
-                    parseLine(line, lastCmd, &currentTime, timestampToCommandDict);
+                    parseLine(line, &lastCmd, &currentTime, timestampToCommandDict);
                 }
             }
 
-            if (lastCmd == DELAY_KW)
+            if (lastCmd)
             {
                 // If the last seen command is a delay, add a PADDING 
                 // event at the end to ensure that the script runs until the end of this delay.
@@ -89,16 +89,16 @@ namespace MyoSimGUI
             string line;
 
             uint currentTime = 0;
-            string lastCmd = "";
+            bool lastCmd = false;
             while ((line = scriptFile.ReadLine()) != null)
             {
                 unsafe
                 {
-                    parseLine(line, lastCmd, &currentTime, timestampToCommandDict);
+                    parseLine(line, &lastCmd, &currentTime, timestampToCommandDict);
                 }
             }
 
-            if (lastCmd == DELAY_KW)
+            if (lastCmd)
             {
                 // If the last seen command is a delay, add a PADDING 
                 // event at the end to ensure that the script runs until the end of this delay.
@@ -108,7 +108,7 @@ namespace MyoSimGUI
             return timestampToCommandDict;
         }
 
-        unsafe private void parseLine(string line, string lastCmd, uint* currentTime,
+        unsafe private void parseLine(string line, bool *lastCmd, uint* currentTime,
             Multimap<uint, ParsedCommand> timestampToCommandDict)
         {
             string[] command = line.Split(commandDelim);
@@ -140,7 +140,14 @@ namespace MyoSimGUI
                 // TODO: Throw an exception.
             }
 
-            lastCmd = command.First();
+            if (command.First() == DELAY_KW)
+            {
+                *lastCmd = true;
+            }
+            else
+            {
+                *lastCmd = false;
+            }
         }
         
         private bool parseMoveEvent(string[] command, ref uint currentTime, Multimap<uint, ParsedCommand> timestampToCommandDict)

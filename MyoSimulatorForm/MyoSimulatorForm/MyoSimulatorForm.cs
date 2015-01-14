@@ -18,9 +18,10 @@ namespace MyoSimGUI
 {
     public partial class MyoSimulatorForm : Form
     {
-        public const string commandDelimiter = "\n";
         public const string stopRecordingLabel = "Stop Recording";
         public const string startRecordingLabel = "Start Recording";
+
+        private string commandDelimiter = Environment.NewLine;
 
         /* Holds resulting binary commands which will be sorted using the time as the key */
         private Dictionary<int, byte[]> bin_command_list = new Dictionary<int, byte[]>();
@@ -281,13 +282,13 @@ namespace MyoSimGUI
             string timeString = timeBox.Text;
             string[] splitOrient;
             double X, Y, Z;
-            double time;
+            int time;
             char[] xyzDelim = {' '};
 
             if (String.IsNullOrWhiteSpace(orientString) ||
                 String.IsNullOrWhiteSpace(timeString))
             {
-                MessageBox.Show("Please fill in both the X Y Z and Time box.");
+                MessageBox.Show("Fill in both the XYZ and Time box.");
             }
             else
             {
@@ -297,7 +298,7 @@ namespace MyoSimGUI
                     MessageBox.Show("The XYZ coordinates must be three " +
                         "numbers separated by a space.");
                 }
-                else if (!Double.TryParse(timeString, out time) ||
+                else if (!Int32.TryParse(timeString, out time) ||
                          !Double.TryParse(splitOrient[0], out X) ||
                          !Double.TryParse(splitOrient[1], out Y) ||
                          !Double.TryParse(splitOrient[2], out Z) ||
@@ -306,7 +307,7 @@ namespace MyoSimGUI
                     /* Check to make sure all values are numbers and valid*/
                     MessageBox.Show("Enter three numbers in the XYZ box " +
                                     "separated by spaces and a positive " +
-                                    "number into into the Time box.\n");
+                                    "integer into into the Time box.\n");
                 }
                 else
                 {
@@ -314,7 +315,24 @@ namespace MyoSimGUI
                                          " " + time + commandDelimiter;
                 }
             }
-                
-        }
-    }
-}
+        } /* AddXYZButton_Click */
+
+        private void addDelayButton_Click(object sender, EventArgs e)
+        {
+            string delayString = delayTextBox.Text;
+            int delayNum;
+            
+            if (!Int32.TryParse(delayString, out delayNum) ||
+                delayNum <= 0)
+            {
+                MessageBox.Show(
+                    "Enter a positive integer into the Delay box.");
+            }
+            else
+            {
+                commandChain.Text += "delay " + delayNum + commandDelimiter;
+            }
+
+        } /* addDelayButton_Click */
+    } /* public partial class MyoSimulatorForm : Form */
+} /* namespace MyoSimGUI */
