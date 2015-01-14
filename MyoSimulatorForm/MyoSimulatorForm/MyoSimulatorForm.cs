@@ -70,7 +70,6 @@ namespace MyoSimGUI
             {
                 poseList.Add(command);
                 commandChain.Text += "async " + label + commandDelimiter;
-                //commandChain.Text = string.Concat(commandChain.Text, label + commandDelimiter);
             }
         }
 
@@ -101,7 +100,10 @@ namespace MyoSimGUI
 
         private void addGestureButton_Click(object sender, EventArgs e)
         {
-            sendCommand(this.gestureList.SelectedItem.ToString(), labelToCommand);
+            if (this.gestureList.SelectedItem != null)
+            {
+                sendCommand(this.gestureList.SelectedItem.ToString(), labelToCommand);
+            }
         }
 
         private void MyoSimulatorForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -271,6 +273,48 @@ namespace MyoSimGUI
                 // Need code for saving 
                 //scriptPath.Text = saveFileDialog.FileName;
             }
+        }
+
+        private void AddXYZButton_Click(object sender, EventArgs e)
+        {
+            string orientString = XYZTextBox.Text;
+            string timeString = timeBox.Text;
+            string[] splitOrient;
+            double X, Y, Z;
+            double time;
+            char[] xyzDelim = {' '};
+
+            if (String.IsNullOrWhiteSpace(orientString) ||
+                String.IsNullOrWhiteSpace(timeString))
+            {
+                MessageBox.Show("Please fill in both the X Y Z and Time box.");
+            }
+            else
+            {
+                splitOrient = orientString.Split(xyzDelim, 3);
+                if (splitOrient.Length != 3)
+                {
+                    MessageBox.Show("The XYZ coordinates must be three " +
+                        "numbers separated by a space.");
+                }
+                else if (!Double.TryParse(timeString, out time) ||
+                         !Double.TryParse(splitOrient[0], out X) ||
+                         !Double.TryParse(splitOrient[1], out Y) ||
+                         !Double.TryParse(splitOrient[2], out Z) ||
+                         time <= 0)
+                {
+                    /* Check to make sure all values are numbers and valid*/
+                    MessageBox.Show("Enter three numbers in the XYZ box " +
+                                    "separated by spaces and a positive " +
+                                    "number into into the Time box.\n");
+                }
+                else
+                {
+                    commandChain.Text += "move " + X + " " + Y + " " + Z +
+                                         " " + time + commandDelimiter;
+                }
+            }
+                
         }
     }
 }

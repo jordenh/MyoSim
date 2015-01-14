@@ -34,11 +34,13 @@ namespace MyoSimGUI
             if (isFilename)
             {
                 scriptFileName = filename;
+                fromFile = true;
             }
             else
             {
                 /* actual script text. I.e. what's written in the file */
                 scriptText = filename;
+                fromFile = false;
             }
         }
 
@@ -79,6 +81,7 @@ namespace MyoSimGUI
 
             return timestampToCommandDict;
         }
+
         private Multimap<uint, ParsedCommand> parseScriptText()
         {
             System.IO.StringReader scriptFile = new System.IO.StringReader(scriptText);
