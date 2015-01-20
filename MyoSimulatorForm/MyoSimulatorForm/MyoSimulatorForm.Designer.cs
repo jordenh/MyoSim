@@ -174,7 +174,7 @@
             this.AddXYZButton.TabStop = false;
             this.AddXYZButton.Text = "Add Position";
             this.AddXYZButton.UseVisualStyleBackColor = true;
-            this.AddXYZButton.Click += new System.EventHandler(this.AddXYZButton_Click);
+            this.AddXYZButton.Click += new System.EventHandler(this.addXYZButton_Click);
             // 
             // delayLabel
             // 
@@ -217,7 +217,6 @@
             this.commandChain.Location = new System.Drawing.Point(138, 58);
             this.commandChain.Multiline = true;
             this.commandChain.Name = "commandChain";
-            this.commandChain.ReadOnly = true;
             this.commandChain.Size = new System.Drawing.Size(370, 296);
             this.commandChain.TabIndex = 0;
             this.commandChain.Tag = "";

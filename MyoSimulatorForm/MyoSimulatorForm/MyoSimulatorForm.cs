@@ -38,6 +38,25 @@ namespace MyoSimGUI
             {"Unknown", HubCommunicator.Pose.UNKNOWN}
         };
 
+        /*
+         * Translate the pretty string to the parser format. Alternatively,
+         * the displayed string in labelToCommand can be changed to match the 
+         * script format.
+         * The script string should match the string found in the dictionary 
+         * NameToAsyncCommand found in ParsedCommand.cs
+         */
+        static Dictionary<string, string> labelToScript = new Dictionary<string, string>
+        {
+            {"Rest", "rest"},
+            {"Fist", "fist"},
+            {"Wave In", "wave_in"},
+            {"Wave Out", "wave_out"},
+            {"Fingers Spread", "fingers_spread"},
+            {"Reserved 1", "reserved1"}, /* This does not have a corresponding async command */
+            {"Thumb to Pinky", "thumb_to_pinky"},
+            {"Unknown", "unknown"}
+        };
+
         private HubCommunicator hubCommunicator;
         private List<HubCommunicator.Pose> poseList;
         private CommandRunner commandRunner;
@@ -67,10 +86,24 @@ namespace MyoSimGUI
         private void sendCommand(string label, Dictionary<string, HubCommunicator.Pose> labelToCommandMap)
         {
             HubCommunicator.Pose command;
+            string scriptLabel;
             if (labelToCommandMap.TryGetValue(label, out command))
             {
                 poseList.Add(command);
-                commandChain.Text += "async " + label + commandDelimiter;
+                if (labelToScript.TryGetValue(label, out scriptLabel))
+                {
+                    commandChain.Text += MyoScriptParser.ASYNC_KW + " " +
+                        scriptLabel + commandDelimiter;
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Script equivalent of label \"" + label +"\" not found" /* Text */,
+                        "Invalid Label" /* Title */,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                }
             }
         }
 
@@ -106,6 +139,67 @@ namespace MyoSimGUI
                 sendCommand(this.gestureList.SelectedItem.ToString(), labelToCommand);
             }
         }
+
+        private void addXYZButton_Click(object sender, EventArgs e)
+        {
+            string orientString = XYZTextBox.Text;
+            string timeString = timeBox.Text;
+            string[] splitOrient;
+            double X, Y, Z;
+            int time;
+            char[] xyzDelim = {' '};
+
+            if (String.IsNullOrWhiteSpace(orientString) ||
+                String.IsNullOrWhiteSpace(timeString))
+            {
+                MessageBox.Show("Fill in both the XYZ and Time box.");
+            }
+            else
+            {
+                splitOrient = orientString.Split(xyzDelim, 3);
+                if (splitOrient.Length != 3)
+                {
+                    MessageBox.Show("The XYZ coordinates must be three " +
+                        "numbers separated by a space.");
+                }
+                else if (!Int32.TryParse(timeString, out time) ||
+                         !Double.TryParse(splitOrient[0], out X) ||
+                         !Double.TryParse(splitOrient[1], out Y) ||
+                         !Double.TryParse(splitOrient[2], out Z) ||
+                         time <= 0)
+                {
+                    /* Check to make sure all values are numbers and valid*/
+                    MessageBox.Show("Enter three numbers in the XYZ box " +
+                                    "separated by spaces and a positive " +
+                                    "integer into into the Time box.\n");
+                }
+                else
+                {
+                    commandChain.Text += MyoScriptParser.MOVE_KW +" " + X +
+                        " " + Y + " " + Z +
+                        " " + time + commandDelimiter;
+                }
+            }
+        } /* AddXYZButton_Click */
+
+        private void addDelayButton_Click(object sender, EventArgs e)
+        {
+            string delayString = delayTextBox.Text;
+            int delayNum;
+            
+            if (!Int32.TryParse(delayString, out delayNum) ||
+                delayNum <= 0)
+            {
+                MessageBox.Show(
+                    "Enter a positive integer into the Delay box.");
+            }
+            else
+            {
+                commandChain.Text += MyoScriptParser.DELAY_KW +" " +
+                    delayNum + commandDelimiter;
+            }
+
+        } /* addDelayButton_Click */
 
         private void MyoSimulatorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -155,32 +249,6 @@ namespace MyoSimGUI
             }
         }
 
-        private void loadScriptToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Title = "Open Script File";
-            openFileDialog.Filter = "TXT files|*.txt";
-            openFileDialog.InitialDirectory = @"C:\";
-            if (getOpenFileDialogResult(openFileDialog) == DialogResult.OK)
-            {
-                StreamReader sr = new StreamReader(openFileDialog.FileName);
-                string commands = sr.ReadToEnd();
-                commandChain.Text = commands;
-                // script path is dead replace by copying script over to run box scriptPath.Text = openFileDialog.FileName;
-            }
-        }
-
-        private DialogResult getOpenFileDialogResult(OpenFileDialog dialog)
-        {
-            OpenFileDialogResult dialogResult = new OpenFileDialogResult(dialog);
-            System.Threading.Thread dialogThread = new System.Threading.Thread(dialogResult.threadShowDialog);
-            dialogThread.SetApartmentState(System.Threading.ApartmentState.STA);
-            dialogThread.Start();
-            dialogThread.Join();
-
-            return dialogResult.getResult();
-        }
-
         private void startStopRecordingToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // TODO: Add the recording feature.
@@ -210,36 +278,61 @@ namespace MyoSimGUI
             }
         }
 
-/* This button does not exist anymore remove when not needed
-        private void runScriptButton_Click(object sender, EventArgs e)
+        private void loadScriptToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string fileName = scriptPath.Text;
-
-            if (fileName.Length > 0)
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "Open Script File";
+            openFileDialog.Filter = "TXT files|*.txt";
+            openFileDialog.RestoreDirectory = true;
+            if (getOpenFileDialogResult(openFileDialog) == DialogResult.OK)
             {
-                MyoScriptParser parser = new MyoScriptParser(fileName);
-
-                Multimap<uint, ParsedCommand> timestampToParsedCommands;
-
-                try
-                {
-                    timestampToParsedCommands = parser.parseScript();
-                }
-                catch (ArgumentException except)
-                {
-                    MessageBox.Show(except.ToString(), string.Format("File does not exist"));
-                    return;
-                }
-                catch (FileNotFoundException except)
-                {
-                    MessageBox.Show(except.ToString(), string.Format("File not found"));
-                    return;
-                }
-
-                commandRunner.runCommands(timestampToParsedCommands);
+                StreamReader sr = new StreamReader(openFileDialog.FileName);
+                string commands = sr.ReadToEnd();
+                commandChain.Text = commands;
+                // script path is dead replace by copying script over to run box scriptPath.Text = openFileDialog.FileName;
             }
         }
-*/
+
+        private DialogResult getOpenFileDialogResult(OpenFileDialog dialog)
+        {
+            OpenFileDialogResult dialogResult = new OpenFileDialogResult(dialog);
+            System.Threading.Thread dialogThread = new System.Threading.Thread(dialogResult.threadShowDialog);
+            dialogThread.SetApartmentState(System.Threading.ApartmentState.STA);
+            dialogThread.Start();
+            dialogThread.Join();
+
+            return dialogResult.getResult();
+        }
+
+        private void saveScriptToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "Save Script File";
+            saveFileDialog.Filter = "TXT files|*.txt";
+            saveFileDialog.RestoreDirectory = true;
+            saveFileDialog.OverwritePrompt = true;
+            
+            if (getSaveFileDialogResult(saveFileDialog) == DialogResult.OK)
+            {
+                System.Console.WriteLine(saveFileDialog.FileName);
+                System.IO.File.WriteAllText(saveFileDialog.FileName,
+                    commandChain.Text);
+            }
+        }
+
+        private DialogResult getSaveFileDialogResult(SaveFileDialog dialog)
+        {
+            SaveFileDialogResult dialogResult =
+                new SaveFileDialogResult(dialog);
+            System.Threading.Thread dialogThread =
+                new System.Threading.Thread(dialogResult.threadShowDialog);
+            //dialogThread.SetApartmentState(System.Threading.ApartmentState.STA);
+            dialogThread.TrySetApartmentState(ApartmentState.STA);
+            dialogThread.Start();
+            dialogThread.Join();
+
+            return dialogResult.getResult();
+        }
 
         public class OpenFileDialogResult
         {
@@ -260,79 +353,28 @@ namespace MyoSimGUI
             {
                 result = openFileDialog.ShowDialog();
             }
+        } /* public class OpenFileDialogResult */
+
+        public class SaveFileDialogResult
+        {
+            private SaveFileDialog saveFileDialog;
+            private DialogResult result;
+
+            public SaveFileDialogResult(SaveFileDialog dialog)
+            {
+                saveFileDialog = dialog;
+            }
+
+            public DialogResult getResult()
+            {
+                return result;
+            }
+
+            public void threadShowDialog()
+            {
+                result = saveFileDialog.ShowDialog();
+            }
         }
 
-        private void saveScriptToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Title = "Save Script File";
-            saveFileDialog.Filter = "TXT files|*.txt";
-            saveFileDialog.InitialDirectory = @"C:\";
-            
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                // Need code for saving 
-                //scriptPath.Text = saveFileDialog.FileName;
-            }
-        }
-
-        private void AddXYZButton_Click(object sender, EventArgs e)
-        {
-            string orientString = XYZTextBox.Text;
-            string timeString = timeBox.Text;
-            string[] splitOrient;
-            double X, Y, Z;
-            int time;
-            char[] xyzDelim = {' '};
-
-            if (String.IsNullOrWhiteSpace(orientString) ||
-                String.IsNullOrWhiteSpace(timeString))
-            {
-                MessageBox.Show("Fill in both the XYZ and Time box.");
-            }
-            else
-            {
-                splitOrient = orientString.Split(xyzDelim, 3);
-                if (splitOrient.Length != 3)
-                {
-                    MessageBox.Show("The XYZ coordinates must be three " +
-                        "numbers separated by a space.");
-                }
-                else if (!Int32.TryParse(timeString, out time) ||
-                         !Double.TryParse(splitOrient[0], out X) ||
-                         !Double.TryParse(splitOrient[1], out Y) ||
-                         !Double.TryParse(splitOrient[2], out Z) ||
-                         time <= 0)
-                {
-                    /* Check to make sure all values are numbers and valid*/
-                    MessageBox.Show("Enter three numbers in the XYZ box " +
-                                    "separated by spaces and a positive " +
-                                    "integer into into the Time box.\n");
-                }
-                else
-                {
-                    commandChain.Text += "move " + X + " " + Y + " " + Z +
-                                         " " + time + commandDelimiter;
-                }
-            }
-        } /* AddXYZButton_Click */
-
-        private void addDelayButton_Click(object sender, EventArgs e)
-        {
-            string delayString = delayTextBox.Text;
-            int delayNum;
-            
-            if (!Int32.TryParse(delayString, out delayNum) ||
-                delayNum <= 0)
-            {
-                MessageBox.Show(
-                    "Enter a positive integer into the Delay box.");
-            }
-            else
-            {
-                commandChain.Text += "delay " + delayNum + commandDelimiter;
-            }
-
-        } /* addDelayButton_Click */
     } /* public partial class MyoSimulatorForm : Form */
 } /* namespace MyoSimGUI */
