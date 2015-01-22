@@ -39,9 +39,9 @@
             this.recorderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startStopRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.XYZLabel = new System.Windows.Forms.Label();
-            this.XYZTextBox = new System.Windows.Forms.TextBox();
-            this.AddXYZButton = new System.Windows.Forms.Button();
+            this.RPYLabel = new System.Windows.Forms.Label();
+            this.RPYTextBox = new System.Windows.Forms.TextBox();
+            this.AddRPYButton = new System.Windows.Forms.Button();
             this.delayLabel = new System.Windows.Forms.Label();
             this.delayTextBox = new System.Windows.Forms.TextBox();
             this.timeBox = new System.Windows.Forms.TextBox();
@@ -147,34 +147,34 @@
             this.playRecordingToolStripMenuItem.Text = "Play Recording";
             this.playRecordingToolStripMenuItem.Click += new System.EventHandler(this.playRecordingToolStripMenuItem_Click);
             // 
-            // XYZLabel
+            // RPYLabel
             // 
-            this.XYZLabel.AutoSize = true;
-            this.XYZLabel.Location = new System.Drawing.Point(12, 211);
-            this.XYZLabel.Name = "XYZLabel";
-            this.XYZLabel.Size = new System.Drawing.Size(34, 13);
-            this.XYZLabel.TabIndex = 21;
-            this.XYZLabel.Text = "X Y Z";
+            this.RPYLabel.AutoSize = true;
+            this.RPYLabel.Location = new System.Drawing.Point(12, 211);
+            this.RPYLabel.Name = "RPYLabel";
+            this.RPYLabel.Size = new System.Drawing.Size(76, 13);
+            this.RPYLabel.TabIndex = 21;
+            this.RPYLabel.Text = "Roll Pitch Yaw";
             // 
-            // XYZTextBox
+            // RPYTextBox
             // 
-            this.XYZTextBox.AcceptsReturn = true;
-            this.XYZTextBox.AcceptsTab = true;
-            this.XYZTextBox.Location = new System.Drawing.Point(12, 227);
-            this.XYZTextBox.Name = "XYZTextBox";
-            this.XYZTextBox.Size = new System.Drawing.Size(120, 20);
-            this.XYZTextBox.TabIndex = 22;
+            this.RPYTextBox.AcceptsReturn = true;
+            this.RPYTextBox.AcceptsTab = true;
+            this.RPYTextBox.Location = new System.Drawing.Point(12, 227);
+            this.RPYTextBox.Name = "RPYTextBox";
+            this.RPYTextBox.Size = new System.Drawing.Size(120, 20);
+            this.RPYTextBox.TabIndex = 22;
             // 
-            // AddXYZButton
+            // AddRPYButton
             // 
-            this.AddXYZButton.Location = new System.Drawing.Point(12, 292);
-            this.AddXYZButton.Name = "AddXYZButton";
-            this.AddXYZButton.Size = new System.Drawing.Size(75, 23);
-            this.AddXYZButton.TabIndex = 23;
-            this.AddXYZButton.TabStop = false;
-            this.AddXYZButton.Text = "Add Position";
-            this.AddXYZButton.UseVisualStyleBackColor = true;
-            this.AddXYZButton.Click += new System.EventHandler(this.addXYZButton_Click);
+            this.AddRPYButton.Location = new System.Drawing.Point(12, 292);
+            this.AddRPYButton.Name = "AddRPYButton";
+            this.AddRPYButton.Size = new System.Drawing.Size(75, 23);
+            this.AddRPYButton.TabIndex = 23;
+            this.AddRPYButton.TabStop = false;
+            this.AddRPYButton.Text = "Add Position";
+            this.AddRPYButton.UseVisualStyleBackColor = true;
+            this.AddRPYButton.Click += new System.EventHandler(this.addRPYButton_Click);
             // 
             // delayLabel
             // 
@@ -217,6 +217,7 @@
             this.commandChain.Location = new System.Drawing.Point(138, 58);
             this.commandChain.Multiline = true;
             this.commandChain.Name = "commandChain";
+            this.commandChain.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.commandChain.Size = new System.Drawing.Size(370, 296);
             this.commandChain.TabIndex = 0;
             this.commandChain.Tag = "";
@@ -242,9 +243,9 @@
             this.Controls.Add(this.timeBox);
             this.Controls.Add(this.delayTextBox);
             this.Controls.Add(this.delayLabel);
-            this.Controls.Add(this.AddXYZButton);
-            this.Controls.Add(this.XYZTextBox);
-            this.Controls.Add(this.XYZLabel);
+            this.Controls.Add(this.AddRPYButton);
+            this.Controls.Add(this.RPYTextBox);
+            this.Controls.Add(this.RPYLabel);
             this.Controls.Add(this.gestureList);
             this.Controls.Add(this.addGestureButton);
             this.Controls.Add(this.gestureLabel);
@@ -275,11 +276,11 @@
         private System.Windows.Forms.ToolStripMenuItem recorderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startStopRecordingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem playRecordingToolStripMenuItem;
-        private System.Windows.Forms.Label XYZLabel;
-        private System.Windows.Forms.TextBox XYZTextBox;
+        private System.Windows.Forms.Label RPYLabel;
+        private System.Windows.Forms.TextBox RPYTextBox;
         private System.Windows.Forms.Label timeLabel;
         private System.Windows.Forms.TextBox timeBox;
-        private System.Windows.Forms.Button AddXYZButton;
+        private System.Windows.Forms.Button AddRPYButton;
         private System.Windows.Forms.Label delayLabel;
         private System.Windows.Forms.TextBox delayTextBox;
         private System.Windows.Forms.TextBox commandChain;

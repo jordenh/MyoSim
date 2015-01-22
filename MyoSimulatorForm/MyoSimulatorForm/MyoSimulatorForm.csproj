@@ -33,7 +33,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;/unsafe</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -69,6 +69,7 @@
     <Compile Include="MyoRecorder.cs" />
     <Compile Include="MyoScriptParser.cs" />
     <Compile Include="ParsedCommands\AsyncCommand.cs" />
+    <Compile Include="ParsedCommands\biDirectional_Dict.cs" />
     <Compile Include="ParsedCommands\ExpectCommand.cs" />
     <Compile Include="ParsedCommands\MoveCommand.cs" />
     <Compile Include="ParsedCommands\SetAccelerationCommand.cs" />

@@ -13,7 +13,6 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using MyoSimGUI.ParsedCommands;
 
-
 namespace MyoSimGUI
 {
     public partial class MyoSimulatorForm : Form
@@ -39,12 +38,27 @@ namespace MyoSimGUI
         };
 
         /*
+         * Events that can be sent via the script
+         */
+        static Dictionary<string, HubCommunicator.EventType> labelToEvent =
+            new Dictionary<string, HubCommunicator.EventType>
+        {
+            {"Pair", HubCommunicator.EventType.PAIRED},
+            {"Unpair", HubCommunicator.EventType.UNPAIRED},
+            {"Connect", HubCommunicator.EventType.CONNECTED},
+            {"Disconnect", HubCommunicator.EventType.DISCONNECTED},
+            {"Arm Recognized", HubCommunicator.EventType.ARM_RECOGNIZED},
+            {"Arm Lost", HubCommunicator.EventType.ARM_LOST}
+        };
+
+        /*
          * Translate the pretty string to the parser format. Alternatively,
          * the displayed string in labelToCommand can be changed to match the 
          * script format.
          * The script string should match the string found in the dictionary 
          * NameToAsyncCommand found in ParsedCommand.cs
          */
+        
         static Dictionary<string, string> labelToScript = new Dictionary<string, string>
         {
             {"Rest", "rest"},
@@ -54,7 +68,9 @@ namespace MyoSimGUI
             {"Fingers Spread", "fingers_spread"},
             {"Reserved 1", "reserved1"}, /* This does not have a corresponding async command */
             {"Thumb to Pinky", "thumb_to_pinky"},
-            {"Unknown", "unknown"}
+            {"Unknown", "unknown"},
+            {"Pair", "pair"},
+            //{labelToEvent.}
         };
 
         private HubCommunicator hubCommunicator;
@@ -134,20 +150,21 @@ namespace MyoSimGUI
 
         private void addGestureButton_Click(object sender, EventArgs e)
         {
+            do_test_stuff();
             if (this.gestureList.SelectedItem != null)
             {
                 sendCommand(this.gestureList.SelectedItem.ToString(), labelToCommand);
             }
         }
 
-        private void addXYZButton_Click(object sender, EventArgs e)
+        private void addRPYButton_Click(object sender, EventArgs e)
         {
-            string orientString = XYZTextBox.Text;
+            string orientString = RPYTextBox.Text;
             string timeString = timeBox.Text;
             string[] splitOrient;
-            double X, Y, Z;
+            double roll, pitch, yaw;
             int time;
-            char[] xyzDelim = {' '};
+            char[] rpyDelim = {' '};
 
             if (String.IsNullOrWhiteSpace(orientString) ||
                 String.IsNullOrWhiteSpace(timeString))
@@ -156,16 +173,16 @@ namespace MyoSimGUI
             }
             else
             {
-                splitOrient = orientString.Split(xyzDelim, 3);
+                splitOrient = orientString.Split(rpyDelim, 3);
                 if (splitOrient.Length != 3)
                 {
-                    MessageBox.Show("The XYZ coordinates must be three " +
+                    MessageBox.Show("The roll, pitch, and yaw must be three " +
                         "numbers separated by a space.");
                 }
                 else if (!Int32.TryParse(timeString, out time) ||
-                         !Double.TryParse(splitOrient[0], out X) ||
-                         !Double.TryParse(splitOrient[1], out Y) ||
-                         !Double.TryParse(splitOrient[2], out Z) ||
+                         !Double.TryParse(splitOrient[0], out roll) ||
+                         !Double.TryParse(splitOrient[1], out pitch) ||
+                         !Double.TryParse(splitOrient[2], out yaw) ||
                          time <= 0)
                 {
                     /* Check to make sure all values are numbers and valid*/
@@ -175,8 +192,8 @@ namespace MyoSimGUI
                 }
                 else
                 {
-                    commandChain.Text += MyoScriptParser.MOVE_KW +" " + X +
-                        " " + Y + " " + Z +
+                    commandChain.Text += MyoScriptParser.MOVE_KW +" " + roll +
+                        " " + pitch + " " + yaw +
                         " " + time + commandDelimiter;
                 }
             }
