@@ -16,12 +16,14 @@ namespace MyoSimGUI.ParsedCommands
         // Note: Arm Sync/Unsync is not listed here, because Arm Sync requires additional
         // parameters. It should either be its own command, or we should allow optional extra
         // parameters for some async commands.
+        /* NOTE: Do not remove RESERVED1. It is needed to preserved the order of the enum */
         public enum AsyncCommandCode { PAIR, UNPAIR, CONNECT, DISCONNECT, ARM_RECOGNIZED, ARM_LOST, REST, FIST, 
             WAVE_IN, WAVE_OUT, FINGERS_SPREAD, THUMB_TO_PINKY, RESERVED1, UNKNOWN};
 
         public enum ExpectCommandCode { VIBRATE, RSSI };
 
-        public static Dictionary<string, AsyncCommandCode> NameToAsyncCommand = new Dictionary<string, AsyncCommandCode>
+        public static biDirectional_Dict<string, AsyncCommandCode>
+            NameToAsyncCommand = new biDirectional_Dict<string, AsyncCommandCode>
         {
             {"pair", AsyncCommandCode.PAIR},
             {"unpair", AsyncCommandCode.UNPAIR},
@@ -37,6 +39,11 @@ namespace MyoSimGUI.ParsedCommands
             {"thumb_to_pinky", AsyncCommandCode.THUMB_TO_PINKY},
             {"unknown", AsyncCommandCode.UNKNOWN}
         };
+
+        public static biDirectional_Dict<string, AsyncCommandCode>.reverse
+            AsyncCommandToName =
+            new biDirectional_Dict<string, AsyncCommandCode>.reverse(
+                NameToAsyncCommand);
 
         public static Dictionary<string, ExpectCommandCode> NameToExpectCommand = new Dictionary<string, ExpectCommandCode>
         {

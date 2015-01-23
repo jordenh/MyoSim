@@ -88,6 +88,7 @@
             this.gestureList.Name = "gestureList";
             this.gestureList.Size = new System.Drawing.Size(120, 121);
             this.gestureList.TabIndex = 17;
+            this.gestureList.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.gestureList_KeyPress);
             // 
             // menu
             // 
@@ -164,6 +165,7 @@
             this.RPYTextBox.Name = "RPYTextBox";
             this.RPYTextBox.Size = new System.Drawing.Size(120, 20);
             this.RPYTextBox.TabIndex = 22;
+            this.RPYTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.RPYTextBox_KeyPress);
             // 
             // AddRPYButton
             // 
@@ -193,6 +195,7 @@
             this.delayTextBox.Name = "delayTextBox";
             this.delayTextBox.Size = new System.Drawing.Size(120, 20);
             this.delayTextBox.TabIndex = 24;
+            this.delayTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.delayTextBox_KeyPress);
             // 
             // timeBox
             // 
@@ -202,6 +205,7 @@
             this.timeBox.Name = "timeBox";
             this.timeBox.Size = new System.Drawing.Size(120, 20);
             this.timeBox.TabIndex = 23;
+            this.timeBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.timeBox_KeyPress);
             // 
             // timeLabel
             // 
@@ -221,6 +225,7 @@
             this.commandChain.Size = new System.Drawing.Size(370, 296);
             this.commandChain.TabIndex = 0;
             this.commandChain.Tag = "";
+            this.commandChain.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.commandChain_KeyPress);
             // 
             // addDelayButton
             // 

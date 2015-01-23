@@ -147,9 +147,6 @@ namespace MyoSimGUI
                 case MyoSharp.Poses.Pose.Fist:
                     code = ParsedCommands.ParsedCommand.AsyncCommandCode.FIST;
                     break;
-                case MyoSharp.Poses.Pose.Reserved1:
-                    code = ParsedCommands.ParsedCommand.AsyncCommandCode.RESERVED1;
-                    break;
                 case MyoSharp.Poses.Pose.Rest:
                     code = ParsedCommands.ParsedCommand.AsyncCommandCode.REST;
                     break;

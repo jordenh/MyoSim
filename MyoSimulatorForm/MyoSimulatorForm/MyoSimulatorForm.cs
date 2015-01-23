@@ -25,23 +25,28 @@ namespace MyoSimGUI
         /* Holds resulting binary commands which will be sorted using the time as the key */
         private Dictionary<int, byte[]> bin_command_list = new Dictionary<int, byte[]>();
 
-        static Dictionary<string, HubCommunicator.Pose> labelToCommand = new Dictionary<string, HubCommunicator.Pose>
+        static biDirectional_Dict<string, HubCommunicator.Pose> labelToCommand
+            = new biDirectional_Dict<string, HubCommunicator.Pose>
         {
             {"Rest", HubCommunicator.Pose.REST},
             {"Fist", HubCommunicator.Pose.FIST},
             {"Wave In", HubCommunicator.Pose.WAVE_IN},
             {"Wave Out", HubCommunicator.Pose.WAVE_OUT},
             {"Fingers Spread", HubCommunicator.Pose.FINGERS_SPREAD},
-            {"Reserved 1", HubCommunicator.Pose.RESERVED1},
             {"Thumb to Pinky", HubCommunicator.Pose.THUMB_TO_PINKY},
             {"Unknown", HubCommunicator.Pose.UNKNOWN}
         };
+        static biDirectional_Dict<string, HubCommunicator.Pose>.reverse
+            commandToLabel =
+            new biDirectional_Dict<string, HubCommunicator.Pose>.reverse(
+                labelToCommand);
 
         /*
          * Events that can be sent via the script
          */
-        static Dictionary<string, HubCommunicator.EventType> labelToEvent =
-            new Dictionary<string, HubCommunicator.EventType>
+        static biDirectional_Dict<string, HubCommunicator.EventType>
+            labelToEvent =
+            new biDirectional_Dict<string, HubCommunicator.EventType>
         {
             {"Pair", HubCommunicator.EventType.PAIRED},
             {"Unpair", HubCommunicator.EventType.UNPAIRED},
@@ -50,31 +55,62 @@ namespace MyoSimGUI
             {"Arm Recognized", HubCommunicator.EventType.ARM_RECOGNIZED},
             {"Arm Lost", HubCommunicator.EventType.ARM_LOST}
         };
+        static biDirectional_Dict<string, HubCommunicator.EventType>.reverse
+            eventToLabel = 
+            new biDirectional_Dict<string,HubCommunicator.EventType>.reverse(
+                labelToEvent);
 
-        /*
+        /**
          * Translate the pretty string to the parser format. Alternatively,
          * the displayed string in labelToCommand can be changed to match the 
          * script format.
          * The script string should match the string found in the dictionary 
          * NameToAsyncCommand found in ParsedCommand.cs
          */
-        
         static Dictionary<string, string> labelToScript = new Dictionary<string, string>
         {
-            {"Rest", "rest"},
-            {"Fist", "fist"},
-            {"Wave In", "wave_in"},
-            {"Wave Out", "wave_out"},
-            {"Fingers Spread", "fingers_spread"},
-            {"Reserved 1", "reserved1"}, /* This does not have a corresponding async command */
-            {"Thumb to Pinky", "thumb_to_pinky"},
-            {"Unknown", "unknown"},
-            {"Pair", "pair"},
-            //{labelToEvent.}
+            {commandToLabel[HubCommunicator.Pose.REST],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.REST]},
+            {commandToLabel[HubCommunicator.Pose.FIST],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.FIST]},
+            {commandToLabel[HubCommunicator.Pose.WAVE_IN],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.WAVE_IN]},
+            {commandToLabel[HubCommunicator.Pose.WAVE_OUT],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.WAVE_OUT]},
+            {commandToLabel[HubCommunicator.Pose.FINGERS_SPREAD],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.FINGERS_SPREAD]},
+            {commandToLabel[HubCommunicator.Pose.THUMB_TO_PINKY],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.THUMB_TO_PINKY]},
+            {commandToLabel[HubCommunicator.Pose.UNKNOWN],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.UNKNOWN]},
+            {eventToLabel[HubCommunicator.EventType.PAIRED],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.PAIR]},
+            {eventToLabel[HubCommunicator.EventType.UNPAIRED],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.UNPAIR]},
+            {eventToLabel[HubCommunicator.EventType.CONNECTED],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.CONNECT]},
+            {eventToLabel[HubCommunicator.EventType.DISCONNECTED],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.DISCONNECT]},
+            {eventToLabel[HubCommunicator.EventType.ARM_RECOGNIZED],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED]},
+            {eventToLabel[HubCommunicator.EventType.ARM_LOST],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.ARM_LOST]}
         };
 
         private HubCommunicator hubCommunicator;
-        private List<HubCommunicator.Pose> poseList;
         private CommandRunner commandRunner;
         private Boolean currentlyRecording;
         private MyoRecorder recorder;
@@ -83,43 +119,49 @@ namespace MyoSimGUI
         {
             currentlyRecording = false;
             hubCommunicator = new HubCommunicator(pipeStream);
-            poseList = new List<HubCommunicator.Pose>();
             commandRunner = new CommandRunner(hubCommunicator);
             InitializeComponent();
             
             this.sendCommandButton.Enabled = false;
+            foreach (string key in labelToEvent.Keys)
+            {
+                this.gestureList.Items.Add(key);
+            }
+
             foreach (string key in labelToCommand.Keys)
             {
                 this.gestureList.Items.Add(key);
             }
         }
-
+        
         public void enableSendCommand()
         {
             this.sendCommandButton.Enabled = true;
         }
 
-        private void sendCommand(string label, Dictionary<string, HubCommunicator.Pose> labelToCommandMap)
+        /**
+         * Add a gesture or an event to the script box
+         * @param in label string of the command as shown in the GUI
+         * @param in labelToScriptMap Dictionary mapping the GUI string to the
+         *                            script string.
+         */
+        private void sendCommand(string label,
+                         Dictionary<string, string> labelToScriptMap)
         {
-            HubCommunicator.Pose command;
             string scriptLabel;
-            if (labelToCommandMap.TryGetValue(label, out command))
+            if (labelToScriptMap.TryGetValue(label, out scriptLabel))
             {
-                poseList.Add(command);
-                if (labelToScript.TryGetValue(label, out scriptLabel))
-                {
-                    commandChain.Text += MyoScriptParser.ASYNC_KW + " " +
-                        scriptLabel + commandDelimiter;
-                }
-                else
-                {
-                    MessageBox.Show(
-                        "Script equivalent of label \"" + label +"\" not found" /* Text */,
-                        "Invalid Label" /* Title */,
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error,
-                        MessageBoxDefaultButton.Button1);
-                }
+                commandChain.Text += MyoScriptParser.ASYNC_KW + " " +
+                    scriptLabel + commandDelimiter;
+            }
+            else
+            {
+                MessageBox.Show(
+                    "Script equivalent of label \"" + label +"\" not found" /* Text */,
+                    "Invalid Label" /* Title */,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1);
             }
         }
 
@@ -146,16 +188,31 @@ namespace MyoSimGUI
 
             }
 
-        }
+        } /* sendCommandButton_Click */
+
+        private void commandChain_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                sendCommandButton_Click(sendCommandButton, e);
+            }
+        } /*commandChain_KeyPress */
 
         private void addGestureButton_Click(object sender, EventArgs e)
         {
-            do_test_stuff();
             if (this.gestureList.SelectedItem != null)
             {
-                sendCommand(this.gestureList.SelectedItem.ToString(), labelToCommand);
+                sendCommand(this.gestureList.SelectedItem.ToString(), labelToScript);
             }
         }
+
+        private void gestureList_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                addGestureButton_Click(addGestureButton, e);
+            }
+        } /* gestureList_KeyPress */
 
         private void addRPYButton_Click(object sender, EventArgs e)
         {
@@ -197,7 +254,23 @@ namespace MyoSimGUI
                         " " + time + commandDelimiter;
                 }
             }
-        } /* AddXYZButton_Click */
+        } /* AddRPYButton_Click */
+
+        private void RPYTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                addRPYButton_Click(AddRPYButton, e);
+            }
+        } /* RPYTextBox_KeyPress */
+
+        private void timeBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                addRPYButton_Click(AddRPYButton, e);
+            }
+        } /* timeBox_KeyPress */
 
         private void addDelayButton_Click(object sender, EventArgs e)
         {
@@ -217,6 +290,14 @@ namespace MyoSimGUI
             }
 
         } /* addDelayButton_Click */
+
+        private void delayTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                addDelayButton_Click(addDelayButton, e);
+            }
+        } /* delayTextBox_KeyPress */
 
         private void MyoSimulatorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
