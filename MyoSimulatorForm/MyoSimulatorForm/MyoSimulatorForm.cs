@@ -352,7 +352,7 @@ namespace MyoSimGUI
             // TODO: Add the recording feature.
             if (!currentlyRecording)
             {
-                currentlyRecording = true;
+                currentlyRecording = true; // ***false??
                 startStopRecordingToolStripMenuItem.Text = stopRecordingLabel;
                 recorder = new MyoRecorder();
                 recorder.Record();
