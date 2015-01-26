@@ -17,10 +17,13 @@ namespace MyoSimGUI
 
         public struct RecordedData
         {
-            public RecordedData(ParsedCommand.AsyncCommandCode asyncCommand)
+            public RecordedData(ParsedCommand.AsyncCommandCode asyncCommand,
+                ParsedCommand.armDirection armDirection =
+                    new ParsedCommand.armDirection())
             {
                 this.type = RecordedDataType.ASYNC;
                 this.asyncCommand = asyncCommand;
+                this.armDirection = armDirection;
 
                 // Only the above elements should be used.
                 this.orientationQuat = new ParsedCommand.Quaternion();
@@ -38,6 +41,7 @@ namespace MyoSimGUI
 
                 // Only the above elements should be used.
                 this.asyncCommand = new ParsedCommand.AsyncCommandCode();
+                this.armDirection = new ParsedCommand.armDirection();
             }
 
             public override string ToString()
@@ -57,6 +61,7 @@ namespace MyoSimGUI
             public ParsedCommand.Quaternion orientationQuat;
             public ParsedCommand.vector3 gyroDat;
             public ParsedCommand.vector3 accelDat;
+            public ParsedCommand.armDirection armDirection;
         }
 
         public RecorderFileHandler(string recorderFileName)
@@ -69,7 +74,7 @@ namespace MyoSimGUI
             Multimap<uint, RecordedData> timestampToCommandDict = new Multimap<uint, RecordedData>();
             using (BinaryReader br = new BinaryReader(File.Open(fileName, FileMode.Open)))
             {
-                while (br.BaseStream.Position != br.BaseStream.Length)
+                while (br.BaseStream.Position < br.BaseStream.Length)
                 {
                     uint timestamp = br.ReadUInt32();
                     uint actualTime = timestamp;
@@ -80,7 +85,24 @@ namespace MyoSimGUI
                     {
                         // Asynchronous -- first bit was a 1.
                         ushort action = br.ReadUInt16();
-                        RecordedData commandData = new RecordedData((ParsedCommand.AsyncCommandCode) action);
+                        RecordedData commandData;
+                        /* ARM_RECOGNIZE command has two additional parameters */
+                        if (action ==
+                            (ushort)ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED)
+                        {
+                            byte arm = br.ReadByte();
+                            byte xDir = br.ReadByte();
+                            commandData =
+                                new RecordedData((ParsedCommand.AsyncCommandCode) action,
+                                    new ParsedCommand.armDirection(
+                                        (HubCommunicator.Arm)arm,
+                                        (HubCommunicator.XDirection)xDir));
+                        }
+                        else
+                        {
+                            commandData =
+                                new RecordedData((ParsedCommand.AsyncCommandCode)action);
+                        }
                         timestampToCommandDict.Add(actualTime, commandData);
                     }
                     else
@@ -131,6 +153,13 @@ namespace MyoSimGUI
                             br.Write(timestamp);
                             ushort action = (ushort) commandDat.asyncCommand;
                             br.Write(action);
+                            /* armRecognize (aka armSync) has extra parameters */
+                            if (commandDat.asyncCommand ==
+                                ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED)
+                            {
+                                br.Write((byte)commandDat.armDirection.arm);
+                                br.Write((byte)commandDat.armDirection.xDirection);
+                            }
                         }
                         else
                         {
@@ -148,10 +177,10 @@ namespace MyoSimGUI
                             br.Write(commandDat.accelDat.x);
                             br.Write(commandDat.accelDat.y);
                             br.Write(commandDat.accelDat.z);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+                        } /* if (commandDat.type == RecordedDataType.ASYNC) */
+                    } /* foreach (RecordedData commandDat in commandDatList) */
+                } /* foreach (KeyValuePair<uint, List<RecordedData> */
+            } /* using (BinaryWriter br */
+        } /* public void writeRecorderFile */
+    } /* class RecorderFileHandler */
+} /* namespace MyoSimGUI */

@@ -190,14 +190,6 @@ namespace MyoSimGUI
 
         } /* sendCommandButton_Click */
 
-        private void commandChain_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)Keys.Enter)
-            {
-                sendCommandButton_Click(sendCommandButton, e);
-            }
-        } /*commandChain_KeyPress */
-
         private void addGestureButton_Click(object sender, EventArgs e)
         {
             if (this.gestureList.SelectedItem != null)
@@ -325,7 +317,7 @@ namespace MyoSimGUI
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Title = "Open Recorded Binary Midas (RBM) File";
             openFileDialog.Filter = "RBM files|*.rbm";
-            openFileDialog.InitialDirectory = @"C:\";
+            openFileDialog.RestoreDirectory = true;
             if (getOpenFileDialogResult(openFileDialog) == DialogResult.OK)
             {
                 string fileName = openFileDialog.FileName;
@@ -352,7 +344,7 @@ namespace MyoSimGUI
             // TODO: Add the recording feature.
             if (!currentlyRecording)
             {
-                currentlyRecording = true; // ***false??
+                currentlyRecording = true;
                 startStopRecordingToolStripMenuItem.Text = stopRecordingLabel;
                 recorder = new MyoRecorder();
                 recorder.Record();
@@ -387,7 +379,6 @@ namespace MyoSimGUI
                 StreamReader sr = new StreamReader(openFileDialog.FileName);
                 string commands = sr.ReadToEnd();
                 commandChain.Text = commands;
-                // script path is dead replace by copying script over to run box scriptPath.Text = openFileDialog.FileName;
             }
         }
 

@@ -44,7 +44,6 @@ namespace MyoSimGUI
             WAVE_IN,
             WAVE_OUT,
             FINGERS_SPREAD,
-            RESERVED1,
             THUMB_TO_PINKY,
             UNKNOWN
         }
@@ -75,9 +74,6 @@ namespace MyoSimGUI
                     break;
                 case ParsedCommand.AsyncCommandCode.FINGERS_SPREAD:
                     pose = Pose.FINGERS_SPREAD;
-                    break;
-                case ParsedCommand.AsyncCommandCode.RESERVED1:
-                    pose = Pose.RESERVED1;
                     break;
                 case ParsedCommand.AsyncCommandCode.THUMB_TO_PINKY:
                     pose = Pose.THUMB_TO_PINKY;

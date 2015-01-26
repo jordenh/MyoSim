@@ -13,9 +13,11 @@ namespace MyoSimGUI
         ParsedCommands.ParsedCommand.Quaternion storedOrientation;
         ParsedCommands.ParsedCommand.vector3 storedAccel;
         ParsedCommands.ParsedCommand.vector3 storedGyro;
+        ParsedCommands.ParsedCommand.armDirection storedArmDirection;
         long firstTime;
         MyoSharp.Device.IHub hub;
         MyoSharp.Device.IMyo connectedMyo;
+
 
         public MyoRecorder()
         {
@@ -113,9 +115,13 @@ namespace MyoSimGUI
         {
             long millis = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             uint time = (uint)(millis - firstTime);
+            storedArmDirection = new ParsedCommands.ParsedCommand.armDirection(
+                                    (HubCommunicator.Arm)e.Arm,
+                                    (HubCommunicator.XDirection)e.XDirection);
             timestampToData.Add(time, 
                 new RecorderFileHandler.RecordedData(
-                    ParsedCommands.ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED));
+                    ParsedCommands.ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED,
+                    storedArmDirection));
         }
 
         private void Myo_ArmLost(object sender, MyoEventArgs e)
