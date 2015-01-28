@@ -47,7 +47,7 @@ namespace myoSim
 
             if (!WaitNamedPipe(pipeName, timeout))
             {
-                printf("Could not open pipe: 20 second wait time out.");
+                printf("Could not open pipe: %3f second wait time out.", (float)timeout/1000);
                 return false;
             }
         }
