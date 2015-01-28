@@ -13,32 +13,104 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using MyoSimGUI.ParsedCommands;
 
-
 namespace MyoSimGUI
 {
     public partial class MyoSimulatorForm : Form
     {
-        public const string commandDelimiter = ", ";
         public const string stopRecordingLabel = "Stop Recording";
         public const string startRecordingLabel = "Start Recording";
+
+        private string commandDelimiter = Environment.NewLine;
 
         /* Holds resulting binary commands which will be sorted using the time as the key */
         private Dictionary<int, byte[]> bin_command_list = new Dictionary<int, byte[]>();
 
-        static Dictionary<string, HubCommunicator.Pose> labelToCommand = new Dictionary<string, HubCommunicator.Pose>
+        static biDirectional_Dict<string, HubCommunicator.Pose> labelToCommand
+            = new biDirectional_Dict<string, HubCommunicator.Pose>
         {
             {"Rest", HubCommunicator.Pose.REST},
             {"Fist", HubCommunicator.Pose.FIST},
             {"Wave In", HubCommunicator.Pose.WAVE_IN},
             {"Wave Out", HubCommunicator.Pose.WAVE_OUT},
             {"Fingers Spread", HubCommunicator.Pose.FINGERS_SPREAD},
-            {"Reserved 1", HubCommunicator.Pose.RESERVED1},
             {"Thumb to Pinky", HubCommunicator.Pose.THUMB_TO_PINKY},
             {"Unknown", HubCommunicator.Pose.UNKNOWN}
         };
+        static biDirectional_Dict<string, HubCommunicator.Pose>.reverse
+            commandToLabel =
+            new biDirectional_Dict<string, HubCommunicator.Pose>.reverse(
+                labelToCommand);
+
+        /*
+         * Events that can be sent via the script
+         */
+        static biDirectional_Dict<string, HubCommunicator.EventType>
+            labelToEvent =
+            new biDirectional_Dict<string, HubCommunicator.EventType>
+        {
+            {"Pair", HubCommunicator.EventType.PAIRED},
+            {"Unpair", HubCommunicator.EventType.UNPAIRED},
+            {"Connect", HubCommunicator.EventType.CONNECTED},
+            {"Disconnect", HubCommunicator.EventType.DISCONNECTED},
+            {"Arm Recognized", HubCommunicator.EventType.ARM_RECOGNIZED},
+            {"Arm Lost", HubCommunicator.EventType.ARM_LOST}
+        };
+        static biDirectional_Dict<string, HubCommunicator.EventType>.reverse
+            eventToLabel = 
+            new biDirectional_Dict<string,HubCommunicator.EventType>.reverse(
+                labelToEvent);
+
+        /**
+         * Translate the pretty string to the parser format. Alternatively,
+         * the displayed string in labelToCommand can be changed to match the 
+         * script format.
+         * The script string should match the string found in the dictionary 
+         * NameToAsyncCommand found in ParsedCommand.cs
+         */
+        static Dictionary<string, string> labelToScript = new Dictionary<string, string>
+        {
+            {commandToLabel[HubCommunicator.Pose.REST],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.REST]},
+            {commandToLabel[HubCommunicator.Pose.FIST],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.FIST]},
+            {commandToLabel[HubCommunicator.Pose.WAVE_IN],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.WAVE_IN]},
+            {commandToLabel[HubCommunicator.Pose.WAVE_OUT],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.WAVE_OUT]},
+            {commandToLabel[HubCommunicator.Pose.FINGERS_SPREAD],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.FINGERS_SPREAD]},
+            {commandToLabel[HubCommunicator.Pose.THUMB_TO_PINKY],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.THUMB_TO_PINKY]},
+            {commandToLabel[HubCommunicator.Pose.UNKNOWN],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.UNKNOWN]},
+            {eventToLabel[HubCommunicator.EventType.PAIRED],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.PAIR]},
+            {eventToLabel[HubCommunicator.EventType.UNPAIRED],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.UNPAIR]},
+            {eventToLabel[HubCommunicator.EventType.CONNECTED],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.CONNECT]},
+            {eventToLabel[HubCommunicator.EventType.DISCONNECTED],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.DISCONNECT]},
+            {eventToLabel[HubCommunicator.EventType.ARM_RECOGNIZED],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED]},
+            {eventToLabel[HubCommunicator.EventType.ARM_LOST],
+                ParsedCommand.AsyncCommandToName[
+                    ParsedCommand.AsyncCommandCode.ARM_LOST]}
+        };
 
         private HubCommunicator hubCommunicator;
-        private List<HubCommunicator.Pose> poseList;
         private CommandRunner commandRunner;
         private Boolean currentlyRecording;
         private MyoRecorder recorder;
@@ -47,50 +119,67 @@ namespace MyoSimGUI
         {
             currentlyRecording = false;
             hubCommunicator = new HubCommunicator(pipeStream);
-            poseList = new List<HubCommunicator.Pose>();
             commandRunner = new CommandRunner(hubCommunicator);
             InitializeComponent();
             
             this.sendCommandButton.Enabled = false;
+            foreach (string key in labelToEvent.Keys)
+            {
+                this.gestureList.Items.Add(key);
+            }
+
             foreach (string key in labelToCommand.Keys)
             {
                 this.gestureList.Items.Add(key);
             }
         }
-
+        
         public void enableSendCommand()
         {
             this.sendCommandButton.Enabled = true;
         }
 
-        private void sendCommand(string label, Dictionary<string, HubCommunicator.Pose> labelToCommandMap)
+        /**
+         * Add a gesture or an event to the script box
+         * @param in label string of the command as shown in the GUI
+         * @param in labelToScriptMap Dictionary mapping the GUI string to the
+         *                            script string.
+         */
+        private void sendCommand(string label,
+                         Dictionary<string, string> labelToScriptMap)
         {
-            HubCommunicator.Pose command;
-            if (labelToCommandMap.TryGetValue(label, out command))
+            string scriptLabel;
+            if (labelToScriptMap.TryGetValue(label, out scriptLabel))
             {
-                poseList.Add(command);
-                commandChain.Text = string.Concat(commandChain.Text, label + commandDelimiter);
+                commandChain.Text += MyoScriptParser.ASYNC_KW + " " +
+                    scriptLabel + commandDelimiter;
+            }
+            else
+            {
+                MessageBox.Show(
+                    "Script equivalent of label \"" + label +"\" not found" /* Text */,
+                    "Invalid Label" /* Title */,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error,
+                    MessageBoxDefaultButton.Button1);
             }
         }
 
         private void sendCommandButton_Click(object sender, EventArgs e)
         {
             string command = commandChain.Text;
+            MyoScriptParser parser = new MyoScriptParser(command, false);
+            Multimap<uint, ParsedCommand> timestampToParsedCommands;
 
             try
             {
-                foreach (HubCommunicator.Pose pose in poseList)
+                timestampToParsedCommands = parser.parseScript();
+                if (!hubCommunicator.isConnected())
                 {
-                    System.Console.WriteLine("Pose to send: " + pose);
-
-                    if (!hubCommunicator.isConnected())
-                    {
-                        System.Console.WriteLine("Failed to connect!!");
-                        return;
-                    }
-
-                    hubCommunicator.SendPose(pose);
+                    System.Console.WriteLine("Failed to connect!!");
+                    return;
                 }
+                commandRunner.runCommands(timestampToParsedCommands);
             }
             catch (Exception error)
             {
@@ -99,12 +188,116 @@ namespace MyoSimGUI
 
             }
 
-        }
+        } /* sendCommandButton_Click */
+
+        private void commandChain_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                sendCommandButton_Click(sendCommandButton, e);
+            }
+        } /*commandChain_KeyPress */
 
         private void addGestureButton_Click(object sender, EventArgs e)
         {
-            sendCommand(this.gestureList.SelectedItem.ToString(), labelToCommand);
+            if (this.gestureList.SelectedItem != null)
+            {
+                sendCommand(this.gestureList.SelectedItem.ToString(), labelToScript);
+            }
         }
+
+        private void gestureList_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                addGestureButton_Click(addGestureButton, e);
+            }
+        } /* gestureList_KeyPress */
+
+        private void addRPYButton_Click(object sender, EventArgs e)
+        {
+            string orientString = RPYTextBox.Text;
+            string timeString = timeBox.Text;
+            string[] splitOrient;
+            double roll, pitch, yaw;
+            int time;
+            char[] rpyDelim = {' '};
+
+            if (String.IsNullOrWhiteSpace(orientString) ||
+                String.IsNullOrWhiteSpace(timeString))
+            {
+                MessageBox.Show("Fill in both the XYZ and Time box.");
+            }
+            else
+            {
+                splitOrient = orientString.Split(rpyDelim, 3);
+                if (splitOrient.Length != 3)
+                {
+                    MessageBox.Show("The roll, pitch, and yaw must be three " +
+                        "numbers separated by a space.");
+                }
+                else if (!Int32.TryParse(timeString, out time) ||
+                         !Double.TryParse(splitOrient[0], out roll) ||
+                         !Double.TryParse(splitOrient[1], out pitch) ||
+                         !Double.TryParse(splitOrient[2], out yaw) ||
+                         time <= 0)
+                {
+                    /* Check to make sure all values are numbers and valid*/
+                    MessageBox.Show("Enter three numbers in the XYZ box " +
+                                    "separated by spaces and a positive " +
+                                    "integer into into the Time box.\n");
+                }
+                else
+                {
+                    commandChain.Text += MyoScriptParser.MOVE_KW +" " + roll +
+                        " " + pitch + " " + yaw +
+                        " " + time + commandDelimiter;
+                }
+            }
+        } /* AddRPYButton_Click */
+
+        private void RPYTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                addRPYButton_Click(AddRPYButton, e);
+            }
+        } /* RPYTextBox_KeyPress */
+
+        private void timeBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                addRPYButton_Click(AddRPYButton, e);
+            }
+        } /* timeBox_KeyPress */
+
+        private void addDelayButton_Click(object sender, EventArgs e)
+        {
+            string delayString = delayTextBox.Text;
+            int delayNum;
+            
+            if (!Int32.TryParse(delayString, out delayNum) ||
+                delayNum <= 0)
+            {
+                MessageBox.Show(
+                    "Enter a positive integer into the Delay box.");
+            }
+            else
+            {
+                commandChain.Text += MyoScriptParser.DELAY_KW +" " +
+                    delayNum + commandDelimiter;
+            }
+
+        } /* addDelayButton_Click */
+
+        private void delayTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                addDelayButton_Click(addDelayButton, e);
+            }
+        } /* delayTextBox_KeyPress */
 
         private void MyoSimulatorForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -154,35 +347,12 @@ namespace MyoSimGUI
             }
         }
 
-        private void loadScriptToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Title = "Open Script File";
-            openFileDialog.Filter = "TXT files|*.txt";
-            openFileDialog.InitialDirectory = @"C:\";
-            if (getOpenFileDialogResult(openFileDialog) == DialogResult.OK)
-            {
-                scriptPath.Text = openFileDialog.FileName;
-            }
-        }
-
-        private DialogResult getOpenFileDialogResult(OpenFileDialog dialog)
-        {
-            OpenFileDialogResult dialogResult = new OpenFileDialogResult(dialog);
-            System.Threading.Thread dialogThread = new System.Threading.Thread(dialogResult.threadShowDialog);
-            dialogThread.SetApartmentState(System.Threading.ApartmentState.STA);
-            dialogThread.Start();
-            dialogThread.Join();
-
-            return dialogResult.getResult();
-        }
-
         private void startStopRecordingToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // TODO: Add the recording feature.
             if (!currentlyRecording)
             {
-                currentlyRecording = true;
+                currentlyRecording = true; // ***false??
                 startStopRecordingToolStripMenuItem.Text = stopRecordingLabel;
                 recorder = new MyoRecorder();
                 recorder.Record();
@@ -206,33 +376,60 @@ namespace MyoSimGUI
             }
         }
 
-        private void runScriptButton_Click(object sender, EventArgs e)
+        private void loadScriptToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string fileName = scriptPath.Text;
-
-            if (fileName.Length > 0)
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "Open Script File";
+            openFileDialog.Filter = "TXT files|*.txt";
+            openFileDialog.RestoreDirectory = true;
+            if (getOpenFileDialogResult(openFileDialog) == DialogResult.OK)
             {
-                MyoScriptParser parser = new MyoScriptParser(fileName);
-
-                Multimap<uint, ParsedCommand> timestampToParsedCommands;
-
-                try
-                {
-                    timestampToParsedCommands = parser.parseScript();
-                }
-                catch (ArgumentException except)
-                {
-                    MessageBox.Show(except.ToString(), string.Format("File does not exist"));
-                    return;
-                }
-                catch (FileNotFoundException except)
-                {
-                    MessageBox.Show(except.ToString(), string.Format("File not found"));
-                    return;
-                }
-
-                commandRunner.runCommands(timestampToParsedCommands);
+                StreamReader sr = new StreamReader(openFileDialog.FileName);
+                string commands = sr.ReadToEnd();
+                commandChain.Text = commands;
+                // script path is dead replace by copying script over to run box scriptPath.Text = openFileDialog.FileName;
             }
+        }
+
+        private DialogResult getOpenFileDialogResult(OpenFileDialog dialog)
+        {
+            OpenFileDialogResult dialogResult = new OpenFileDialogResult(dialog);
+            System.Threading.Thread dialogThread = new System.Threading.Thread(dialogResult.threadShowDialog);
+            dialogThread.SetApartmentState(System.Threading.ApartmentState.STA);
+            dialogThread.Start();
+            dialogThread.Join();
+
+            return dialogResult.getResult();
+        }
+
+        private void saveScriptToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "Save Script File";
+            saveFileDialog.Filter = "TXT files|*.txt";
+            saveFileDialog.RestoreDirectory = true;
+            saveFileDialog.OverwritePrompt = true;
+            
+            if (getSaveFileDialogResult(saveFileDialog) == DialogResult.OK)
+            {
+                System.Console.WriteLine(saveFileDialog.FileName);
+                System.IO.File.WriteAllText(saveFileDialog.FileName,
+                    commandChain.Text);
+            }
+        }
+
+        private DialogResult getSaveFileDialogResult(SaveFileDialog dialog)
+        {
+            SaveFileDialogResult dialogResult =
+                new SaveFileDialogResult(dialog);
+            System.Threading.Thread dialogThread =
+                new System.Threading.Thread(dialogResult.threadShowDialog);
+            //dialogThread.SetApartmentState(System.Threading.ApartmentState.STA);
+            dialogThread.TrySetApartmentState(ApartmentState.STA);
+            dialogThread.Start();
+            dialogThread.Join();
+
+            return dialogResult.getResult();
         }
 
         public class OpenFileDialogResult
@@ -254,6 +451,28 @@ namespace MyoSimGUI
             {
                 result = openFileDialog.ShowDialog();
             }
+        } /* public class OpenFileDialogResult */
+
+        public class SaveFileDialogResult
+        {
+            private SaveFileDialog saveFileDialog;
+            private DialogResult result;
+
+            public SaveFileDialogResult(SaveFileDialog dialog)
+            {
+                saveFileDialog = dialog;
+            }
+
+            public DialogResult getResult()
+            {
+                return result;
+            }
+
+            public void threadShowDialog()
+            {
+                result = saveFileDialog.ShowDialog();
+            }
         }
-    }
-}
+
+    } /* public partial class MyoSimulatorForm : Form */
+} /* namespace MyoSimGUI */
