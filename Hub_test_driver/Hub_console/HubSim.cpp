@@ -1,11 +1,29 @@
 #include "stdafx.h"
 #include "HubSim.hpp"
 #include "DeviceListenerSim.h"
+#include <string>
+#include <iostream>
+#include <map>
+#include <cfloat>
 
-// TODO: This will change when we come up with a protocol.
-#define MAX_MESSAGE_LEN 50
+#define PIPE_COMM_HEADER_SIZE 3
+#define SYNC_DATA_NUM_BYTES 40
+#define SYNC_DATA_NUM_FLOATS 10
+#define POSE_DATA_NUM_BYTES 2
+#define ARM_RECOGNIZED_DATA_NUM_BYTES 2
 
 using namespace myoSim;
+
+std::map<EventType, myoSimEvent> Hub::eventTypeToEventMap = {
+        { ET_PAIRED, myoSimEvent::paired },
+        { ET_UNPAIRED, myoSimEvent::unpaired },
+        { ET_CONNECTED, myoSimEvent::connected },
+        { ET_DISCONNECTED, myoSimEvent::disconnected },
+        { ET_ARM_RECOGNIZED, myoSimEvent::armRecognized },
+        { ET_ARM_LOST, myoSimEvent::armLost },
+        { ET_SYNC_DAT, myoSimEvent::orientation },
+        { ET_POSE, myoSimEvent::pose }
+};
 
 Hub::Hub(const std::string& applicationIdentifier)
 {
@@ -100,12 +118,12 @@ void Hub::onDeviceEvent(SimEvent simEvent)
                 simEvent.getYOrientation(), simEvent.getZOrientation(), simEvent.getWOrientation());
             listener->onOrientationData(myo, timestamp, orientation);
 
-            myo::Vector3<float> accelerometerData = myo::Vector3<float>(simEvent.getAccelerometerData(vectorIndex::first),
-                simEvent.getAccelerometerData(vectorIndex::second), simEvent.getAccelerometerData(vectorIndex::third));
+            myo::Vector3<float> accelerometerData = myo::Vector3<float>(simEvent.getAccelerometerX(),
+                simEvent.getAccelerometerY(), simEvent.getAccelerometerZ());
             listener->onAccelerometerData(myo, timestamp, accelerometerData);
 
-            myo::Vector3<float> gyroData = myo::Vector3<float>(simEvent.getGyroscopeData(vectorIndex::first),
-                simEvent.getGyroscopeData(vectorIndex::second), simEvent.getGyroscopeData(vectorIndex::third));
+            myo::Vector3<float> gyroData = myo::Vector3<float>(simEvent.getGyroscopeYawPerSecond(),
+                simEvent.getGyroscopePitchPerSecond(), simEvent.getGyroscopeRollPerSecond());
             listener->onGyroscopeData(myo, timestamp, gyroData);
             break;
         }
@@ -130,11 +148,24 @@ Myo* Hub::addMyo(unsigned int identifier)
     return myo;
 }
 
+unsigned short Hub::extractUnsignedShort(TCHAR* bytes)
+{
+    unsigned short us;
+    memcpy(&us, bytes, sizeof(us));
+    return us;
+}
+
+float Hub::extractFloat(TCHAR* bytes)
+{
+    float f;
+    memcpy(&f, bytes, sizeof(f));
+    return f;
+}
+
 void Hub::run(unsigned int duration_ms)
 {
     // Run for duration_ms, read from named pipe for events, form a SimEvent
-    // object based on received information, dispatch events to onDeviceEvent
-    
+    // object based on received information, dispatch events to onDeviceEvent  
     std::vector<Myo*>::iterator it;
     DWORD startTime = GetTickCount();
     while (true)
@@ -143,74 +174,75 @@ void Hub::run(unsigned int duration_ms)
 
         for (it = myos.begin(); it != myos.end(); it++)
         {
-            // TODO: Implement some way of data packing, so that we don't
-            // have to read the raw data here.
-            TCHAR buffer[MAX_MESSAGE_LEN];
-            unsigned int numBytes = MAX_MESSAGE_LEN;
             DWORD actualBytes;
-            ZeroMemory(buffer, MAX_MESSAGE_LEN);
 
-            bool success = (*it)->readFromPipe(buffer, numBytes, &actualBytes);
-
-            if (success)
+            if ((*it)->getReadTimeout() != duration_ms)
             {
-                std::string message(buffer);
-                SimEvent evt;
-
-            if (message == "DCed")
-            {
-                evt.setEventType(myoSimEvent::disconnected);
+                (*it)->setReadTimeout(duration_ms);
             }
-            // TODO: For now, all data received is pose data. Must change to support all data. 
-            // Will do that once protocol has been decided.
+
+            // Read 
+            TCHAR header[PIPE_COMM_HEADER_SIZE];
+            bool success = (*it)->readFromPipe(header, PIPE_COMM_HEADER_SIZE, &actualBytes);
+
+            if (!success) continue;
+
+            unsigned char dataSize = header[0];
+            unsigned short eventType = extractUnsignedShort(&(header[1]));
+
+            SimEvent evt;
+
+            //TODO: Check that dataSize agrees with the expected sizes.
+            if (eventType == ET_SYNC_DAT)
+            {
+                TCHAR dat[SYNC_DATA_NUM_BYTES];
+                success = (*it)->readFromPipe(dat, SYNC_DATA_NUM_BYTES, &actualBytes);
+
+                if (!success) continue;
+
+                float floatData[SYNC_DATA_NUM_FLOATS];
+                for (int i = 0; i < SYNC_DATA_NUM_FLOATS; i++)
+                {
+                    floatData[i] = extractFloat(&(dat[i * sizeof(float)]));
+                }
+
+                evt.setEventType(myoSimEvent::orientation);
+                evt.setOrientation(floatData[0], floatData[1], floatData[2], floatData[3]);
+                evt.setGyroscopeData(floatData[4], floatData[5], floatData[6]);
+                evt.setAccelerometerData(floatData[7], floatData[8], floatData[9]);
+
+            }
+            else if (eventType == ET_POSE)
+            {
+                TCHAR dat[POSE_DATA_NUM_BYTES];
+                success = (*it)->readFromPipe(dat, POSE_DATA_NUM_BYTES, &actualBytes);
+
+                if (!success) continue;
+
+                unsigned short poseType = extractUnsignedShort(dat);
+
+                evt.setEventType(myoSimEvent::pose);
+                evt.setPose(Pose((Pose::Type) poseType));
+            }
+            else if (eventType == ET_ARM_RECOGNIZED)
+            {
+                TCHAR dat[ARM_RECOGNIZED_DATA_NUM_BYTES];
+                success = (*it)->readFromPipe(dat, ARM_RECOGNIZED_DATA_NUM_BYTES, &actualBytes);
+
+                if (!success) continue;
+                evt.setArm((Arm) dat[0]);
+                evt.setXDirection((XDirection) dat[1]);
+                evt.setEventType(myoSimEvent::armRecognized);
+            }
             else
             {
-                evt.setEventType(myoSimEvent::pose);
-                // TODO: Have a proper way of dealing with this. Do it in 
-                // a different class. Perhaps have the Myo class convert
-                // messages to events first.
-                if (message == "rest")
-                {
-                    myo::Pose pose(myo::Pose::rest);
-                    evt.setPose(pose);
-                }
-                else if (message == "fist")
-                {
-                    myo::Pose pose(myo::Pose::fist);
-                    evt.setPose(pose);
-                }
-                else if (message == "waveIn")
-                {
-                    myo::Pose pose(myo::Pose::waveIn);
-                    evt.setPose(pose);
-                }
-                else if (message == "waveOut")
-                {
-                    myo::Pose pose(myo::Pose::waveOut);
-                    evt.setPose(pose);
-                }
-                else if (message == "fingersSpread")
-                {
-                    myo::Pose pose(myo::Pose::fingersSpread);
-                    evt.setPose(pose);
-                }
-                else if (message == "thumbToPinky")
-                {
-                    myo::Pose pose(myo::Pose::thumbToPinky);
-                    evt.setPose(pose);
-                }
-                else
-                {
-                    myo::Pose pose(myo::Pose::unknown);
-                    evt.setPose(pose);
-                }
-            } // if (message == "DCed")
-
-                evt.setTimestamp(GetTickCount());
-                evt.setMyoIdentifier((*it)->getIdentifier());
-
-                onDeviceEvent(evt);
+                evt.setEventType(eventTypeToEventMap[(EventType) eventType]);
             }
+                                            
+            evt.setTimestamp(GetTickCount());
+            evt.setMyoIdentifier((*it)->getIdentifier());
+
+            onDeviceEvent(evt);        
         }
     }
 }

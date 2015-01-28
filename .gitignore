@@ -21,6 +21,8 @@
 *.la
 *.a
 *.lib
+!gtestd.lib
+!gtest_main-mdd.lib
 
 # Executables
 *.exe
@@ -34,3 +36,11 @@
 TemporaryGeneratedFile*.cs
 *.cache
 *.suo
+
+*.sdf
+*.opensdf
+*Debug
+*/ipch
+!*/lib/MyoSharp.dll
+!*/lib/x64/myo.dll
+!*/lib/x86/myo.dll

@@ -3,10 +3,9 @@
 #pragma once
 
 #include <stdint.h>
-
-#include "myo/cxx/Pose.hpp"
-#include "myo/cxx/Quaternion.hpp"
-#include "myo/cxx/Vector3.hpp"
+#include "SimQuaternion.h"
+#include "SimVector3.h"
+#include "PoseSim.h"
 
 namespace myoSim {
 
@@ -59,16 +58,16 @@ namespace myoSim {
         virtual void onArmLost(Myo* myo, uint64_t timestamp) {}
 
         /// Called when a paired Myo has provided a new pose.
-        virtual void onPose(Myo* myo, uint64_t timestamp, myo::Pose pose) {}
+        virtual void onPose(Myo* myo, uint64_t timestamp, Pose pose) {}
 
         /// Called when a paired Myo has provided new orientation data.
-        virtual void onOrientationData(Myo* myo, uint64_t timestamp, const myo::Quaternion<float>& rotation) {}
+        virtual void onOrientationData(Myo* myo, uint64_t timestamp, const Quaternion<float>& rotation) {}
 
         /// Called when a paired Myo has provided new accelerometer data in units of g.
-        virtual void onAccelerometerData(Myo* myo, uint64_t timestamp, const myo::Vector3<float>& accel) {}
+        virtual void onAccelerometerData(Myo* myo, uint64_t timestamp, const Vector3<float>& accel) {}
 
         /// Called when a paired Myo has provided new gyroscope data in units of deg/s.
-        virtual void onGyroscopeData(Myo* myo, uint64_t timestamp, const myo::Vector3<float>& gyro) {}
+        virtual void onGyroscopeData(Myo* myo, uint64_t timestamp, const Vector3<float>& gyro) {}
 
         /// Called when a paired Myo has provided a new RSSI value.
         /// @see Myo::requestRssi() to request an RSSI value from the Myo.

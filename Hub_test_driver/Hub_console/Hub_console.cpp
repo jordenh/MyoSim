@@ -18,9 +18,7 @@
 #define USE_SIMULATOR
 
 #ifdef USE_SIMULATOR
-#include "HubSim.hpp"
-#include "MyoSim.h"
-#include "DeviceListenerSim.h"
+#include "MyoSimIncludes.hpp"
 #endif
 
 #ifdef USE_SIMULATOR
@@ -45,30 +43,38 @@ public:
     void onDisconnect(Myo* myo, uint64_t timestamp)
     {
         std::string temp;
-        std::cout << "unknown received" << std::endl;
+        std::cout << "On Disconnect!" << std::endl;
         isDisconnected = true;
         std::cin >> temp;
-    }
 
+    }
     // onPose() is called whenever the Myo detects that the person wearing it has changed their pose, for example,
     // making a fist, or not making a fist anymore.
-    void onPose(Myo* myo, uint64_t timestamp, myo::Pose pose)
+    void onPose(Myo* myo, uint64_t timestamp, Pose pose)
     {
-        if (currentPose.type() != pose.type())
-        {
-            std::string poseString = pose.toString();
-            std::cout << "Current pose: " << poseString << std::endl;
-        }
-
-        currentPose = pose;
-        // Vibrate the Myo whenever we've detected that the user has made a fist.
-        if (pose == myo::Pose::fist) {
-            myo->vibrate(myo::Myo::vibrationMedium);
-        }
+        std::cout << "Pose: " << pose.toString() << " *****************************************************************" << std::endl;
     }
 
-    myo::Pose currentPose;
+    void onOrientationData(Myo* myo, uint64_t timestamp, const Quaternion<float>& rotation) 
+    {
+        std::cout << "Orientation: (" << rotation.x() << ", " << rotation.y() << ", " << rotation.z() << ", " << rotation.w() << ")" << std::endl;
+    }
+
+    /// Called when a paired Myo has provided new accelerometer data in units of g.
+    void onAccelerometerData(Myo* myo, uint64_t timestamp, const Vector3<float>& accel) 
+    {
+        std::cout << "Accelerometer: (" << accel.x() << ", " << accel.y() << ", " << accel.z() << std::endl;
+    }
+
+    /// Called when a paired Myo has provided new gyroscope data in units of deg/s.
+    void onGyroscopeData(Myo* myo, uint64_t timestamp, const Vector3<float>& gyro) 
+    {
+        std::cout << "Gyro: (" << gyro.x() << ", " << gyro.y() << ", " << gyro.z() << std::endl;
+    }
+
+    Pose currentPose;
 };
+
 int main(int argc, char** argv)
 {
     try {
@@ -76,8 +82,9 @@ int main(int argc, char** argv)
         std::cout << "Attempting to find a Myo..." << std::endl;
 
         Myo* myo = hub.waitForMyo(10000);
-
+       
         if (!myo) {
+
             throw std::runtime_error("Unable to find a Myo!");
         }
 
@@ -90,7 +97,7 @@ int main(int argc, char** argv)
             hub.run(1000 / 20);
             if (isDisconnected)
             {
-	            break;
+                break;
             }
         }
     }
@@ -101,61 +108,3 @@ int main(int argc, char** argv)
         return 1;
     }
 }
-
-/*
-#include "stdafx.h"
-#include <Windows.h>
-#include <myo/myo.hpp>
-
-#define BUFFER_SIZE 512
-
-int _tmain(int argc, _TCHAR* argv[])
-{
-    HANDLE pipe;
-    LPTSTR pipeName = TEXT("\\\\.\\pipe\\BvrPipe");
-
-    while (true)
-    {
-        pipe = CreateFile(pipeName, GENERIC_READ | GENERIC_WRITE, 0, 
-            NULL, OPEN_EXISTING, 0, NULL);
-
-        if (pipe != INVALID_HANDLE_VALUE) break;
-
-        if (GetLastError() != ERROR_PIPE_BUSY)
-        {
-            std::cout << "Could not open pipe. Last error=" << GetLastError() << std::endl;
-            return -1;
-        }
-
-        if (!WaitNamedPipe(pipeName, 20000))
-        {
-            printf("Could not open pipe: 20 second wait time out.");
-            return -1;
-        }
-    }
-
-    BOOL success;
-    do
-    {
-        TCHAR buffer[BUFFER_SIZE];
-        DWORD numBytes;
-        ZeroMemory(buffer, BUFFER_SIZE);
-        success = ReadFile(pipe, buffer, BUFFER_SIZE*sizeof(TCHAR), &numBytes, NULL);
-
-        if (!success && GetLastError() != ERROR_MORE_DATA) break;
-
-        std::cout << buffer << std::endl;
-    } while (!success);
-
-    if (!success)
-    {
-        std::cout << "ReadFile from pipe failed. Last error=" << GetLastError() << std::endl;
-        return -1;
-    }
-    
-    system("PAUSE");
-    CloseHandle(pipe);
-	return 0;
-}
-
-*/
