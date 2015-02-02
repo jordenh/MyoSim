@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Forms;
 using System.IO;
 using System.IO.Pipes;
@@ -487,22 +488,50 @@ namespace MyoSimGUI
             Form form = new Form();
             Label armLabel = new Label();
             Label xDirLabel = new Label();
-            RadioButton armChoices = new RadioButton();
-            RadioButton xDirChoices = new RadioButton();
+            GroupBox armRadioButtonBox = new GroupBox();
+            RadioButton armChoicesLeft = new RadioButton();
+            RadioButton armChoicesRight = new RadioButton();
+            GroupBox xDirRadioButtonBox = new GroupBox();
+            RadioButton xDirChoicesWrist = new RadioButton();
+            RadioButton xDirChoicesElbow = new RadioButton();
             Button okButton = new Button();
             Button cancelButton = new Button();
 
-            okButton.Text = "OK";
-            cancelButton.Text = "Cancel";
-            okButton.DialogResult = DialogResult.OK;
-            cancelButton.DialogResult = DialogResult.Cancel;
 
             armLabel.Text = "Arm:";
+            armLabel.Location = new Point(10, 10);
+            armChoicesLeft.Location = new Point(armLabel.Left, armLabel.Bottom);
+
             xDirLabel.Text = "Myo XDirection:";
+            xDirLabel.Location = new Point(armChoicesLeft.Left, armChoicesLeft.Bottom);
+            xDirChoicesWrist.Location = new Point(xDirLabel.Left, xDirLabel.Bottom);
+            
+            okButton.Text = "OK";
+            okButton.DialogResult = DialogResult.OK;
+//            okButton.Anchor = (System.Windows.Forms.AnchorStyles.Right |
+ //                              System.Windows.Forms.AnchorStyles.Top);
+            okButton.Location = new Point(form.Left, xDirChoicesWrist.Bottom);
 
+            cancelButton.Text = "Cancel";
+            cancelButton.DialogResult = DialogResult.Cancel;
+            //cancelButton.Anchor = (System.Windows.Forms.AnchorStyles.Right |
+             //                      System.Windows.Forms.AnchorStyles.Top);
+            cancelButton.Location = new Point(okButton.Right, xDirChoicesWrist.Bottom);
+            
 
+            form.Text = "Choose arm settings";
             form.AcceptButton = okButton;
             form.CancelButton = cancelButton;
+            form.StartPosition = FormStartPosition.CenterParent;
+
+            /* Add buttons */
+            form.Controls.Add(armLabel);
+            form.Controls.Add(armChoicesLeft);
+            form.Controls.Add(xDirLabel);
+            form.Controls.Add(xDirChoicesWrist);
+            form.Controls.Add(okButton);
+            form.Controls.Add(cancelButton);
+
             DialogResult dialogResult = form.ShowDialog();
             //arm_value = ;
             //xDir_value = ;
