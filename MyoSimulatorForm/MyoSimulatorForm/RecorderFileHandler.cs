@@ -18,8 +18,8 @@ namespace MyoSimGUI
         public struct RecordedData
         {
             public RecordedData(ParsedCommand.AsyncCommandCode asyncCommand,
-                ParsedCommand.armDirection armDirection =
-                    new ParsedCommand.armDirection())
+                AsyncCommand.armDirection armDirection =
+                    new AsyncCommand.armDirection())
             {
                 this.type = RecordedDataType.ASYNC;
                 this.asyncCommand = asyncCommand;
@@ -41,7 +41,7 @@ namespace MyoSimGUI
 
                 // Only the above elements should be used.
                 this.asyncCommand = new ParsedCommand.AsyncCommandCode();
-                this.armDirection = new ParsedCommand.armDirection();
+                this.armDirection = new AsyncCommand.armDirection();
             }
 
             public override string ToString()
@@ -61,7 +61,7 @@ namespace MyoSimGUI
             public ParsedCommand.Quaternion orientationQuat;
             public ParsedCommand.vector3 gyroDat;
             public ParsedCommand.vector3 accelDat;
-            public ParsedCommand.armDirection armDirection;
+            public AsyncCommand.armDirection armDirection;
         }
 
         public RecorderFileHandler(string recorderFileName)
@@ -94,7 +94,7 @@ namespace MyoSimGUI
                             byte xDir = br.ReadByte();
                             commandData =
                                 new RecordedData((ParsedCommand.AsyncCommandCode) action,
-                                    new ParsedCommand.armDirection(
+                                    new AsyncCommand.armDirection(
                                         (HubCommunicator.Arm)arm,
                                         (HubCommunicator.XDirection)xDir));
                         }

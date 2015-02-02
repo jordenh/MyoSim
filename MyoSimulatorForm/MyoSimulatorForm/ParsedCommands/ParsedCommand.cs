@@ -16,7 +16,6 @@ namespace MyoSimGUI.ParsedCommands
         // Note: Arm Sync/Unsync is not listed here, because Arm Sync requires additional
         // parameters. It should either be its own command, or we should allow optional extra
         // parameters for some async commands.
-        /* NOTE: Do not remove RESERVED1. It is needed to preserved the order of the enum */
         public enum AsyncCommandCode { PAIR, UNPAIR, CONNECT, DISCONNECT, ARM_RECOGNIZED, ARM_LOST, REST, FIST, 
             WAVE_IN, WAVE_OUT, FINGERS_SPREAD, THUMB_TO_PINKY,UNKNOWN};
 
@@ -88,25 +87,6 @@ namespace MyoSimGUI.ParsedCommands
             public float x;
             public float y;
             public float z;
-        }
-
-        public struct armDirection
-        {
-            public armDirection(HubCommunicator.Arm arm,
-                HubCommunicator.XDirection xDirection)
-            {
-                this.arm = arm;
-                this.xDirection = xDirection;
-            }
-
-            public String toString()
-            {
-                return String.Format("arm: {0} xDirection: {1}", arm,
-                    xDirection);
-            }
-
-            public HubCommunicator.Arm arm;
-            public HubCommunicator.XDirection xDirection;
         }
 
         public const int TIME_B_START = 0;

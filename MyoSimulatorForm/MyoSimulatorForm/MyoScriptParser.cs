@@ -22,6 +22,7 @@ namespace MyoSimGUI
         public const int SIZEOF_MOVE_CMD = 5;
         public const int SIZEOF_SET_ACC_CMD = 4;
         public const int SIZEOF_ASYNC_CMD = 2;
+        public const int SIZEOF_ASYNC_ARMRECOG_CMD = 4;
         public const int SIZEOF_EXPECT_CMD = 3;
         public const int SIZEOF_DELAY_CMD = 2;
 
@@ -231,11 +232,19 @@ namespace MyoSimGUI
             ParsedCommand parsedCommand;
             uint asyncCommandNum;
             uint relativeSetTime;
-
-            if (command.Length <= 2 || !uint.TryParse(command[2], out relativeSetTime))
+            uint arm;
+            uint xDirection;
+            
+            if (command.Length <= SIZEOF_ASYNC_CMD ||
+                !uint.TryParse(command[SIZEOF_ASYNC_CMD], out relativeSetTime))
             {
                 // If the user does not supply a time to set the async event,
                 // set it at the current time.
+                relativeSetTime = 0;
+            }
+            else if (command.Length <= SIZEOF_ASYNC_ARMRECOG_CMD ||
+                !uint.TryParse(command[SIZEOF_ASYNC_ARMRECOG_CMD], out relativeSetTime))
+            {
                 relativeSetTime = 0;
             }
 
@@ -246,7 +255,19 @@ namespace MyoSimGUI
                 asyncCommandNum = (uint) ParsedCommand.NameToAsyncCommand[command[1]];
             }
 
-            parsedCommand = new AsyncCommand((ParsedCommand.AsyncCommandCode) asyncCommandNum);
+            if (asyncCommandNum == (uint) ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED)
+            {
+                uint.TryParse(command[2], out arm);
+                uint.TryParse(command[3], out xDirection);
+                parsedCommand = new AsyncCommand((ParsedCommand.AsyncCommandCode) asyncCommandNum,
+                    (HubCommunicator.Arm)arm,
+                    (HubCommunicator.XDirection)xDirection);
+            }
+            else
+            {
+                parsedCommand = new AsyncCommand((ParsedCommand.AsyncCommandCode) asyncCommandNum);
+            }
+
             timestampToCommandDict.Add(currentTime + relativeSetTime, parsedCommand);
 
             return true;

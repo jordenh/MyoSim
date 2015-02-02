@@ -13,7 +13,7 @@ namespace MyoSimGUI
         ParsedCommands.ParsedCommand.Quaternion storedOrientation;
         ParsedCommands.ParsedCommand.vector3 storedAccel;
         ParsedCommands.ParsedCommand.vector3 storedGyro;
-        ParsedCommands.ParsedCommand.armDirection storedArmDirection;
+        ParsedCommands.AsyncCommand.armDirection storedArmDirection;
         long firstTime;
         MyoSharp.Device.IHub hub;
         MyoSharp.Device.IMyo connectedMyo;
@@ -115,7 +115,7 @@ namespace MyoSimGUI
         {
             long millis = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
             uint time = (uint)(millis - firstTime);
-            storedArmDirection = new ParsedCommands.ParsedCommand.armDirection(
+            storedArmDirection = new ParsedCommands.AsyncCommand.armDirection(
                                     (HubCommunicator.Arm)e.Arm,
                                     (HubCommunicator.XDirection)e.XDirection);
             timestampToData.Add(time, 

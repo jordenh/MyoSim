@@ -151,8 +151,23 @@ namespace MyoSimGUI
             string scriptLabel;
             if (labelToScriptMap.TryGetValue(label, out scriptLabel))
             {
-                commandChain.Text += MyoScriptParser.ASYNC_KW + " " +
-                    scriptLabel + commandDelimiter;
+                uint arm = (uint)HubCommunicator.Arm.RIGHT;
+                uint xDirection = (uint)HubCommunicator.XDirection.FACING_ELBOW;
+                if ((scriptLabel ==
+                    ParsedCommand.AsyncCommandToName[
+                        ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED])  &&
+                    armRecognizeInputBox("Myo Arm Orientation",
+                        ref arm,
+                        ref xDirection) == DialogResult.OK)
+                {
+                    commandChain.Text += MyoScriptParser.ASYNC_KW + " " +
+                        scriptLabel + commandDelimiter;
+                }
+                else
+                {
+                    commandChain.Text += MyoScriptParser.ASYNC_KW + " " +
+                        scriptLabel + commandDelimiter;
+                }
             }
             else
             {
@@ -463,6 +478,35 @@ namespace MyoSimGUI
             {
                 result = saveFileDialog.ShowDialog();
             }
+        }
+
+        public static DialogResult armRecognizeInputBox(string title,
+            ref uint arm_value,
+            ref uint xDir_value)
+        {
+            Form form = new Form();
+            Label armLabel = new Label();
+            Label xDirLabel = new Label();
+            RadioButton armChoices = new RadioButton();
+            RadioButton xDirChoices = new RadioButton();
+            Button okButton = new Button();
+            Button cancelButton = new Button();
+
+            okButton.Text = "OK";
+            cancelButton.Text = "Cancel";
+            okButton.DialogResult = DialogResult.OK;
+            cancelButton.DialogResult = DialogResult.Cancel;
+
+            armLabel.Text = "Arm:";
+            xDirLabel.Text = "Myo XDirection:";
+
+
+            form.AcceptButton = okButton;
+            form.CancelButton = cancelButton;
+            DialogResult dialogResult = form.ShowDialog();
+            //arm_value = ;
+            //xDir_value = ;
+            return dialogResult;
         }
 
     } /* public partial class MyoSimulatorForm : Form */

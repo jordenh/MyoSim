@@ -193,7 +193,9 @@ namespace MyoSimGUI
                         else if (command.getType() == ParsedCommand.CommandType.ASYNC)
                         {
                             AsyncCommand asyncCommand = (AsyncCommand)command;
-                            RecorderFileHandler.RecordedData asyncDat = new RecorderFileHandler.RecordedData(asyncCommand.getAsyncCommand());
+                            RecorderFileHandler.RecordedData asyncDat = new RecorderFileHandler.RecordedData(
+                                asyncCommand.getAsyncCommand(),
+                                asyncCommand.getArmDirection());
                             timeToRecordedData.Add(time, asyncDat);
                         }
                         else
