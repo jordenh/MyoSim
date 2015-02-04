@@ -30,6 +30,7 @@ namespace MyoSimGUI
         private string scriptFileName;
         private string scriptText;
         private bool fromFile;
+        private HubCommunicator.XDirection orientation;
 
         public MyoScriptParser(string filename, bool isFilename)
         {
@@ -37,12 +38,14 @@ namespace MyoSimGUI
             {
                 scriptFileName = filename;
                 fromFile = true;
+                orientation = HubCommunicator.XDirection.FACING_ELBOW;
             }
             else
             {
                 /* actual script text. I.e. what's written in the file */
                 scriptText = filename;
                 fromFile = false;
+                orientation = HubCommunicator.XDirection.FACING_ELBOW;
             }
         }
 
@@ -167,9 +170,16 @@ namespace MyoSimGUI
 
             if (parseSuccess)
             {
-                gyroData.x = -degreesToRadians(gyroData.x);
+                gyroData.x = degreesToRadians(gyroData.x);
                 gyroData.y = degreesToRadians(gyroData.y);
                 gyroData.z = degreesToRadians(gyroData.z);
+                if (orientation != HubCommunicator.XDirection.FACING_WRIST)
+                {
+                    /* Correct for orientation of Myo */
+                    gyroData.x *= -1;
+                    gyroData.y *= -1;
+                    gyroData.z *= -1;
+                }
                 ParsedCommand parsedCommand = new MoveCommand(gyroData, duration);
                 timestampToCommandDict.Add(currentTime, parsedCommand);
                 currentTime += duration;
@@ -274,11 +284,13 @@ namespace MyoSimGUI
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error,
                         MessageBoxDefaultButton.Button1);
+                    return false;
                 }
 
                 if (AsyncCommand.stringToxDir.ContainsKey(xDirection_string))
                 {
                     xDirection = (uint)AsyncCommand.stringToxDir[xDirection_string];
+                    orientation = (HubCommunicator.XDirection)xDirection;
                 }
                 else
                 {
@@ -288,6 +300,7 @@ namespace MyoSimGUI
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error,
                         MessageBoxDefaultButton.Button1);
+                    return false;
                 }
 
                 parsedCommand = new AsyncCommand((ParsedCommand.AsyncCommandCode) asyncCommandNum,
