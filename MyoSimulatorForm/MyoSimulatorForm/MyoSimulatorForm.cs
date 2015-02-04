@@ -156,13 +156,18 @@ namespace MyoSimGUI
                 uint xDirection = (uint)HubCommunicator.XDirection.FACING_ELBOW;
                 if ((scriptLabel ==
                     ParsedCommand.AsyncCommandToName[
-                        ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED])  &&
-                    armRecognizeInputBox("Myo Arm Orientation",
-                        ref arm,
-                        ref xDirection) == DialogResult.OK)
+                        ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED]))
                 {
-                    commandChain.Text += MyoScriptParser.ASYNC_KW + " " +
-                        scriptLabel + commandDelimiter;
+                    if (armRecognizeInputBox("Myo Arm Orientation",
+                            ref arm,
+                            ref xDirection) == DialogResult.OK)
+                    {
+                        commandChain.Text += MyoScriptParser.ASYNC_KW + " " +
+                            scriptLabel + " " +
+                            AsyncCommand.armToString[(HubCommunicator.Arm)arm] + " " +
+                            AsyncCommand.xDirToString[(HubCommunicator.XDirection)xDirection] + " " +
+                            commandDelimiter;
+                    }
                 }
                 else
                 {
@@ -500,25 +505,43 @@ namespace MyoSimGUI
 
             armLabel.Text = "Arm:";
             armLabel.Location = new Point(10, 10);
-            armChoicesLeft.Location = new Point(armLabel.Left, armLabel.Bottom);
+            armRadioButtonBox.Location = new Point(armLabel.Left, armLabel.Bottom);
+            armRadioButtonBox.Controls.Add(armChoicesLeft);
+            armRadioButtonBox.Controls.Add(armChoicesRight);
+            armRadioButtonBox.AutoSize = true;
+            armRadioButtonBox.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            armChoicesLeft.Location = new Point(10, 10);
+            armChoicesLeft.Text = "Left";
+            armChoicesRight.Location = new Point(armChoicesLeft.Right,
+                                                  armChoicesLeft.Top);
+            armChoicesRight.Text = "Right";
 
             xDirLabel.Text = "Myo XDirection:";
-            xDirLabel.Location = new Point(armChoicesLeft.Left, armChoicesLeft.Bottom);
-            xDirChoicesWrist.Location = new Point(xDirLabel.Left, xDirLabel.Bottom);
+            xDirLabel.Location = new Point(armLabel.Left, armRadioButtonBox.Bottom);
+            xDirRadioButtonBox.Location = new Point(xDirLabel.Left, xDirLabel.Bottom);
+            xDirRadioButtonBox.Controls.Add(xDirChoicesWrist);
+            xDirRadioButtonBox.Controls.Add(xDirChoicesElbow);
+            xDirRadioButtonBox.AutoSize = true;
+            xDirRadioButtonBox.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            xDirChoicesWrist.Location = new Point(10, 10);
+            xDirChoicesWrist.Text = "Wrist";
+            xDirChoicesWrist.BringToFront();
+            xDirChoicesElbow.Location = new Point(xDirChoicesWrist.Right, xDirChoicesWrist.Top);
+            xDirChoicesElbow.Text = "Elbow";
+            xDirChoicesElbow.BringToFront();
             
             okButton.Text = "OK";
             okButton.DialogResult = DialogResult.OK;
-//            okButton.Anchor = (System.Windows.Forms.AnchorStyles.Right |
- //                              System.Windows.Forms.AnchorStyles.Top);
-            okButton.Location = new Point(form.Left, xDirChoicesWrist.Bottom);
+            okButton.Location = new Point(xDirRadioButtonBox.Left,
+                                          xDirRadioButtonBox.Bottom);
 
             cancelButton.Text = "Cancel";
             cancelButton.DialogResult = DialogResult.Cancel;
-            //cancelButton.Anchor = (System.Windows.Forms.AnchorStyles.Right |
-             //                      System.Windows.Forms.AnchorStyles.Top);
-            cancelButton.Location = new Point(okButton.Right, xDirChoicesWrist.Bottom);
-            
+            cancelButton.Location = new Point(okButton.Right, okButton.Top);
 
+
+            form.AutoSizeMode = AutoSizeMode.GrowOnly;
+            form.AutoSize = true;
             form.Text = "Choose arm settings";
             form.AcceptButton = okButton;
             form.CancelButton = cancelButton;
@@ -526,15 +549,31 @@ namespace MyoSimGUI
 
             /* Add buttons */
             form.Controls.Add(armLabel);
-            form.Controls.Add(armChoicesLeft);
+            form.Controls.Add(armRadioButtonBox);
             form.Controls.Add(xDirLabel);
-            form.Controls.Add(xDirChoicesWrist);
+            form.Controls.Add(xDirRadioButtonBox);
             form.Controls.Add(okButton);
             form.Controls.Add(cancelButton);
 
             DialogResult dialogResult = form.ShowDialog();
-            //arm_value = ;
-            //xDir_value = ;
+
+            if (armChoicesLeft.Checked)
+            {
+                arm_value = (uint)HubCommunicator.Arm.LEFT;
+            }
+            else if (armChoicesRight.Checked)
+            {
+                arm_value = (uint)HubCommunicator.Arm.RIGHT;
+            }
+
+            if (xDirChoicesWrist.Checked)
+            {
+                xDir_value = (uint)HubCommunicator.XDirection.FACING_WRIST;
+            }
+            else if (xDirChoicesElbow.Checked)
+            {
+                xDir_value = (uint)HubCommunicator.XDirection.FACING_ELBOW;
+            }
             return dialogResult;
         }
 

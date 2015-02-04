@@ -17,7 +17,7 @@ namespace MyoSimGUI.ParsedCommands
         // parameters. It should either be its own command, or we should allow optional extra
         // parameters for some async commands.
         public enum AsyncCommandCode { PAIR, UNPAIR, CONNECT, DISCONNECT, ARM_RECOGNIZED, ARM_LOST, REST, FIST, 
-            WAVE_IN, WAVE_OUT, FINGERS_SPREAD, THUMB_TO_PINKY,UNKNOWN};
+            WAVE_IN, WAVE_OUT, FINGERS_SPREAD, THUMB_TO_PINKY, UNKNOWN};
 
         public enum ExpectCommandCode { VIBRATE, RSSI };
 

@@ -1,12 +1,20 @@
 async connect
 async pair
-async arm_recognized
+async arm_recognized 1 0
+delay 200
+async rest
 delay 200
 async thumb_to_pinky
 delay 200
+async rest
+delay 200
 async wave_in
 delay 200
+async rest
+delay 200
 async wave_out
+delay 200
+async rest
 delay 200
 move 40 0 0 1000
 delay 1500
@@ -19,5 +27,11 @@ delay 1500
 move 40 0 0 1000
 move 0 -40 0 1000
 delay 1500
+async wave_in
+delay 200
+async rest
+delay 200
 async thumb_to_pinky
 delay 100
+async rest
+delay 200

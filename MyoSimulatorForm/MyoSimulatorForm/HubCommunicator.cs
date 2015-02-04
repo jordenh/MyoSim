@@ -44,6 +44,7 @@ namespace MyoSimGUI
             WAVE_IN,
             WAVE_OUT,
             FINGERS_SPREAD,
+            RESERVED1,      /* KEEP THIS! Must match the hub's pose enum */
             THUMB_TO_PINKY,
             UNKNOWN
         }

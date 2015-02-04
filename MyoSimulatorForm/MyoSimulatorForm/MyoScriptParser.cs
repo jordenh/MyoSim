@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MyoSimGUI
 {
@@ -232,8 +233,10 @@ namespace MyoSimGUI
             ParsedCommand parsedCommand;
             uint asyncCommandNum;
             uint relativeSetTime;
-            uint arm;
-            uint xDirection;
+            string arm_string;
+            string xDirection_string;
+            uint arm = (uint)HubCommunicator.Arm.RIGHT;
+            uint xDirection = (uint)HubCommunicator.XDirection.FACING_ELBOW;
             
             if (command.Length <= SIZEOF_ASYNC_CMD ||
                 !uint.TryParse(command[SIZEOF_ASYNC_CMD], out relativeSetTime))
@@ -257,8 +260,36 @@ namespace MyoSimGUI
 
             if (asyncCommandNum == (uint) ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED)
             {
-                uint.TryParse(command[2], out arm);
-                uint.TryParse(command[3], out xDirection);
+                arm_string = command[2];
+                xDirection_string = command[3];
+                if (AsyncCommand.stringToArm.ContainsKey(arm_string))
+                {
+                    arm = (uint)AsyncCommand.stringToArm[arm_string];
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Invalid Arm value: " + arm_string /* Text */,
+                        "Invalid Arm" /* Title */,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                }
+
+                if (AsyncCommand.stringToxDir.ContainsKey(xDirection_string))
+                {
+                    xDirection = (uint)AsyncCommand.stringToxDir[xDirection_string];
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Invalid xDirection value: " + xDirection_string /* Text */,
+                        "Invalid xDirection" /* Title */,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                }
+
                 parsedCommand = new AsyncCommand((ParsedCommand.AsyncCommandCode) asyncCommandNum,
                     (HubCommunicator.Arm)arm,
                     (HubCommunicator.XDirection)xDirection);
