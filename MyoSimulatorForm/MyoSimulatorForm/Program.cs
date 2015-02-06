@@ -31,7 +31,7 @@ namespace MyoSimGUI
 
         static void Main(string[] args)
         {
-            Int32 maxServerInstance = 2;
+            Int32 maxServerInstance = 1;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             using (NamedPipeServerStream pipeStream = new NamedPipeServerStream("BvrPipe", PipeDirection.InOut, maxServerInstance))

@@ -57,8 +57,6 @@ namespace MyoSimGUI
                                 hubCommunicator.SendUnpaired();
                                 break;
                             case ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED:
-                                // Temporary
-                                //hubCommunicator.SendArmRecognized(HubCommunicator.Arm.RIGHT, HubCommunicator.XDirection.FACING_ELBOW);
                                 hubCommunicator.SendArmRecognized(
                                     recordedData.armDirection.arm,
                                     recordedData.armDirection.xDirection);

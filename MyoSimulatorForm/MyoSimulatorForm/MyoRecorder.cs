@@ -55,7 +55,6 @@ namespace MyoSimGUI
                     e.Myo.GyroscopeDataAcquired += Myo_GyroscopeData;
                     e.Myo.OrientationDataAcquired += Myo_OrientationData;
                     e.Myo.PoseChanged += Myo_PoseChanged;
-
                 };
 
                 // listen for when the Myo disconnects
