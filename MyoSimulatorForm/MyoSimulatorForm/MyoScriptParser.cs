@@ -170,13 +170,16 @@ namespace MyoSimGUI
 
             if (parseSuccess)
             {
-                gyroData.x = degreesToRadians(gyroData.x);
+                gyroData.x = -degreesToRadians(gyroData.x);
                 gyroData.y = degreesToRadians(gyroData.y);
                 gyroData.z = degreesToRadians(gyroData.z);
                 if (orientation != HubCommunicator.XDirection.FACING_WRIST)
                 {
                     /* Correct for orientation of Myo */
-                    gyroData.x *= -1;
+                    /* Some what of a hack. Project Midas should recieve get
+                     * the xDirection and Arm and correct for this. I.e sending
+                     * the armRecognize event should handle this
+                     */
                     gyroData.y *= -1;
                     gyroData.z *= -1;
                 }

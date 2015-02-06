@@ -86,8 +86,10 @@ namespace MyoSimGUI
                         // Asynchronous -- first bit was a 1.
                         ushort action = br.ReadUInt16();
                         RecordedData commandData;
-                        /* ARM_RECOGNIZE command has two additional parameters */
-                        if (action ==
+                        /* ARM_RECOGNIZE command has two additional parameters
+                         * This does not work, it causes reading pass eof error
+                         */
+                        /*if (action ==
                             (ushort)ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED)
                         {
                             byte arm = br.ReadByte();
@@ -98,11 +100,9 @@ namespace MyoSimGUI
                                         (HubCommunicator.Arm)arm,
                                         (HubCommunicator.XDirection)xDir));
                         }
-                        else
-                        {
+                        else*/
                             commandData =
                                 new RecordedData((ParsedCommand.AsyncCommandCode)action);
-                        }
                         timestampToCommandDict.Add(actualTime, commandData);
                     }
                     else
@@ -153,13 +153,16 @@ namespace MyoSimGUI
                             br.Write(timestamp);
                             ushort action = (ushort) commandDat.asyncCommand;
                             br.Write(action);
-                            /* armRecognize (aka armSync) has extra parameters */
-                            if (commandDat.asyncCommand ==
+                            /* TODO */
+                            /* armRecognize (aka armSync) has extra parameters
+                             * This does not work it's causing read pass eof
+                             * error, but should be used to send arm data*/
+                          /*if (commandDat.asyncCommand ==
                                 ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED)
                             {
                                 br.Write((byte)commandDat.armDirection.arm);
                                 br.Write((byte)commandDat.armDirection.xDirection);
-                            }
+                            }*/
                         }
                         else
                         {
