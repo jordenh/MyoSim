@@ -225,7 +225,6 @@
             this.commandChain.Size = new System.Drawing.Size(370, 296);
             this.commandChain.TabIndex = 0;
             this.commandChain.Tag = "";
-            this.commandChain.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.commandChain_KeyPress);
             // 
             // addDelayButton
             // 

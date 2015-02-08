@@ -16,9 +16,8 @@ namespace MyoSimGUI.ParsedCommands
         // Note: Arm Sync/Unsync is not listed here, because Arm Sync requires additional
         // parameters. It should either be its own command, or we should allow optional extra
         // parameters for some async commands.
-        /* NOTE: Do not remove RESERVED1. It is needed to preserved the order of the enum */
         public enum AsyncCommandCode { PAIR, UNPAIR, CONNECT, DISCONNECT, ARM_RECOGNIZED, ARM_LOST, REST, FIST, 
-            WAVE_IN, WAVE_OUT, FINGERS_SPREAD, THUMB_TO_PINKY, RESERVED1, UNKNOWN};
+            WAVE_IN, WAVE_OUT, FINGERS_SPREAD, THUMB_TO_PINKY, UNKNOWN};
 
         public enum ExpectCommandCode { VIBRATE, RSSI };
 

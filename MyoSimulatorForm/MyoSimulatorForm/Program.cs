@@ -31,9 +31,10 @@ namespace MyoSimGUI
 
         static void Main(string[] args)
         {
+            Int32 maxServerInstance = 1;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            using (NamedPipeServerStream pipeStream = new NamedPipeServerStream("BvrPipe", PipeDirection.InOut))
+            using (NamedPipeServerStream pipeStream = new NamedPipeServerStream("BvrPipe", PipeDirection.InOut, maxServerInstance))
             {
                 Console.WriteLine("[Server] Pipe created {0}", pipeStream.GetHashCode());
                 form = new MyoSimulatorForm(pipeStream);

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MyoSimGUI
 {
@@ -22,12 +23,14 @@ namespace MyoSimGUI
         public const int SIZEOF_MOVE_CMD = 5;
         public const int SIZEOF_SET_ACC_CMD = 4;
         public const int SIZEOF_ASYNC_CMD = 2;
+        public const int SIZEOF_ASYNC_ARMRECOG_CMD = 4;
         public const int SIZEOF_EXPECT_CMD = 3;
         public const int SIZEOF_DELAY_CMD = 2;
 
         private string scriptFileName;
         private string scriptText;
         private bool fromFile;
+        private HubCommunicator.XDirection orientation;
 
         public MyoScriptParser(string filename, bool isFilename)
         {
@@ -35,12 +38,14 @@ namespace MyoSimGUI
             {
                 scriptFileName = filename;
                 fromFile = true;
+                orientation = HubCommunicator.XDirection.FACING_ELBOW;
             }
             else
             {
                 /* actual script text. I.e. what's written in the file */
                 scriptText = filename;
                 fromFile = false;
+                orientation = HubCommunicator.XDirection.FACING_ELBOW;
             }
         }
 
@@ -168,6 +173,16 @@ namespace MyoSimGUI
                 gyroData.x = -degreesToRadians(gyroData.x);
                 gyroData.y = degreesToRadians(gyroData.y);
                 gyroData.z = degreesToRadians(gyroData.z);
+                if (orientation != HubCommunicator.XDirection.FACING_WRIST)
+                {
+                    /* Correct for orientation of Myo */
+                    /* Some what of a hack. Project Midas should recieve get
+                     * the xDirection and Arm and correct for this. I.e sending
+                     * the armRecognize event should handle this
+                     */
+                    gyroData.y *= -1;
+                    gyroData.z *= -1;
+                }
                 ParsedCommand parsedCommand = new MoveCommand(gyroData, duration);
                 timestampToCommandDict.Add(currentTime, parsedCommand);
                 currentTime += duration;
@@ -231,11 +246,21 @@ namespace MyoSimGUI
             ParsedCommand parsedCommand;
             uint asyncCommandNum;
             uint relativeSetTime;
-
-            if (command.Length <= 2 || !uint.TryParse(command[2], out relativeSetTime))
+            string arm_string;
+            string xDirection_string;
+            uint arm = (uint)HubCommunicator.Arm.RIGHT;
+            uint xDirection = (uint)HubCommunicator.XDirection.FACING_ELBOW;
+            
+            if (command.Length <= SIZEOF_ASYNC_CMD ||
+                !uint.TryParse(command[SIZEOF_ASYNC_CMD], out relativeSetTime))
             {
                 // If the user does not supply a time to set the async event,
                 // set it at the current time.
+                relativeSetTime = 0;
+            }
+            else if (command.Length <= SIZEOF_ASYNC_ARMRECOG_CMD ||
+                !uint.TryParse(command[SIZEOF_ASYNC_ARMRECOG_CMD], out relativeSetTime))
+            {
                 relativeSetTime = 0;
             }
 
@@ -246,7 +271,50 @@ namespace MyoSimGUI
                 asyncCommandNum = (uint) ParsedCommand.NameToAsyncCommand[command[1]];
             }
 
-            parsedCommand = new AsyncCommand((ParsedCommand.AsyncCommandCode) asyncCommandNum);
+            if (asyncCommandNum == (uint) ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED)
+            {
+                arm_string = command[2];
+                xDirection_string = command[3];
+                if (AsyncCommand.stringToArm.ContainsKey(arm_string))
+                {
+                    arm = (uint)AsyncCommand.stringToArm[arm_string];
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Invalid Arm value: " + arm_string /* Text */,
+                        "Invalid Arm" /* Title */,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                    return false;
+                }
+
+                if (AsyncCommand.stringToxDir.ContainsKey(xDirection_string))
+                {
+                    xDirection = (uint)AsyncCommand.stringToxDir[xDirection_string];
+                    orientation = (HubCommunicator.XDirection)xDirection;
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Invalid xDirection value: " + xDirection_string /* Text */,
+                        "Invalid xDirection" /* Title */,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1);
+                    return false;
+                }
+
+                parsedCommand = new AsyncCommand((ParsedCommand.AsyncCommandCode) asyncCommandNum,
+                    (HubCommunicator.Arm)arm,
+                    (HubCommunicator.XDirection)xDirection);
+            }
+            else
+            {
+                parsedCommand = new AsyncCommand((ParsedCommand.AsyncCommandCode) asyncCommandNum);
+            }
+
             timestampToCommandDict.Add(currentTime + relativeSetTime, parsedCommand);
 
             return true;

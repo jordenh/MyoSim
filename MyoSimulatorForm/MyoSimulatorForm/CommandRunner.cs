@@ -57,8 +57,9 @@ namespace MyoSimGUI
                                 hubCommunicator.SendUnpaired();
                                 break;
                             case ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED:
-                                // Temporary
-                                hubCommunicator.SendArmRecognized(HubCommunicator.Arm.RIGHT, HubCommunicator.XDirection.FACING_ELBOW);
+                                hubCommunicator.SendArmRecognized(
+                                    recordedData.armDirection.arm,
+                                    recordedData.armDirection.xDirection);
                                 break;
                             case ParsedCommand.AsyncCommandCode.ARM_LOST:
                                 hubCommunicator.SendArmLost();
@@ -190,7 +191,9 @@ namespace MyoSimGUI
                         else if (command.getType() == ParsedCommand.CommandType.ASYNC)
                         {
                             AsyncCommand asyncCommand = (AsyncCommand)command;
-                            RecorderFileHandler.RecordedData asyncDat = new RecorderFileHandler.RecordedData(asyncCommand.getAsyncCommand());
+                            RecorderFileHandler.RecordedData asyncDat = new RecorderFileHandler.RecordedData(
+                                asyncCommand.getAsyncCommand(),
+                                asyncCommand.getArmDirection());
                             timeToRecordedData.Add(time, asyncDat);
                         }
                         else
