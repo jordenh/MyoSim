@@ -362,7 +362,6 @@ namespace MyoSimGUI
 
         private void startStopRecordingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // TODO: Add the recording feature.
             if (!currentlyRecording)
             {
                 currentlyRecording = true;

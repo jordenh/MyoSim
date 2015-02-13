@@ -165,6 +165,9 @@ namespace MyoSimGUI
                         currentOrientation.z = (((float)lastMoveDelta.z) / lastDuration) * ORIENTATION_DELAY + currentOrientation.z;
                     }
 
+                    /* Myo Coordinate System: if myo's xDirection is towards elbow
+                     * +x is towards elbow, +y is to the right, and +z is up
+                     */
                     ParsedCommand.vector3 convertedToMyo = new ParsedCommand.vector3(currentOrientation.z, currentOrientation.y, currentOrientation.x);
                     ParsedCommand.Quaternion newOrientation = getQuatFromAngles(convertedToMyo);
                     RecorderFileHandler.RecordedData orientationDat = new RecorderFileHandler.RecordedData(newOrientation,

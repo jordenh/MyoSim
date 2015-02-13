@@ -153,16 +153,6 @@ namespace MyoSimGUI
                             br.Write(timestamp);
                             ushort action = (ushort) commandDat.asyncCommand;
                             br.Write(action);
-                            /* TODO */
-                            /* armRecognize (aka armSync) has extra parameters
-                             * This does not work it's causing read pass eof
-                             * error, but should be used to send arm data*/
-                          /*if (commandDat.asyncCommand ==
-                                ParsedCommand.AsyncCommandCode.ARM_RECOGNIZED)
-                            {
-                                br.Write((byte)commandDat.armDirection.arm);
-                                br.Write((byte)commandDat.armDirection.xDirection);
-                            }*/
                         }
                         else
                         {
