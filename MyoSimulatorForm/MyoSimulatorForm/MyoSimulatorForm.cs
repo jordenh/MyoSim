@@ -378,8 +378,6 @@ namespace MyoSimGUI
                     startStopRecordingToolStripMenuItem.Text = startRecordingLabel;
                     Multimap<uint, RecorderFileHandler.RecordedData> timeToDataMap = recorder.StopRecording();
 
-                    // Testing
-                    // TODO: Allow the user to specify a file.
                     SaveFileDialog saveFileDialog = new SaveFileDialog();
                     saveFileDialog.Title = "Save Recorded File";
                     saveFileDialog.Filter = "RBM files|*.rbm";
