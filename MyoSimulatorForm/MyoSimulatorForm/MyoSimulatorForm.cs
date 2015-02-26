@@ -362,7 +362,6 @@ namespace MyoSimGUI
 
         private void startStopRecordingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // TODO: Add the recording feature.
             if (!currentlyRecording)
             {
                 currentlyRecording = true;
@@ -379,10 +378,18 @@ namespace MyoSimGUI
                     startStopRecordingToolStripMenuItem.Text = startRecordingLabel;
                     Multimap<uint, RecorderFileHandler.RecordedData> timeToDataMap = recorder.StopRecording();
 
-                    // Testing
-                    // TODO: Allow the user to specify a file.
-                    RecorderFileHandler fileHandler = new RecorderFileHandler("recorded_binary_test.rbm");
-                    fileHandler.writeRecorderFile(timeToDataMap);
+                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.Title = "Save Recorded File";
+                    saveFileDialog.Filter = "RBM files|*.rbm";
+                    saveFileDialog.RestoreDirectory = true;
+                    saveFileDialog.OverwritePrompt = true;
+                    
+                    if (getSaveFileDialogResult(saveFileDialog) == DialogResult.OK)
+                    {
+                        System.Console.WriteLine(saveFileDialog.FileName);
+                        RecorderFileHandler fileHandler = new RecorderFileHandler(saveFileDialog.FileName);
+                        fileHandler.writeRecorderFile(timeToDataMap);
+                    }
 
                     System.Console.WriteLine("Ended recording!");
                 }

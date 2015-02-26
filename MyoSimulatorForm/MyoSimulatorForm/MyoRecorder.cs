@@ -48,6 +48,7 @@ namespace MyoSimGUI
                     firstTime = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
                     timestampToData.Add(0, new RecorderFileHandler.RecordedData(
                         ParsedCommands.ParsedCommand.AsyncCommandCode.CONNECT));
+                    /* TODO look into sending arm recognize */
                     e.Myo.Vibrate(VibrationType.Short);
                     e.Myo.AccelerometerDataAcquired += Myo_AccelerometerData;
                     e.Myo.ArmLost += Myo_ArmLost;
@@ -99,15 +100,15 @@ namespace MyoSimGUI
              * the xDirection and Arm and correct for this. I.e sending
              * the armRecognize event should handle this
              */
-            if (storedArmDirection.xDirection != HubCommunicator.XDirection.FACING_ELBOW)
+            if (storedArmDirection.xDirection == HubCommunicator.XDirection.FACING_WRIST)
             {
                 orientation = CommandRunner.getQuatFromAngles(
-                new ParsedCommands.ParsedCommand.vector3((float) e.Yaw, -1*(float) e.Pitch, -1*(float) e.Roll));
+                    new ParsedCommands.ParsedCommand.vector3((float) e.Roll, -1*(float) e.Pitch, (float) e.Yaw));
             }
-            else
+            else 
             {
                 orientation = CommandRunner.getQuatFromAngles(
-                    new ParsedCommands.ParsedCommand.vector3((float) e.Yaw, (float) e.Pitch, (float) e.Roll));
+                    new ParsedCommands.ParsedCommand.vector3(-1*(float) e.Roll, (float) e.Pitch, (float) e.Yaw));
             }
 
             storedOrientation = orientation;
@@ -116,41 +117,18 @@ namespace MyoSimGUI
 
         private void Myo_GyroscopeData(object sender, GyroscopeDataEventArgs e)
         {
-            /* Correct for orientation of Myo */
-            /* Some what of a hack. Project Midas should recieve get
-             * the xDirection and Arm and correct for this. I.e sending
-             * the armRecognize event should handle this
-             */
-            if (storedArmDirection.xDirection != HubCommunicator.XDirection.FACING_ELBOW)
-            {
-                storedGyro = new ParsedCommands.ParsedCommand.vector3(
-                    e.Gyroscope.X,
-                    -1 * e.Gyroscope.Y,
-                    -1 * e.Gyroscope.Z);
-            }
-            else
-            {
-                storedGyro = new ParsedCommands.ParsedCommand.vector3(e.Gyroscope.X, e.Gyroscope.Y, e.Gyroscope.Z);
-            }
+            storedGyro = new ParsedCommands.ParsedCommand.vector3(
+                e.Gyroscope.X,
+                e.Gyroscope.Y,
+                e.Gyroscope.Z);
         }
 
         private void Myo_AccelerometerData(object sender, AccelerometerDataEventArgs e)
         {
-            /* Correct for orientation of Myo */
-            /* Some what of a hack. Project Midas should recieve get
-             * the xDirection and Arm and correct for this. I.e sending
-             * the armRecognize event should handle this
-             */
-            if (storedArmDirection.xDirection != HubCommunicator.XDirection.FACING_ELBOW)
-            {
-                storedAccel = new ParsedCommands.ParsedCommand.vector3(e.Accelerometer.X,
-                    -1 * e.Accelerometer.Y, -1 * e.Accelerometer.Z);
-            }
-            else
-            {
-                storedAccel = new ParsedCommands.ParsedCommand.vector3(e.Accelerometer.X,
-                    e.Accelerometer.Y, e.Accelerometer.Z);
-            }
+            storedAccel = new ParsedCommands.ParsedCommand.vector3(
+                e.Accelerometer.X,
+                e.Accelerometer.Y,
+                e.Accelerometer.Z);
         }
 
         private void Myo_ArmRecognized(object sender, ArmRecognizedEventArgs e)
